@@ -1,16 +1,21 @@
 #include	"CodeGenerator.h"
 
+typedef struct variable {
+	int address;
+	char* identifier;
+	char* type;
+	char* value;
+	/* Think! what does a Variable contain? */
+} Variable;
+
 typedef struct symbol_table {
 
 	/* Think! what does a symbol_table contain? */
-
+	Variable data;
+	Variable* next;
 } Symbol_table;
 
-typedef struct variable {
-
-	/* Think! what does a Variable contain? */
-
-} Variable;
+Symbol_table symbolTalble;
 
 /*
 *	You need to build a data structure for the symbol table
@@ -18,6 +23,23 @@ typedef struct variable {
 *
 *	You also need to build some functions that add/remove/find element in the symbol table
 */
+
+void add_variable_to_symbol_table(Variable var) 
+{
+	printf("inside_add_variable to symbol table\n");
+	printf("Var identifier is: %s\n", var.identifier);
+}
+
+Variable* get_variable_from_table(const char* name) 
+{
+	printf("BARAK need to get variable named: \n", name);
+	return &symbolTalble.data;
+}
+
+void remove_variable_from_symbol_table(const char* name) 
+{
+	printf("BARAK PREFOREM REMOVE FROM YOUR SYMBOL LIST for this var: \n", name);
+}
 
 
 /*
@@ -27,6 +49,7 @@ typedef struct variable {
 */
 int  code_recur(treenode *root)
 {
+	printf("PCODE BRO\n");
 	if_node  *ifn;
 	for_node *forn;
 	leafnode *leaf;
@@ -39,6 +62,7 @@ int  code_recur(treenode *root)
 			leaf = (leafnode *) root;
 			switch (leaf->hdr.type) {
 				case TN_IDENT:
+					printf(leaf->data.sval->str);
 					/*
 					*	In order to get the identifier name you have to use:
 					*	leaf->data.sval->str
@@ -50,6 +74,8 @@ int  code_recur(treenode *root)
 					*	In order to get the int value you have to use: 
 					*	leaf->data.ival 
 					*/
+					printf("This node represent an Integer");
+					printf("%d", leaf->data.ival);
 					break;
 
 				case TN_REAL:
@@ -57,6 +83,7 @@ int  code_recur(treenode *root)
 					*	In order to get the real value you have to use:
 					*	leaf->data.dval
 					*/
+					printf("%f", leaf->data.dval);
 					break;
 			}
 			break;
@@ -131,6 +158,54 @@ int  code_recur(treenode *root)
 						  code_recur(root->lnode);
 						  code_recur(root->rnode);
 						  break;
+					  case DIV:
+						  code_recur(root->lnode);
+						  code_recur(root->rnode);
+						  break;
+					  case STAR:
+						  code_recur(root->lnode);
+						  code_recur(root->rnode);
+						  break;
+					  case NOT:
+						  code_recur(root->lnode);
+						  code_recur(root->rnode);
+						  break;
+					  case AND:
+						  code_recur(root->lnode);
+						  code_recur(root->rnode);
+						  break;
+					  case EQUAL:
+						  code_recur(root->lnode);
+						  code_recur(root->rnode);
+						  break;
+					  case NOT_EQ:
+						  code_recur(root->lnode);
+						  code_recur(root->rnode);
+						  break;
+					  case GRTR:
+						  code_recur(root->lnode);
+						  code_recur(root->rnode);
+						  break;
+					  case LESS:
+						  code_recur(root->lnode);
+						  code_recur(root->rnode);
+						  break;
+					  case GRTR_EQ:
+						  code_recur(root->lnode);
+						  code_recur(root->rnode);
+						  break;
+					  case LESS_EQ:
+						  code_recur(root->lnode);
+						  code_recur(root->rnode);
+						  break;
+					  case INCR:
+						  code_recur(root->lnode);
+						  code_recur(root->rnode);
+						  break;
+					  case DECR:
+						  code_recur(root->lnode);
+						  code_recur(root->rnode);
+						  break;
 					  /*
 					  *	Maybe there is more cases!
 					  *	Add them here
@@ -169,9 +244,55 @@ int  code_recur(treenode *root)
 *	Output: prints the Sumbol Table on the console
 */
 void print_symbol_table(treenode *root) {
-	printf("---------------------------------------\n");
-	printf("Showing the Symbol Table:\n");
+	treenode *right_node;
+	treenode *left_node;
+	leafnode *leaf;
+	//printf("---------------------------------------\n");
+	//printf("Showing the Symbol Table:\n");
+
+	//root->hdr.c_contxt->tags
 	/*
 	*	add your code here
 	*/
+
+	switch (root->hdr.which) {
+		case NODE_T:
+			switch (root->hdr.type) {
+				case TN_TRANS_LIST:
+					//printf(node->hdr);
+					printf("This is TN_TRANS_LIST, means it childs\n");
+					print_symbol_table(root->lnode);
+					print_symbol_table(root->rnode);
+					break;
+				case TN_DECL:
+					printf("==================================================\n");
+					printf("I should add you to the symbol table, but first of all, i need to parse you to a variable\n");
+					printf("Lets find some data:\n");
+					left_node = (treenode *)root->lnode;
+					right_node = (treenode *)root->rnode;
+					
+					Variable* var = malloc(sizeof(Variable));
+					if (left_node->hdr.type == TN_TYPE_LIST && right_node->hdr.type == TN_IDENT)
+					{
+						// add_variable_to_symbol_table()
+						printf("Found a decleration node!! \n");
+						leaf = (leafnode *) left_node->lnode;
+						printf("my type is: %d\n", leaf->hdr.type);
+						leaf = (leafnode *) right_node;
+						var->identifier = leaf->data.str;
+						printf("my ID is: %s\n", leaf->data.str);
+						add_variable_to_symbol_table(*var);
+					}
+					else
+					{
+						printf("NADA\n");
+					}
+					free(var);
+					
+					printf("==================================================\n");
+					break;
+			}
+			break;
+	}
 }
+

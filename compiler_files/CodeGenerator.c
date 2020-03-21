@@ -3,7 +3,7 @@
 typedef struct variable {
 	int address;
 	char* identifier;
-	char* type;
+	tn_t type;
 	char* value;
 	/* Think! what does a Variable contain? */
 } Variable;
@@ -28,7 +28,10 @@ void add_variable_to_symbol_table(Variable var)
 {
 	printf("inside_add_variable to symbol table\n");
 	printf("Var identifier is: %s\n", var.identifier);
+	printf("Var type is: %d\n", var.type);
+	// add to the linked list
 }
+
 
 Variable* get_variable_from_table(const char* name) 
 {
@@ -266,21 +269,19 @@ void print_symbol_table(treenode *root) {
 					break;
 				case TN_DECL:
 					printf("==================================================\n");
-					printf("I should add you to the symbol table, but first of all, i need to parse you to a variable\n");
-					printf("Lets find some data:\n");
+					// printf("I should add you to the symbol table, but first of all, i need to parse you to a variable\n");
+					// printf("Lets find some data:\n");
 					left_node = (treenode *)root->lnode;
 					right_node = (treenode *)root->rnode;
 					
 					Variable* var = malloc(sizeof(Variable));
 					if (left_node->hdr.type == TN_TYPE_LIST && right_node->hdr.type == TN_IDENT)
 					{
-						// add_variable_to_symbol_table()
-						printf("Found a decleration node!! \n");
+						// printf("Found a decleration node!! \n");
 						leaf = (leafnode *) left_node->lnode;
-						printf("my type is: %d\n", leaf->hdr.type);
+						var->type = leaf->hdr.type;
 						leaf = (leafnode *) right_node;
 						var->identifier = leaf->data.str;
-						printf("my ID is: %s\n", leaf->data.str);
 						add_variable_to_symbol_table(*var);
 					}
 					else

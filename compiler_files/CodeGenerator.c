@@ -30,6 +30,7 @@ void add_variable_to_symbol_table(Variable var)
 	printf("Var identifier is: %s\n", var.identifier);
 	printf("Var type is: %d\n", var.type);
 	// add to the linked list
+	
 }
 
 

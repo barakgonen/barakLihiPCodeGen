@@ -21,6 +21,7 @@ BEGIN_HEADER
 /*  ###############################################################  */
 void	print_symbol_table	ARGS((treenode*));
 int		code_recur			ARGS((treenode*));
+void    print_result();
 /*  ###############################################################  */
 
 END_HEADER

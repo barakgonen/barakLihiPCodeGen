@@ -45,17 +45,16 @@ void add_variable_to_symbol_table(VariableNode** head_ref, Variable* var_to_add)
 	var_node->data = var_to_add;
 	var_node->data->address = CODE_INIT_FRAME_IN_BYTES + symbolTalble->variables_counter;
 	
-	printf("         <add_variable_to_symbol_table()> new_var identifier is: %s\n", var_node->data->identifier);
-	printf("         <add_variable_to_symbol_table()> new_var type is: %d\n", var_node->data->type);
-	printf("         <add_variable_to_symbol_table()> new_var address is: %d\n", var_node->data->address);
+	// printf("         <add_variable_to_symbol_table()> new_var identifier is: %s\n", var_node->data->identifier);
+	// printf("         <add_variable_to_symbol_table()> new_var type is: %d\n", var_node->data->type);
+	// printf("         <add_variable_to_symbol_table()> new_var address is: %d\n", var_node->data->address);
 
-	// symbolTalble->vars = var_node;
 	(*head_ref) = var_node;
 }
 
 Variable* get_variable_from_table(const char* name) 
 {
-	printf("      <get_variable_from_table()> need to get variable named: %s\n", name);
+	// printf("      <get_variable_from_table()> need to get variable named: %s\n", name);
 	VariableNode* tmp_var_lst = symbolTalble->vars;
 	if (tmp_var_lst == NULL) {
 		printf("      <get_variable_from_table()> ERROR! \n");
@@ -85,10 +84,21 @@ void remove_variable_from_symbol_table(const char* name)
 */
 int  code_recur(treenode *root)
 {
-	printf("PCODE BRO\n");
+	if (symbolTalble == NULL) {
+		// printf("---------------------------------------\n");
+		// printf("Showing the Symbol Table:\n");
+		symbolTalble = (Symbol_table*)malloc(sizeof(Symbol_table));
+		symbolTalble->variables_counter = 0;
+		endOfVariablesTable = symbolTalble->vars;
+		// printf("<print_symbol_table()> Initialized the symbol table, it should happen only once. current variables_counter is: %d\n", symbolTalble->variables_counter);
+		print_symbol_table(root);
+	}
 	if_node  *ifn;
 	for_node *forn;
 	leafnode *leaf;
+	Variable* variable;
+	treenode *right_node;
+	treenode *left_node;
 	
     if (!root)
         return SUCCESS;
@@ -102,7 +112,7 @@ int  code_recur(treenode *root)
 					break;
 
 				case TN_IDENT:
-					printf(leaf->data.sval->str);
+					// printf("%s\n", leaf->data.sval->str);
 					/*
 					*	In order to get the identifier name you have to use:
 					*	leaf->data.sval->str
@@ -130,8 +140,7 @@ int  code_recur(treenode *root)
 					*	In order to get the int value you have to use: 
 					*	leaf->data.ival 
 					*/
-					printf("This node represent an Integer");
-					printf("%d", leaf->data.ival);
+					// printf("This node represent an Integer: \n%d", leaf->data.ival);
 					break;
 
 				case TN_REAL:
@@ -139,7 +148,7 @@ int  code_recur(treenode *root)
 					*	In order to get the real value you have to use:
 					*	leaf->data.dval
 					*/
-					printf("%f", leaf->data.dval);
+					// printf("%f\n", leaf->data.dval);
 					break;
 			}
 			break;
@@ -312,11 +321,27 @@ int  code_recur(treenode *root)
 					break;
 					
 				case TN_DECL:
-					/* structs declaration - for HW2 */
-					code_recur(root->lnode);
-					code_recur(root->rnode);
-					break;
+					// printf("I should add you to the symbol table, but first of all, i need to parse you to a variable\n");
+					// printf("Lets find some data:\n");
+					left_node = (treenode *)root->lnode;
+					right_node = (treenode *)root->rnode;
+					leaf = (leafnode*) root->rnode;
 
+					if (left_node->hdr.type == TN_TYPE_LIST)
+					{
+						if (right_node->hdr.type == TN_IDENT && right_node->hdr.which == LEAF_T)
+						{
+
+							variable = get_variable_from_table(leaf->data.sval->str);		
+							if (variable !=NULL){
+								printf("LDC %d\n", variable->address);
+								variable = NULL;
+							}
+							else
+								printf("ERROR variable hasn't found in symbol table!\n");
+						}
+					}
+				break;
 				case TN_DECL_LIST:
 					/* Maybe you will use it later */
 					code_recur(root->lnode);
@@ -445,24 +470,54 @@ int  code_recur(treenode *root)
 					if(root->hdr.tok == EQ){
 						/* Regular assignment "=" */
 						/* e.g. x = 5; */
-						code_recur(root->lnode);
-						code_recur(root->rnode);
+						// printf("   in TN_ASSIGN case =, need to preform: ");
+						leaf = (leafnode*) root->lnode;
+						// printf("%s", leaf->data.sval->str);
+						variable = get_variable_from_table(leaf->data.sval->str);
+						leaf = (leafnode*) root->rnode;
+						switch(leaf->hdr.type) {
+							case(TN_INT):
+								// printf(" = %d\n", leaf->data.ival);
+								printf("LDC %d\n", variable->address);
+								printf("LDC %d\n", leaf->data.dval);
+								printf("STO\n");
+							break;
+							case(TN_REAL):
+								printf(" = %f\n", leaf->data.dval);
+							break;
+							case(TN_IDENT):
+								printf(" this is classic initialization without an assignment like int x;\n");
+								// printf("Need to check symbol-table for the address of: %s", variable->identifier);
+								break;
+							default:
+								printf("ERROR, type is: %d\n", leaf->hdr.type);
+								break;
+						}
+						
 					}
 					else if (root->hdr.tok == PLUS_EQ){
 						/* Plus equal assignment "+=" */
 						/* e.g. x += 5; */
-						code_recur(root->lnode);
-						code_recur(root->rnode);
+						printf("   in TN_ASSIGN case +=, need to preform: ");
+						leaf = (leafnode*) root->lnode;
+						printf("%s", leaf->data.sval->str);
+						leaf = (leafnode*) root->rnode;
+						printf(" += %s\n", leaf->data.sval->str);
+
 					}
 					else if (root->hdr.tok == MINUS_EQ){
+						printf("   in TN_ASSIGN case -=, need to preform:  \n");
+						leaf = (leafnode*) root->lnode;
+						printf("%s", leaf->data.sval->str);
+						leaf = (leafnode*) root->rnode;
+						printf(" -= %s\n", leaf->data.sval->str);
 						/* Minus equal assignment "-=" */
 						/* e.g. x -= 5; */
-						code_recur(root->lnode);
-						code_recur(root->rnode);
 					}
 					else if (root->hdr.tok == STAR_EQ){
 						/* Multiply equal assignment "*=" */
 						/* e.g. x *= 5; */
+						printf("   in TN_ASSIGN case *=, need to preform:  \n");
 						code_recur(root->lnode);
 						code_recur(root->rnode);
 					}
@@ -661,7 +716,7 @@ void print_symbol_table(treenode *root) {
 						// printf("BAKBAK strlen IS: %d\n", strlen(leaf->data.str));
 						// var->identifier = malloc(strlen(leaf->data.str) + 1);
 						// strcpy(var->identifier, leaf->data.str);
-						printf("size of identifier is: %d\n", sizeof(leaf->data.sval));
+						// printf("size of identifier is: %d\n", sizeof(leaf->data.sval));
 						var->identifier = leaf->data.sval->str;
 						// strcpy(var->identifier, leaf->data.sval->str);
 						add_variable_to_symbol_table(&symbolTalble->vars, var);
@@ -669,9 +724,50 @@ void print_symbol_table(treenode *root) {
 					else
 					{
 						printf("NADA\n");
+					// if (left_node->hdr.type == TN_TYPE_LIST)
+					// {
+					// 	if (right_node->hdr.type == TN_IDENT && right_node->hdr.which == LEAF_T)
+					// 	{
+					// 		// printf("Found a decleration node! for type int bla; that's why setting is_data_set flag to false\n");
+					// 		// var->is_data_set = 0;
+					// 		leaf = (leafnode *) left_node->lnode;
+					// 		var->type = leaf->hdr.type;
+					// 		leaf = (leafnode *) right_node;
+					// 		var->identifier = leaf->data.sval->str;
+					// 		add_variable_to_symbol_table(&symbolTalble->vars, var);
+					// 	}
+					// 	else if (right_node->hdr.type == TN_ASSIGN)
+					// 	{
+							// // printf("Found a decleration node! for type int bla = 7; \n");
+							// leaf = (leafnode *) right_node->lnode;
+							// // printf("identifier = %s\n", leaf->data.sval->str);
+							// var->identifier = leaf->data.sval->str;
+							// leaf = (leafnode *) right_node->rnode;
+							// var->type = leaf->hdr.type;
+							// var->is_data_set = 1;
+							// switch (leaf->hdr.type){
+							// 	case (TN_INT):
+							// 		// printf("value = %d\n", leaf->data.u_ival);
+							// 		var->integer_data = leaf->data.u_ival;
+							// 		// sprintf(var->value, "%d", leaf->data.u_ival);
+							// 		break;
+							// 	case (TN_REAL):
+							// 		// printf("value = %f\n", leaf->data.dval);
+							// 		var->float_data = leaf->data.dval;
+							// 		// sprintf(var->value, "%f", leaf->data.dval);
+							// 		break;
+							// 	default:
+							// 		printf("DEFFFFFFAULT my type is: %d\n", leaf->hdr.type);
+							// 		break;
+							// }
+							// add_variable_to_symbol_table(&symbolTalble->vars, var);
+						// }
+						// else
+						// {
+							// printf("NADA\n");
+						// }	
 					}
 					free(var);
-					
 					// printf("   =================================================================================================================\n");
 					break;
 				case TN_BLOCK:
@@ -705,7 +801,32 @@ void print_symbol_table(treenode *root) {
 					}
 					break;
 				case TN_STEMNT_LIST:
+					printf("   in TN_STEMNT_LIST\n");
+					if (root->lnode != NULL) {
+						print_symbol_table(root->lnode);
+					}
+					// printf("root->right type: %d\n", root->rnode->hdr.type);
+					if (root->rnode != NULL){
+						print_symbol_table(root->rnode);
+					}
 					break;
+
+				case TN_STEMNT:
+					printf("   in TN_STEMNT\n");
+					if (root->lnode == NULL && root->rnode->hdr.type ==TN_JUMP){
+						printf("   This is the return statement!\n");
+					}
+					else if (root->lnode != NULL) {
+						print_symbol_table(root->lnode);
+					}
+					// printf("root->right type: %d\n", root->rnode->hdr.type);
+					else if (root->rnode != NULL){
+						print_symbol_table(root->rnode);
+					}
+				break;
+				case TN_ASSIGN:
+					printf("   TN_ASSIGN, relevant for PCode generation\n");
+				break;
 				default:
 					printf("BBDFSDFDSDSFDSFDS my type is: %d\n", root->hdr.type);
 					break;
@@ -733,6 +854,25 @@ void print_variable_data(const char* varID){
 		printf("         <print_variable_data()> new_var identifier is: %s\n", v->identifier);
 		printf("         <print_variable_data()> new_var type is: %d\n", v->type);
 		printf("         <print_variable_data()> new_var address is: %d\n", v->address);
+		// if (v->is_data_set)
+		// {
+		// 	printf("         <print_variable_data()> value is: \n");
+			// switch (v->type){
+			// 	case (TN_INT):
+			// 		printf("value = %d\n", v->value);
+			// 		break;
+			// 	case (TN_REAL):
+			// 		printf("value = %f\n", v->value);
+			// 		break;
+			// 	default:
+			// 		printf("DEFFFFFFAULT my type is: %d\n", v->type);
+			// 		break;
+			// }
+		// }
+		// else{
+		// 	printf("         <print_variable_data()> variable initialized but without value, it's value is null\n");
+		// }
+
 	}
 	else{
 		printf("         <print_variable_data()> couldnt find var named %s\n", varID);
@@ -761,806 +901,6 @@ void print_result() {
 	print_variable_data("i");
 	print_variable_data("j");
 	print_variable_data("k");
-	print_variable_data("l");
-	print_variable_data("m");
-	print_variable_data("n");
-	print_variable_data("o");
-	print_variable_data("p");
-	print_variable_data("q");
-	print_variable_data("r");
-	print_variable_data("s");
-	print_variable_data("t");
-	print_variable_data("w");
-	print_variable_data("g");
-	print_variable_data("h");
-	print_variable_data("i");
-	print_variable_data("b");
-	print_variable_data("c");
-	print_variable_data("u");
-	print_variable_data("v");
-	print_variable_data("a");
-	print_variable_data("b");
-	print_variable_data("c");
-	print_variable_data("d");
-	print_variable_data("a");
-	print_variable_data("b");
-	print_variable_data("c");
-	print_variable_data("d");
-	print_variable_data("e");
-	print_variable_data("f");
-	print_variable_data("c");
-	print_variable_data("d");
-	print_variable_data("e");
-	print_variable_data("f");
-	print_variable_data("j");
-	print_variable_data("g");
-	print_variable_data("h");
-	print_variable_data("i");
-	print_variable_data("j");
-	print_variable_data("k");
-	print_variable_data("l");
-	print_variable_data("m");
-	print_variable_data("n");
-	print_variable_data("o");
-		print_variable_data("a");
-	print_variable_data("b");
-	print_variable_data("c");
-	print_variable_data("d");
-	print_variable_data("e");
-	print_variable_data("f");
-	print_variable_data("c");
-	print_variable_data("d");
-	print_variable_data("e");
-	print_variable_data("f");
-	print_variable_data("j");
-	print_variable_data("g");
-	print_variable_data("h");
-	print_variable_data("i");
-	print_variable_data("j");
-	print_variable_data("k");
-	print_variable_data("l");
-	print_variable_data("m");
-	print_variable_data("n");
-	print_variable_data("o");
-	print_variable_data("p");
-	print_variable_data("q");
-	print_variable_data("r");
-	print_variable_data("s");
-	print_variable_data("t");
-	print_variable_data("w");
-	print_variable_data("g");
-	print_variable_data("h");
-	print_variable_data("i");
-	print_variable_data("b");
-	print_variable_data("c");
-	print_variable_data("u");
-	print_variable_data("v");
-	print_variable_data("a");
-	print_variable_data("b");
-	print_variable_data("c");
-	print_variable_data("d");
-	print_variable_data("a");
-	print_variable_data("b");
-	print_variable_data("c");
-	print_variable_data("d");
-	print_variable_data("e");
-	print_variable_data("f");
-	print_variable_data("c");
-	print_variable_data("d");
-	print_variable_data("e");
-	print_variable_data("f");
-	print_variable_data("j");
-	print_variable_data("g");
-	print_variable_data("h");
-	print_variable_data("i");
-	print_variable_data("j");
-	print_variable_data("k");
-	print_variable_data("l");
-	print_variable_data("m");
-	print_variable_data("n");
-	print_variable_data("o");
-	print_variable_data("p");
-	print_variable_data("q");
-	print_variable_data("r");
-	print_variable_data("s");
-	print_variable_data("e");
-	print_variable_data("w");
-	print_variable_data("x");
-	print_variable_data("y");
-	print_variable_data("t");
-	print_variable_data("u");
-	print_variable_data("v");
-	print_variable_data("w");
-	print_variable_data("g");
-	print_variable_data("f");
-	print_variable_data("j");
-	print_variable_data("g");
-	print_variable_data("h");
-	print_variable_data("i");
-	print_variable_data("j");
-	print_variable_data("k");
-	print_variable_data("l");
-	print_variable_data("m");
-	print_variable_data("n");
-	print_variable_data("o");
-	print_variable_data("p");
-	print_variable_data("h");
-	print_variable_data("i");
-	print_variable_data("b");
-	print_variable_data("c");
-	print_variable_data("d");
-	print_variable_data("e");
-	print_variable_data("f");
-	print_variable_data("j");
-	print_variable_data("g");
-	print_variable_data("h");
-	print_variable_data("p");
-	print_variable_data("h");
-	print_variable_data("i");
-	print_variable_data("b");
-	print_variable_data("c");
-	print_variable_data("d");
-	print_variable_data("e");
-	print_variable_data("f");
-	print_variable_data("j");
-	print_variable_data("i");
-	print_variable_data("a");
-	print_variable_data("b");
-	print_variable_data("c");
-	print_variable_data("d");
-	print_variable_data("e");
-	print_variable_data("j");
-	print_variable_data("n");
-	print_variable_data("o");
-	print_variable_data("p");
-	print_variable_data("q");
-	print_variable_data("r");
-	print_variable_data("s");
-	print_variable_data("k");
-	print_variable_data("l");
-	print_variable_data("m");
-	print_variable_data("n");
-	print_variable_data("o");
-	print_variable_data("p");
-	print_variable_data("q");
-	print_variable_data("r");
-	print_variable_data("s");
-	print_variable_data("t");
-	print_variable_data("u");
-	print_variable_data("v");
-	print_variable_data("w");
-	print_variable_data("x");
-	print_variable_data("n");
-	print_variable_data("o");
-	print_variable_data("p");
-	print_variable_data("q");
-	print_variable_data("r");
-	print_variable_data("s");
-	print_variable_data("y");
-	print_variable_data("z");
-		print_variable_data("a");
-	print_variable_data("b");
-	print_variable_data("c");
-	print_variable_data("d");
-	print_variable_data("e");
-	print_variable_data("f");
-	print_variable_data("c");
-	print_variable_data("d");
-	print_variable_data("e");
-	print_variable_data("f");
-	print_variable_data("j");
-	print_variable_data("g");
-	print_variable_data("h");
-	print_variable_data("i");
-	print_variable_data("j");
-	print_variable_data("k");
-	print_variable_data("l");
-	print_variable_data("m");
-	print_variable_data("n");
-	print_variable_data("o");
-	print_variable_data("p");
-	print_variable_data("q");
-	print_variable_data("r");
-	print_variable_data("s");
-	print_variable_data("t");
-	print_variable_data("w");
-	print_variable_data("g");
-	print_variable_data("h");
-	print_variable_data("i");
-	print_variable_data("b");
-	print_variable_data("c");
-	print_variable_data("u");
-	print_variable_data("v");
-	print_variable_data("a");
-	print_variable_data("b");
-	print_variable_data("c");
-	print_variable_data("d");
-	print_variable_data("a");
-	print_variable_data("b");
-	print_variable_data("c");
-	print_variable_data("d");
-	print_variable_data("e");
-	print_variable_data("f");
-	print_variable_data("c");
-	print_variable_data("d");
-	print_variable_data("e");
-	print_variable_data("f");
-	print_variable_data("j");
-	print_variable_data("g");
-	print_variable_data("h");
-	print_variable_data("i");
-	print_variable_data("j");
-	print_variable_data("k");
-	print_variable_data("l");
-	print_variable_data("m");
-	print_variable_data("n");
-	print_variable_data("o");
-	print_variable_data("p");
-	print_variable_data("q");
-	print_variable_data("r");
-	print_variable_data("s");
-	print_variable_data("e");
-	print_variable_data("w");
-	print_variable_data("x");
-	print_variable_data("y");
-	print_variable_data("t");
-	print_variable_data("u");
-	print_variable_data("v");
-	print_variable_data("w");
-	print_variable_data("g");
-	print_variable_data("f");
-	print_variable_data("j");
-	print_variable_data("g");
-	print_variable_data("h");
-	print_variable_data("i");
-	print_variable_data("j");
-	print_variable_data("k");
-	print_variable_data("l");
-	print_variable_data("m");
-	print_variable_data("n");
-	print_variable_data("o");
-	print_variable_data("p");
-	print_variable_data("h");
-	print_variable_data("i");
-	print_variable_data("b");
-	print_variable_data("c");
-	print_variable_data("d");
-	print_variable_data("e");
-	print_variable_data("f");
-	print_variable_data("j");
-	print_variable_data("g");
-	print_variable_data("h");
-	print_variable_data("p");
-	print_variable_data("h");
-	print_variable_data("i");
-	print_variable_data("b");
-	print_variable_data("c");
-	print_variable_data("d");
-	print_variable_data("e");
-	print_variable_data("f");
-	print_variable_data("j");
-	print_variable_data("i");
-	print_variable_data("a");
-	print_variable_data("b");
-	print_variable_data("c");
-	print_variable_data("d");
-	print_variable_data("e");
-	print_variable_data("j");
-	print_variable_data("n");
-	print_variable_data("o");
-	print_variable_data("p");
-	print_variable_data("q");
-	print_variable_data("r");
-	print_variable_data("s");
-	print_variable_data("k");
-	print_variable_data("l");
-	print_variable_data("m");
-	print_variable_data("n");
-	print_variable_data("o");
-	print_variable_data("p");
-	print_variable_data("q");
-	print_variable_data("r");
-	print_variable_data("s");
-		print_variable_data("a");
-	print_variable_data("b");
-	print_variable_data("c");
-	print_variable_data("d");
-	print_variable_data("e");
-	print_variable_data("f");
-	print_variable_data("c");
-	print_variable_data("d");
-	print_variable_data("e");
-	print_variable_data("f");
-	print_variable_data("j");
-	print_variable_data("g");
-	print_variable_data("h");
-	print_variable_data("i");
-	print_variable_data("j");
-	print_variable_data("k");
-	print_variable_data("l");
-	print_variable_data("m");
-	print_variable_data("n");
-	print_variable_data("o");
-	print_variable_data("p");
-	print_variable_data("q");
-	print_variable_data("r");
-	print_variable_data("s");
-	print_variable_data("t");
-	print_variable_data("w");
-	print_variable_data("g");
-	print_variable_data("h");
-	print_variable_data("i");
-	print_variable_data("b");
-	print_variable_data("c");
-	print_variable_data("u");
-	print_variable_data("v");
-	print_variable_data("a");
-	print_variable_data("b");
-	print_variable_data("c");
-	print_variable_data("d");
-	print_variable_data("a");
-	print_variable_data("b");
-	print_variable_data("c");
-	print_variable_data("d");
-	print_variable_data("e");
-	print_variable_data("f");
-	print_variable_data("c");
-	print_variable_data("d");
-	print_variable_data("e");
-	print_variable_data("f");
-	print_variable_data("j");
-	print_variable_data("g");
-	print_variable_data("h");
-	print_variable_data("i");
-	print_variable_data("j");
-	print_variable_data("k");
-	print_variable_data("l");
-	print_variable_data("m");
-	print_variable_data("n");
-	print_variable_data("o");
-	print_variable_data("p");
-	print_variable_data("q");
-	print_variable_data("r");
-	print_variable_data("s");
-	print_variable_data("e");
-	print_variable_data("w");
-	print_variable_data("x");
-	print_variable_data("y");
-	print_variable_data("t");
-	print_variable_data("u");
-	print_variable_data("v");
-	print_variable_data("w");
-	print_variable_data("g");
-	print_variable_data("f");
-	print_variable_data("j");
-	print_variable_data("g");
-	print_variable_data("h");
-	print_variable_data("i");
-	print_variable_data("j");
-	print_variable_data("k");
-	print_variable_data("l");
-	print_variable_data("m");
-	print_variable_data("n");
-	print_variable_data("o");
-	print_variable_data("p");
-	print_variable_data("h");
-	print_variable_data("i");
-	print_variable_data("b");
-	print_variable_data("c");
-	print_variable_data("d");
-	print_variable_data("e");
-	print_variable_data("f");
-	print_variable_data("j");
-	print_variable_data("g");
-	print_variable_data("h");
-	print_variable_data("p");
-	print_variable_data("h");
-	print_variable_data("i");
-	print_variable_data("b");
-	print_variable_data("c");
-	print_variable_data("d");
-	print_variable_data("e");
-	print_variable_data("f");
-	print_variable_data("j");
-	print_variable_data("i");
-	print_variable_data("a");
-	print_variable_data("b");
-	print_variable_data("c");
-	print_variable_data("d");
-	print_variable_data("e");
-	print_variable_data("j");
-	print_variable_data("n");
-	print_variable_data("o");
-	print_variable_data("p");
-	print_variable_data("q");
-	print_variable_data("r");
-	print_variable_data("s");
-	print_variable_data("k");
-	print_variable_data("l");
-	print_variable_data("m");
-	print_variable_data("n");
-	print_variable_data("o");
-	print_variable_data("p");
-	print_variable_data("q");
-	print_variable_data("r");
-	print_variable_data("s");
-	print_variable_data("t");
-	print_variable_data("u");
-	print_variable_data("v");
-	print_variable_data("w");
-	print_variable_data("x");
-	print_variable_data("n");
-	print_variable_data("o");
-	print_variable_data("p");
-	print_variable_data("q");
-	print_variable_data("r");
-	print_variable_data("s");
-	print_variable_data("y");
-	print_variable_data("z");
-	print_variable_data("t");
-	print_variable_data("u");
-	print_variable_data("v");
-	print_variable_data("w");
-	print_variable_data("x");
-	print_variable_data("n");
-	print_variable_data("o");
-	print_variable_data("p");
-	print_variable_data("q");
-	print_variable_data("r");
-	print_variable_data("s");
-	print_variable_data("y");
-	print_variable_data("z");
-	print_variable_data("p");
-	print_variable_data("q");
-	print_variable_data("r");
-	print_variable_data("s");
-	print_variable_data("e");
-	print_variable_data("w");
-	print_variable_data("x");
-	print_variable_data("y");
-	print_variable_data("t");
-	print_variable_data("u");
-		print_variable_data("a");
-	print_variable_data("b");
-	print_variable_data("c");
-	print_variable_data("d");
-	print_variable_data("e");
-	print_variable_data("f");
-	print_variable_data("c");
-	print_variable_data("d");
-	print_variable_data("e");
-	print_variable_data("f");
-	print_variable_data("j");
-	print_variable_data("g");
-	print_variable_data("h");
-	print_variable_data("i");
-	print_variable_data("j");
-	print_variable_data("k");
-	print_variable_data("l");
-	print_variable_data("m");
-	print_variable_data("n");
-	print_variable_data("o");
-	print_variable_data("p");
-	print_variable_data("q");
-	print_variable_data("r");
-	print_variable_data("s");
-	print_variable_data("t");
-	print_variable_data("w");
-	print_variable_data("g");
-	print_variable_data("h");
-	print_variable_data("i");
-	print_variable_data("b");
-	print_variable_data("c");
-	print_variable_data("u");
-	print_variable_data("v");
-	print_variable_data("a");
-	print_variable_data("b");
-	print_variable_data("c");
-	print_variable_data("d");
-	print_variable_data("a");
-	print_variable_data("b");
-	print_variable_data("c");
-	print_variable_data("d");
-	print_variable_data("e");
-	print_variable_data("f");
-	print_variable_data("c");
-	print_variable_data("d");
-	print_variable_data("e");
-	print_variable_data("f");
-	print_variable_data("j");
-	print_variable_data("g");
-	print_variable_data("h");
-	print_variable_data("i");
-	print_variable_data("j");
-	print_variable_data("k");
-	print_variable_data("l");
-	print_variable_data("m");
-	print_variable_data("n");
-	print_variable_data("o");
-	print_variable_data("p");
-	print_variable_data("q");
-	print_variable_data("r");
-	print_variable_data("s");
-	print_variable_data("e");
-	print_variable_data("w");
-	print_variable_data("x");
-	print_variable_data("y");
-	print_variable_data("t");
-	print_variable_data("u");
-	print_variable_data("v");
-	print_variable_data("w");
-	print_variable_data("g");
-	print_variable_data("f");
-	print_variable_data("j");
-	print_variable_data("g");
-	print_variable_data("h");
-	print_variable_data("i");
-	print_variable_data("j");
-	print_variable_data("k");
-	print_variable_data("l");
-	print_variable_data("m");
-	print_variable_data("n");
-	print_variable_data("o");
-	print_variable_data("p");
-	print_variable_data("h");
-	print_variable_data("i");
-	print_variable_data("b");
-	print_variable_data("c");
-	print_variable_data("d");
-	print_variable_data("e");
-	print_variable_data("f");
-	print_variable_data("j");
-	print_variable_data("g");
-	print_variable_data("h");
-	print_variable_data("p");
-	print_variable_data("h");
-	print_variable_data("i");
-	print_variable_data("b");
-	print_variable_data("c");
-	print_variable_data("d");
-	print_variable_data("e");
-	print_variable_data("f");
-	print_variable_data("j");
-	print_variable_data("i");
-	print_variable_data("a");
-	print_variable_data("b");
-	print_variable_data("c");
-	print_variable_data("d");
-	print_variable_data("e");
-	print_variable_data("j");
-	print_variable_data("n");
-	print_variable_data("o");
-	print_variable_data("p");
-	print_variable_data("q");
-	print_variable_data("r");
-	print_variable_data("s");
-	print_variable_data("k");
-	print_variable_data("l");
-	print_variable_data("m");
-	print_variable_data("n");
-	print_variable_data("o");
-	print_variable_data("p");
-	print_variable_data("q");
-	print_variable_data("r");
-	print_variable_data("s");
-	print_variable_data("t");
-	print_variable_data("u");
-	print_variable_data("v");
-	print_variable_data("w");
-	print_variable_data("x");
-	print_variable_data("n");
-	print_variable_data("o");
-	print_variable_data("p");
-	print_variable_data("q");
-	print_variable_data("r");
-	print_variable_data("s");
-	print_variable_data("y");
-	print_variable_data("z");
-	print_variable_data("v");
-	print_variable_data("w");
-	print_variable_data("g");
-	print_variable_data("f");
-	print_variable_data("j");
-	print_variable_data("g");
-	print_variable_data("h");
-	print_variable_data("i");
-	print_variable_data("j");
-	print_variable_data("k");
-	print_variable_data("l");
-	print_variable_data("m");
-	print_variable_data("n");
-	print_variable_data("o");
-	print_variable_data("p");
-	print_variable_data("h");
-	print_variable_data("i");
-	print_variable_data("b");
-	print_variable_data("c");
-	print_variable_data("d");
-	print_variable_data("e");
-	print_variable_data("f");
-	print_variable_data("j");
-	print_variable_data("g");
-	print_variable_data("h");
-	print_variable_data("a");
-	print_variable_data("b");
-	print_variable_data("c");
-	print_variable_data("d");
-	print_variable_data("e");
-	print_variable_data("f");
-	print_variable_data("c");
-	print_variable_data("d");
-	print_variable_data("e");
-	print_variable_data("f");
-	print_variable_data("j");
-	print_variable_data("g");
-	print_variable_data("h");
-	print_variable_data("i");
-	print_variable_data("j");
-	print_variable_data("k");
-	print_variable_data("l");
-	print_variable_data("m");
-	print_variable_data("n");
-	print_variable_data("o");
-	print_variable_data("p");
-	print_variable_data("q");
-	print_variable_data("r");
-	print_variable_data("s");
-	print_variable_data("t");
-	print_variable_data("w");
-	print_variable_data("g");
-	print_variable_data("h");
-	print_variable_data("i");
-	print_variable_data("b");
-	print_variable_data("c");
-	print_variable_data("u");
-	print_variable_data("v");
-	print_variable_data("a");
-	print_variable_data("b");
-	print_variable_data("c");
-	print_variable_data("d");
-	print_variable_data("a");
-	print_variable_data("b");
-	print_variable_data("c");
-	print_variable_data("d");
-	print_variable_data("e");
-	print_variable_data("f");
-	print_variable_data("c");
-	print_variable_data("d");
-	print_variable_data("e");
-	print_variable_data("f");
-	print_variable_data("j");
-	print_variable_data("g");
-	print_variable_data("h");
-	print_variable_data("i");
-	print_variable_data("j");
-	print_variable_data("k");
-	print_variable_data("l");
-	print_variable_data("m");
-	print_variable_data("n");
-	print_variable_data("o");
-	print_variable_data("p");
-	print_variable_data("q");
-	print_variable_data("r");
-	print_variable_data("s");
-	print_variable_data("e");
-	print_variable_data("w");
-	print_variable_data("x");
-	print_variable_data("y");
-	print_variable_data("t");
-	print_variable_data("u");
-	print_variable_data("v");
-	print_variable_data("w");
-	print_variable_data("g");
-	print_variable_data("f");
-	print_variable_data("j");
-	print_variable_data("g");
-	print_variable_data("h");
-	print_variable_data("i");
-	print_variable_data("j");
-	print_variable_data("k");
-	print_variable_data("l");
-	print_variable_data("m");
-	print_variable_data("n");
-	print_variable_data("o");
-	print_variable_data("p");
-	print_variable_data("h");
-	print_variable_data("i");
-	print_variable_data("b");
-	print_variable_data("c");
-	print_variable_data("d");
-	print_variable_data("e");
-	print_variable_data("f");
-	print_variable_data("j");
-	print_variable_data("g");
-	print_variable_data("h");
-	print_variable_data("p");
-	print_variable_data("h");
-	print_variable_data("i");
-	print_variable_data("b");
-	print_variable_data("c");
-	print_variable_data("d");
-	print_variable_data("e");
-	print_variable_data("f");
-	print_variable_data("j");
-	print_variable_data("i");
-	print_variable_data("a");
-	print_variable_data("b");
-	print_variable_data("c");
-	print_variable_data("d");
-	print_variable_data("e");
-	print_variable_data("j");
-	print_variable_data("n");
-	print_variable_data("o");
-	print_variable_data("p");
-	print_variable_data("q");
-	print_variable_data("r");
-	print_variable_data("s");
-	print_variable_data("k");
-	print_variable_data("l");
-	print_variable_data("m");
-	print_variable_data("n");
-	print_variable_data("o");
-	print_variable_data("p");
-	print_variable_data("q");
-	print_variable_data("r");
-	print_variable_data("s");
-	print_variable_data("t");
-	print_variable_data("u");
-	print_variable_data("v");
-	print_variable_data("w");
-	print_variable_data("x");
-	print_variable_data("n");
-	print_variable_data("o");
-	print_variable_data("p");
-	print_variable_data("q");
-	print_variable_data("r");
-	print_variable_data("s");
-	print_variable_data("y");
-	print_variable_data("z");
-	print_variable_data("p");
-	print_variable_data("h");
-	print_variable_data("i");
-	print_variable_data("b");
-	print_variable_data("c");
-	print_variable_data("d");
-	print_variable_data("e");
-	print_variable_data("f");
-	print_variable_data("j");
-	print_variable_data("i");
-	print_variable_data("a");
-	print_variable_data("b");
-	print_variable_data("c");
-	print_variable_data("d");
-	print_variable_data("e");
-	print_variable_data("j");
-	print_variable_data("n");
-	print_variable_data("o");
-	print_variable_data("p");
-	print_variable_data("q");
-	print_variable_data("r");
-	print_variable_data("s");
-	print_variable_data("k");
-	print_variable_data("l");
-	print_variable_data("m");
-	print_variable_data("n");
-	print_variable_data("o");
-	print_variable_data("p");
-	print_variable_data("q");
-	print_variable_data("r");
-	print_variable_data("s");
-	print_variable_data("t");
-	print_variable_data("u");
-	print_variable_data("v");
-	print_variable_data("w");
-	print_variable_data("x");
-	print_variable_data("n");
-	print_variable_data("o");
-	print_variable_data("p");
-	print_variable_data("q");
-	print_variable_data("r");
-	print_variable_data("s");
-	print_variable_data("y");
-	print_variable_data("z");
 	printf("   Well Done! Code tested: %d%s%d\n", counter, " times, total number of variables in SymbolTable is:", symbolTalble->variables_counter);
 	printf("   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
 	return;

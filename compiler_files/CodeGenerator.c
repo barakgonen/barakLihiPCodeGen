@@ -676,32 +676,8 @@ int  code_recur(treenode *root)
 
 					  case PLUS:
 					  	  /* Plus token "+" */
-<<<<<<< HEAD
-						//   code_recur(root->lnode);
-							code_recur(root->rnode);
-							printf("ADD\n");
-						break;
-
-					  case MINUS:
-					  	  /* Minus token "-" */
-							// todo refactor
-						  leaf = (leafnode*) root->lnode;
-						  src_var = get_variable_from_table(leaf->data.sval->str);
-						  printf("LDC %d\n", src_var.address);
-						  leaf = (leafnode*) root->rnode;
-							switch(leaf->hdr.type) {
-								case(TN_INT):
-									printf("LDC %d\n", leaf->data.ival);
-									printf("SUB\n");
-								break;
-								default:
-									printf("ERROR, unhandled type: %d\n", leaf->hdr.type);
-									break;
-							}	
-						break;
-=======
-						    /* e.g. x+y; */
-							code_recur(root->lnode);
+						  /* e.g. x+y; */
+						  code_recur(root->lnode);
 						  code_recur(root->rnode);
 						  printf("ADD\n");
 						  break;
@@ -713,8 +689,6 @@ int  code_recur(treenode *root)
 						  code_recur(root->rnode);
 						  printf("SUB\n");
 						  break;
-
->>>>>>> handaling with expressions
 					  case DIV:
 					  	  /* Divide token "/" */
 						    /* e.g. x/y; */
@@ -725,40 +699,11 @@ int  code_recur(treenode *root)
 
 					  case STAR:
 					  	  /* multiply token "*" */
-<<<<<<< HEAD
-							leaf = (leafnode*) root->lnode;
-							switch(leaf->hdr.type) {
-								case(TN_INT):
-									printf("LDC %d\n", leaf->data.ival);
-								break;
-								default:
-									printf("ERROR, unhandled type: %d\n", leaf->hdr.type);
-									break;
-							}
-							leaf = (leafnode*) root->rnode;
-							switch(leaf->hdr.type) {
-								case(TN_INT):
-									printf("LDC %d\n", leaf->data.ival);
-								break;
-								case TN_IDENT:
-									// printf("LDC %d\n", get_variable_from_table(leaf->data.sval->str).address);
-									// printf("STO\n");
-								break;
-								default:
-									printf("ERROR, unhandled type: %d\n", leaf->hdr.type);
-									break;
-							}
-							printf("MUL\n");
-								
-						break;
-=======
 						    /* e.g. x*y; */
->>>>>>> handaling with expressions
 						  code_recur(root->lnode);
 						  code_recur(root->rnode);
 						  printf("MUL\n");
 						  break;
-
 					  case AND:
 					  	  /* And token "&&" */
 							/* e.g x&&y */

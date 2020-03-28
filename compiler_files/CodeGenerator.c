@@ -151,13 +151,13 @@ int  code_recur(treenode *root)
 					/* Maybe you will use it later */
 					break;
 
-				// case TN_INT:
-				// 	/* 
-				// 	*	In order to get the int value you have to use: 
-				// 	*	leaf->data.ival 
-				// 	*/
-				// 	// printf("This node represent an Integer: \n%d", leaf->data.ival);
-				// 	break;
+				case TN_INT:
+					/* 
+					*	In order to get the int value you have to use: 
+					*	leaf->data.ival 
+					*/
+					printf("LDC %d\n", leaf->data.ival);
+					break;
 
 				// case TN_REAL:
 				// 	/*
@@ -174,7 +174,6 @@ int  code_recur(treenode *root)
 		case IF_T:
 			ifn = (if_node *) root;
 			switch (ifn->hdr.type) {
-
 				case TN_IF:
 					if (ifn->else_n == NULL) {
 						/* if case */
@@ -182,10 +181,13 @@ int  code_recur(treenode *root)
 						code_recur(ifn->then_n);
 					}
 					else {
-						/* if - else case*/ 
 						code_recur(ifn->cond);
+						printf("FJP else\n");
 						code_recur(ifn->then_n);
+						printf("ujp end\n");
+						printf("else:\n");
 						code_recur(ifn->else_n);
+						printf("end:\n");
 					}
 					return 0;
 
@@ -281,7 +283,9 @@ int  code_recur(treenode *root)
 							case TN_IDENT:
 								src_var = get_variable_from_table(((leafnode*)root->rnode->rnode)->data.sval->str);
 								if (src_var.address != UKNOWN_VARIABLE->address)
-									printf("LDC %d\n", src_var.address);
+								{
+									// printf("LDC %d\n", src_var.address);
+								}
 								else
 									printf("ERROR, variable wasn't found! var identifier is: %s\n", ((leafnode*)root->rnode->rnode)->data.sval->str);
 							break;
@@ -378,7 +382,8 @@ int  code_recur(treenode *root)
 						{
 							target_var = get_variable_from_table(leaf->data.sval->str);		
 							if (target_var.address != UKNOWN_VARIABLE->address) {
-								printf("LDC %d\n", target_var.address);
+								// no need to print in the beggining
+								// printf("LDC %d\n", target_var.address);
 							}
 							else
 								printf("ERROR variable hasn't found in symbol table!\n");
@@ -405,6 +410,7 @@ int  code_recur(treenode *root)
 
 				case TN_STEMNT:
 					/* Maybe you will use it later */
+					// printf("BARAK THIS IS THE STATEMENT BRO\n");
 					code_recur(root->lnode);
 					code_recur(root->rnode);
 					break;
@@ -515,8 +521,16 @@ int  code_recur(treenode *root)
 					if(root->hdr.tok == EQ){
 						/* Regular assignment "=" */
 						/* e.g. x = 5; */
-						// printf("   in TN_ASSIGN case =, need to preform: ");
 						// printf("%s", leaf->data.sval->str);
+						/*
+						ldc 5   -> int x;
+						ldc 10     int x = 10;
+						sto
+						ldc 5      load value of x 
+						ind
+						print	   print value of X = 10;
+						*/
+						// printf("   in TN_ASSIGN NODE, need to understand wether it's complicated such as a+=b, or a =b \n");
 						leaf = (leafnode*) root->rnode;
 						switch(leaf->hdr.type) {
 							case(TN_INT):
@@ -524,6 +538,15 @@ int  code_recur(treenode *root)
 								printf("LDC %d\n", target_var.address);
 								printf("LDC %d\n", leaf->data.dval);
 								printf("STO\n");
+							break;
+							case TN_EXPR:
+								// printf("GOT TO THE TN_EXPR: \n");
+								// printf("NEED TO IMPLEMENT EXPRESSION SUCH AS a = a + 6\n");
+								// printf("IND \n");
+								// printf("LDC %d\n", leaf->data.ival);
+								code_recur(root->lnode);
+								printf("IND\n");
+								code_recur(root->rnode);
 							break;
 							// case(TN_REAL):
 								// printf(" = %f\n", leaf->data.dval);
@@ -600,9 +623,10 @@ int  code_recur(treenode *root)
 
 					  case PLUS:
 					  	  /* Plus token "+" */
-						  code_recur(root->lnode);
-						  code_recur(root->rnode);
-						  break;
+						//   code_recur(root->lnode);
+							code_recur(root->rnode);
+							printf("ADD\n");
+						break;
 
 					  case MINUS:
 					  	  /* Minus token "-" */
@@ -642,6 +666,10 @@ int  code_recur(treenode *root)
 							switch(leaf->hdr.type) {
 								case(TN_INT):
 									printf("LDC %d\n", leaf->data.ival);
+								break;
+								case TN_IDENT:
+									// printf("LDC %d\n", get_variable_from_table(leaf->data.sval->str).address);
+									// printf("STO\n");
 								break;
 								default:
 									printf("ERROR, unhandled type: %d\n", leaf->hdr.type);
@@ -881,14 +909,8 @@ void print_symbol_table(treenode *root) {
 					// printf("   TN_TYPE_LIST\n");
 					break;
 				case TN_DECL_LIST:
-					// printf("root->left type: %d\n", root->lnode->hdr.type);
-					if (root->lnode != NULL) {
-						print_symbol_table(root->lnode);
-					}
-					// printf("root->right type: %d\n", root->rnode->hdr.type);
-					if (root->rnode != NULL){
-						print_symbol_table(root->rnode);
-					}
+					print_symbol_table(root->lnode);
+					print_symbol_table(root->rnode);
 					break;
 				case TN_STEMNT_LIST:
 					// printf("   in TN_STEMNT_LIST\n");

@@ -9,6 +9,7 @@ typedef struct variable {
 	char* value;
 	int is_value_set;
 	int data_as_int;
+	double data_as_double;
 	/* Think! what does a Variable contain? */
 } Variable;
 
@@ -129,6 +130,8 @@ int  code_recur(treenode *root)
 						// if you remove this comment you should check b = a<6;
 						printf("LDC %d\n", src_var.address);
 					}
+					else
+						printf("IND\n");					
 					/*
 					*	In order to get the identifier name you have to use:
 					*	leaf->data.sval->str
@@ -383,6 +386,8 @@ int  code_recur(treenode *root)
 					break;
 					
 				case TN_DECL:
+					code_recur(root->lnode);
+					code_recur(root->rnode);				
 					// printf("I should add you to the symbol table, but first of all, i need to parse you to a variable\n");
 					// printf("Lets find some data:\n");
 					// left_node = (treenode *)root->lnode;
@@ -401,7 +406,7 @@ int  code_recur(treenode *root)
 						// 		printf("ERROR variable hasn't found in symbol table! var id is: %s\n", leaf->data.sval->str);
 						// }
 					// }
-				break;
+					break;
 				case TN_DECL_LIST:
 					/* Maybe you will use it later */
 					code_recur(root->lnode);
@@ -532,7 +537,7 @@ int  code_recur(treenode *root)
 					{
 						case EQ:
 							/* Regular assignment "=" */
-							/* e.g. x = 5; */												
+							/* e.g. x = 5; */		
 							if (root->lnode != NULL)
 							{
 								// Means this is an assignment to a variable, so lets identify target variable, it's the left leaf of the node
@@ -553,12 +558,12 @@ int  code_recur(treenode *root)
 											code_recur(root->rnode);
 											printf("STO\n");
 										break;
-											// case(TN_INT):
-						// 		// printf(" = %d\n", leaf->data.ival);
-						// 		printf("LDC %d\n", target_var.address);
-						// 		printf("LDC %d\n", leaf->data.dval);
-						// 		printf("STO\n");
-						// 	break;
+										case TN_INT:
+											// printf(" = %d\n", leaf->data.ival);
+											code_recur(root->lnode);
+											code_recur(root->rnode);
+											printf("STO\n");
+										break;
 										case TN_EXPR:
 											printf("GOT TO THE TN_EXPR: \n");
 											// printf("NEED TO IMPLEMENT EXPRESSION SUCH AS a = a + 6\n");
@@ -877,31 +882,36 @@ void print_symbol_table(treenode *root) {
 					}
 					else if (left_node->hdr.type == TN_TYPE_LIST &&right_node->hdr.type == TN_ASSIGN)
 					{
-							// printf("Found a decleration node! for type int bla = 7; \n");
-							leaf = (leafnode *) right_node->lnode;
-							// printf("identifier = %s\n", leaf->data.sval->str);
-							var->identifier = leaf->data.sval->str;
-							leaf = (leafnode *) right_node->rnode;
-							var->type = leaf->hdr.type;
-							// var->is_data_set = 1;
-							switch (leaf->hdr.type){
-								case (TN_INT):
-									// printf("value = %d\n", leaf->data.u_ival);
-									var->is_value_set = 1;
-									var->data_as_int = leaf->data.u_ival;
-									// var->integer_data = leaf->data.u_ival;
-									// sprintf(var->value, "%d", leaf->data.u_ival);
-									break;
-								case (TN_REAL):
-									// printf("value = %f\n", leaf->data.dval);
-									// var->float_data = leaf->data.dval;
-									// sprintf(var->value, "%f", leaf->data.dval);
-									break;
-								default:
-									printf("DEFFFFFFAULT my type is: %d\n", leaf->hdr.type);
-									break;
-							}
-							add_variable_to_symbol_table(&symbolTalble->vars, *var);
+						// printf("Found a decleration node!\n");
+						leaf = (leafnode *) right_node->lnode;
+						// printf("identifier = %s\n", leaf->data.sval->str);
+						var->identifier = leaf->data.sval->str;
+						leaf = (leafnode *) right_node->rnode;
+						var->type = leaf->hdr.type;
+						switch (leaf->hdr.type){
+							case TN_INT:
+								// printf("right child is int\n");
+								// printf("value = %d\n", leaf->data.u_ival);
+								var->is_value_set = 1;
+								var->data_as_int = leaf->data.u_ival;
+								// var->integer_data = leaf->data.u_ival;
+								// sprintf(var->value, "%d", leaf->data.u_ival);
+								break;
+							case (TN_REAL):
+								var->is_value_set = 1;
+								var->data_as_double = leaf->data.dval;
+								// printf("value = %f\n", leaf->data.dval);
+								// sprintf(var->value, "%f", leaf->data.dval);
+								break;
+							case TN_EXPR:
+								var->is_value_set = 0;
+							break;
+							default:
+								printf("defaultInSym my type is: %d\n", leaf->hdr.type);
+								break;
+						}
+						// printf("adding var to symbol table: %s\n", var->identifier);
+						add_variable_to_symbol_table(&symbolTalble->vars, *var);
 					}
 					else
 					{
@@ -977,7 +987,7 @@ void print_symbol_table(treenode *root) {
 					}
 				break;
 				case TN_ASSIGN:
-					// printf("   TN_ASSIGN, relevant for PCode generation\n");
+					printf("   TN_ASSIGN, relevant for PCode generation\n");
 				break;
 				case TN_FUNC_CALL:
 				break;

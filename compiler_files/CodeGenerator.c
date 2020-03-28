@@ -123,15 +123,13 @@ int  code_recur(treenode *root)
 				// 	break;
 
 				case TN_IDENT:
-					if (strcmp(leaf->data.sval->str, "printf") != 0 && strcmp(leaf->data.sval->str, "main"))
+					if (strcmp(leaf->data.sval->str, "printf") != 0 && strcmp(leaf->data.sval->str, "main") != 0)
 					{
 						// printf("Need to load variable identified as: %s%s\n", leaf->data.sval->str, " from memory");
 						src_var = get_variable_from_table(leaf->data.sval->str);
 						// if you remove this comment you should check b = a<6;
 						printf("LDC %d\n", src_var.address);
-					}
-					else
-						printf("IND\n");					
+					}				
 					/*
 					*	In order to get the identifier name you have to use:
 					*	leaf->data.sval->str
@@ -590,7 +588,7 @@ int  code_recur(treenode *root)
 								{
 									code_recur(root->lnode);
 									code_recur(root->rnode);
-									// printf("STO\n");
+									printf("STO\n");
 								}
 								/*
 								ldc 5   -> int x;
@@ -683,13 +681,19 @@ int  code_recur(treenode *root)
 					  	  /* Plus token "+" */
 						  /* e.g. x+y; */
 						  code_recur(root->lnode);
+						  if (root->lnode->hdr.type == TN_IDENT) {
+							  printf("IND\n");
+						  }
 						  code_recur(root->rnode);
+						  if (root->rnode->hdr.type == TN_IDENT) {
+							  printf("IND\n");
+						  }
 						  printf("ADD\n");
 						  break;
 
 					  case MINUS:
 					  	  /* Minus token "-" */
-						    /* e.g. x-y; */
+						  /* e.g. x-y; */
 						  code_recur(root->lnode);
 						  code_recur(root->rnode);
 						  printf("SUB\n");

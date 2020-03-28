@@ -48,12 +48,13 @@ void add_variable_to_symbol_table(VariableNode** head_ref, Variable var_to_add)
 	var_node->data = var_to_add;
 	var_node->data.address = CODE_INIT_FRAME_IN_BYTES + symbolTalble->variables_counter;
 	
-	printf("         <add_variable_to_symbol_table()> new_var identifier is: %s\n", var_node->data.identifier);
-	printf("         <add_variable_to_symbol_table()> new_var type is: %d\n", var_node->data.type);
-	printf("         <add_variable_to_symbol_table()> new_var address is: %d\n", var_node->data.address);
-	if (var_node->data.is_value_set == 1){ 
-		printf("         <add_variable_to_symbol_table()> new_var value is: %d\n", var_node->data.data_as_int);
-	}
+	
+	// printf("         <add_variable_to_symbol_table()> new_var identifier is: %s\n", var_node->data.identifier);
+	// printf("         <add_variable_to_symbol_table()> new_var type is: %d\n", var_node->data.type);
+	// printf("         <add_variable_to_symbol_table()> new_var address is: %d\n", var_node->data.address);
+	// if (var_node->data.is_value_set == 1){ 
+	// 	printf("         <add_variable_to_symbol_table()> new_var value is: %d\n", var_node->data.data_as_int);
+	// }
 
 	(*head_ref) = var_node;
 }
@@ -70,6 +71,7 @@ Variable get_variable_from_table(const char* name)
 		// && tmp_var_lst->data != NULL) {
 			// printf("var name: %s\n", tmp_var_lst->data.identifier);
 			if(strcmp(tmp_var_lst->data.identifier, name) == 0) { 
+				// printf("      <get_variable_from_table()> var is: %s\n", tmp_var_lst->data.identifier);
 				return tmp_var_lst->data;
 			}
 			tmp_var_lst = tmp_var_lst->next;
@@ -81,7 +83,7 @@ Variable get_variable_from_table(const char* name)
 
 void remove_variable_from_symbol_table(const char* name) 
 {
-	printf("BARAK PREFOREM REMOVE FROM YOUR SYMBOL LIST for this var: \n", name);
+	// printf("BARAK PREFOREM REMOVE FROM YOUR SYMBOL LIST for this var: \n", name);
 }
 
 
@@ -95,9 +97,9 @@ int  code_recur(treenode *root)
 	if (symbolTalble == NULL) {
 		// printf("---------------------------------------\n");
 		// printf("Showing the Symbol Table:\n");
-		symbolTalble = (Symbol_table*)malloc(sizeof(Symbol_table));
-		symbolTalble->variables_counter = 0;
-		endOfVariablesTable = symbolTalble->vars;
+		// symbolTalble = (Symbol_table*)malloc(sizeof(Symbol_table));
+		// symbolTalble->variables_counter = 0;
+		// endOfVariablesTable = symbolTalble->vars;
 		// printf("<print_symbol_table()> Initialized the symbol table, it should happen only once. current variables_counter is: %d\n", symbolTalble->variables_counter);
 		print_symbol_table(root);
 	}
@@ -116,25 +118,30 @@ int  code_recur(treenode *root)
 		case LEAF_T:
 			leaf = (leafnode *) root;
 			switch (leaf->hdr.type) {
-				case TN_LABEL:
-					/* Maybe you will use it later */
-					break;
+				// case TN_LABEL:
+				// 	/* Maybe you will use it later */
+				// 	break;
 
 				case TN_IDENT:
-					// printf("%s\n", leaf->data.sval->str);
+					if (strcmp(leaf->data.sval->str, "printf") != 0 && strcmp(leaf->data.sval->str, "main"))
+					{
+						// printf("Need to load variable identified as: %s%s\n", leaf->data.sval->str, " from memory");
+						src_var = get_variable_from_table(leaf->data.sval->str);
+						printf("LDC %d\n", src_var.address);
+					}
 					/*
 					*	In order to get the identifier name you have to use:
 					*	leaf->data.sval->str
 					*/
 					break;
 
-				case TN_COMMENT:
-					/* Maybe you will use it later */
-					break;
+				// case TN_COMMENT:
+				// 	/* Maybe you will use it later */
+				// 	break;
 
-				case TN_ELLIPSIS:
-					/* Maybe you will use it later */
-					break;
+				// case TN_ELLIPSIS:
+				// 	/* Maybe you will use it later */
+				// 	break;
 
 				case TN_STRING:
 					/* Maybe you will use it later */
@@ -144,21 +151,23 @@ int  code_recur(treenode *root)
 					/* Maybe you will use it later */
 					break;
 
-				case TN_INT:
-					/* 
-					*	In order to get the int value you have to use: 
-					*	leaf->data.ival 
-					*/
-					// printf("This node represent an Integer: \n%d", leaf->data.ival);
-					break;
+				// case TN_INT:
+				// 	/* 
+				// 	*	In order to get the int value you have to use: 
+				// 	*	leaf->data.ival 
+				// 	*/
+				// 	// printf("This node represent an Integer: \n%d", leaf->data.ival);
+				// 	break;
 
-				case TN_REAL:
-					/*
-					*	In order to get the real value you have to use:
-					*	leaf->data.dval
-					*/
-					// printf("%f\n", leaf->data.dval);
-					break;
+				// case TN_REAL:
+				// 	/*
+				// 	*	In order to get the real value you have to use:
+				// 	*	leaf->data.dval
+				// 	*/
+				// 	// printf("%f\n", leaf->data.dval);
+				// 	break;
+				default:
+					printf("barak unhandled leaf bro, it's type is: %d\n", leaf->hdr.type);
 			}
 			break;
 
@@ -266,17 +275,25 @@ int  code_recur(treenode *root)
 							case TN_INT:
 								printf("LDC %d\n", ((leafnode*)root->rnode->rnode)->data.ival);
 							break;
+							case TN_REAL:
+								printf("LDC %f\n", ((leafnode*)root->rnode->rnode)->data.dval);
+							break;
 							case TN_IDENT:
-								printf("BBBBBBBB\n");
-							// 	src_var = get_variable_from_table(((leafnode*)root->rnode->rnode)->data.sval->str);
-							// 	if (src_var != NULL)
-							// 		printf("need to print var identified as: %s\n", src_var->identifier);
-							// 	else
-							// 		printf("it was null i think, i couldnt find var named: %s\n", ((leafnode*)root->rnode->rnode)->data.sval->str);
+								src_var = get_variable_from_table(((leafnode*)root->rnode->rnode)->data.sval->str);
+								if (src_var.address != UKNOWN_VARIABLE->address)
+									printf("LDC %d\n", src_var.address);
+								else
+									printf("ERROR, variable wasn't found! var identifier is: %s\n", ((leafnode*)root->rnode->rnode)->data.sval->str);
+							break;
+							case TN_EXPR:
+								if (root->rnode != NULL)
+									code_recur(root->rnode);
+								else
+									printf("TN_EXPR RIGHT IS NULL\n");
 								break;
-							// default:
-							// 	printf("type is: %s\n", ((leafnode*)root->rnode->rnode)->hdr.type);
-							// break;
+							default:
+								printf("ERROR, default, case is not handled! case is is: %d\n", ((leafnode*)root->rnode->rnode)->hdr.type);
+							break;
 						}
 						printf("PRINT\n");
 					}
@@ -301,8 +318,10 @@ int  code_recur(treenode *root)
 
 				case TN_EXPR_LIST:
 					/* Maybe you will use it later */
-					code_recur(root->lnode);
-					code_recur(root->rnode);
+					if (root->lnode != NULL)
+						code_recur(root->lnode);
+					if (root->rnode != NULL)
+						code_recur(root->rnode);
 					break;
 
 				case TN_NAME_LIST:
@@ -353,19 +372,16 @@ int  code_recur(treenode *root)
 					left_node = (treenode *)root->lnode;
 					right_node = (treenode *)root->rnode;
 					leaf = (leafnode*) root->rnode;
-
 					if (left_node->hdr.type == TN_TYPE_LIST)
 					{
 						if (right_node->hdr.type == TN_IDENT && right_node->hdr.which == LEAF_T)
 						{
-
-							// target_var = get_variable_from_table(leaf->data.sval->str);		
-							// if (target_var !=NULL){
-							// 	printf("LDC %d\n", target_var->address);
-							// 	target_var = NULL;
-							// }
-							// else
-							// 	printf("ERROR variable hasn't found in symbol table!\n");
+							target_var = get_variable_from_table(leaf->data.sval->str);		
+							if (target_var.address != UKNOWN_VARIABLE->address) {
+								printf("LDC %d\n", target_var.address);
+							}
+							else
+								printf("ERROR variable hasn't found in symbol table!\n");
 						}
 					}
 				break;
@@ -509,13 +525,13 @@ int  code_recur(treenode *root)
 								printf("LDC %d\n", leaf->data.dval);
 								printf("STO\n");
 							break;
-							case(TN_REAL):
-								printf(" = %f\n", leaf->data.dval);
-							break;
-							case(TN_IDENT):
-								printf(" this is classic initialization without an assignment like int x;\n");
+							// case(TN_REAL):
+								// printf(" = %f\n", leaf->data.dval);
+							// break;
+							// case(TN_IDENT):
+								// printf(" this is classic initialization without an assignment like int x;\n");
 								// printf("Need to check symbol-table for the address of: %s\n", target_var.identifier);
-								break;
+								// break;
 							default:
 								printf("ERROR, type is: %d\n", leaf->hdr.type);
 								break;
@@ -590,10 +606,21 @@ int  code_recur(treenode *root)
 
 					  case MINUS:
 					  	  /* Minus token "-" */
-						  code_recur(root->lnode);
-						  code_recur(root->rnode);
-						  break;
-
+						  leaf = (leafnode*) root->lnode;
+						  src_var = get_variable_from_table(leaf->data.sval->str);
+						  printf("LDC %d\n", src_var.address);
+						  leaf = (leafnode*) root->rnode;
+							switch(leaf->hdr.type) {
+								case(TN_INT):
+									printf("LDC %d\n", leaf->data.ival);
+									printf("SUB\n");
+								break;
+								default:
+									printf("ERROR, unhandled type: %d\n", leaf->hdr.type);
+									break;
+							}
+								
+						break;
 					  case DIV:
 					  	  /* Divide token "/" */
 						  code_recur(root->lnode);
@@ -602,6 +629,27 @@ int  code_recur(treenode *root)
 
 					  case STAR:
 					  	  /* multiply token "*" */
+							leaf = (leafnode*) root->lnode;
+							switch(leaf->hdr.type) {
+								case(TN_INT):
+									printf("LDC %d\n", leaf->data.ival);
+								break;
+								default:
+									printf("ERROR, unhandled type: %d\n", leaf->hdr.type);
+									break;
+							}
+							leaf = (leafnode*) root->rnode;
+							switch(leaf->hdr.type) {
+								case(TN_INT):
+									printf("LDC %d\n", leaf->data.ival);
+								break;
+								default:
+									printf("ERROR, unhandled type: %d\n", leaf->hdr.type);
+									break;
+							}
+							printf("MUL\n");
+								
+						break;
 						  code_recur(root->lnode);
 						  code_recur(root->rnode);
 						  break;
@@ -616,6 +664,7 @@ int  code_recur(treenode *root)
 					  	  /* Or token "||" */
 						  code_recur(root->lnode);
 						  code_recur(root->rnode);
+						  printf("OR\n");
 						  break;
 						
 					  case NOT:
@@ -705,13 +754,14 @@ int  code_recur(treenode *root)
 */
 void print_symbol_table(treenode *root) {
 	if (symbolTalble == NULL) {
-		printf("---------------------------------------\n");
-		printf("Showing the Symbol Table:\n");
+		// printf("---------------------------------------\n");
+		// printf("Showing the Symbol Table:\n");
 		symbolTalble = (Symbol_table*)malloc(sizeof(Symbol_table));
 		symbolTalble->variables_counter = 0;
 		endOfVariablesTable = symbolTalble->vars;
 		UKNOWN_VARIABLE = (Variable*)malloc(sizeof(Variable));
-		printf("<print_symbol_table()> Initialized the symbol table, it should happen only once. current variables_counter is: %d\n", symbolTalble->variables_counter);
+		UKNOWN_VARIABLE->address = 0;
+		// printf("<print_symbol_table()> Initialized the symbol table, it should happen only once. current variables_counter is: %d\n", symbolTalble->variables_counter);
 	}
 	// printf("current size of symbol table is: %d\n", symbolTalble->variables_counter);
 	treenode *right_node;
@@ -733,7 +783,7 @@ void print_symbol_table(treenode *root) {
 					print_symbol_table(root->rnode);
 					break;
 				case TN_DECL:
-					printf("   =================================================================================================================\n");
+					// printf("   =================================================================================================================\n");
 					// printf("I should add you to the symbol table, but first of all, i need to parse you to a variable\n");
 					// printf("Lets find some data:\n");
 					left_node = (treenode *)root->lnode;
@@ -742,7 +792,7 @@ void print_symbol_table(treenode *root) {
 					Variable* var = malloc(sizeof(Variable));
 					if (left_node->hdr.type == TN_TYPE_LIST && right_node->hdr.type == TN_IDENT)
 					{
-						printf("Found a decleration node!!! \n");
+						// printf("Found a decleration node!!! \n");
 						leaf = (leafnode *) left_node->lnode;
 						var->type = leaf->hdr.type;
 						leaf = (leafnode *) right_node;
@@ -759,7 +809,7 @@ void print_symbol_table(treenode *root) {
 					}
 					else if (left_node->hdr.type == TN_TYPE_LIST &&right_node->hdr.type == TN_ASSIGN)
 					{
-							printf("Found a decleration node! for type int bla = 7; \n");
+							// printf("Found a decleration node! for type int bla = 7; \n");
 							leaf = (leafnode *) right_node->lnode;
 							// printf("identifier = %s\n", leaf->data.sval->str);
 							var->identifier = leaf->data.sval->str;
@@ -775,7 +825,7 @@ void print_symbol_table(treenode *root) {
 									// sprintf(var->value, "%d", leaf->data.u_ival);
 									break;
 								case (TN_REAL):
-									printf("value = %f\n", leaf->data.dval);
+									// printf("value = %f\n", leaf->data.dval);
 									// var->float_data = leaf->data.dval;
 									// sprintf(var->value, "%f", leaf->data.dval);
 									break;
@@ -808,7 +858,7 @@ void print_symbol_table(treenode *root) {
 						// }	
 					}
 					free(var);
-					printf("   !!===============================================================================================================\n");
+					// printf("   !!===============================================================================================================\n");
 					break;
 				case TN_BLOCK:
 					// printf("in TN_BLOCK\n");
@@ -841,7 +891,7 @@ void print_symbol_table(treenode *root) {
 					}
 					break;
 				case TN_STEMNT_LIST:
-					printf("   in TN_STEMNT_LIST\n");
+					// printf("   in TN_STEMNT_LIST\n");
 					if (root->lnode != NULL) {
 						print_symbol_table(root->lnode);
 					}
@@ -852,9 +902,9 @@ void print_symbol_table(treenode *root) {
 					break;
 
 				case TN_STEMNT:
-					printf("   in TN_STEMNT\n");
+					// printf("   in TN_STEMNT\n");
 					if (root->lnode == NULL && root->rnode->hdr.type ==TN_JUMP){
-						printf("   This is the return statement!\n");
+						// printf("   This is the return statement!\n");
 					}
 					else if (root->lnode != NULL) {
 						print_symbol_table(root->lnode);
@@ -865,24 +915,24 @@ void print_symbol_table(treenode *root) {
 					}
 				break;
 				case TN_ASSIGN:
-					printf("   TN_ASSIGN, relevant for PCode generation\n");
+					// printf("   TN_ASSIGN, relevant for PCode generation\n");
 				break;
 				case TN_FUNC_CALL:
 				break;
 				default:
-					printf("BBDFSDFDSDSFDSFDS my type is: %d\n", root->hdr.type);
+					// printf("BBDFSDFDSDSFDSFDS my type is: %d\n", root->hdr.type);
 					break;
 			}
 			break;
 		case FOR_T:
-			printf("Apperently for and main represents the same fucking way \n");
+			// printf("Apperently for and main represents the same fucking way \n");
 			forn = (for_node *) root;
 			if (forn != NULL){
 				print_symbol_table(forn->stemnt);
 			}
 			// printf("%d\n", forn->stemnt->hdr.type);
 
-			break;
+		break;
 		default:
 			printf("Barak, unrecognized which: %d\n", root->hdr.which);
 	}

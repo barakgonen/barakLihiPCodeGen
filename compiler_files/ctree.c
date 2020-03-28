@@ -204,8 +204,6 @@ argument, as in cpp
 				show_tree(parse_tree,stdout);
 			else if (show_SymbolTable)
 				print_symbol_table(parse_tree);
-                print_result();
-
             parse_tree = (treenode *) NULL;
         } 
 		else 

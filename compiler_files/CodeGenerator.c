@@ -660,18 +660,23 @@ int  code_recur(treenode *root)
 
 					  case INCR:
 						  /* Increment token "++" */
+						  /* e.g. x++; */
 						  code_recur(root->lnode);
 						  code_recur(root->rnode);
+						  printf("INC\n");
 						  break;
 
 					  case DECR:
 						  /* Decrement token "--" */
+						  /* e.g. x--; */
 						  code_recur(root->lnode);
 						  code_recur(root->rnode);
+						  printf("DEC\n");
 						  break;
 
 					  case PLUS:
 					  	  /* Plus token "+" */
+<<<<<<< HEAD
 						//   code_recur(root->lnode);
 							code_recur(root->rnode);
 							printf("ADD\n");
@@ -694,14 +699,33 @@ int  code_recur(treenode *root)
 									break;
 							}	
 						break;
-					  case DIV:
-					  	  /* Divide token "/" */
+=======
+						    /* e.g. x+y; */
+							code_recur(root->lnode);
+						  code_recur(root->rnode);
+						  printf("ADD\n");
+						  break;
+
+					  case MINUS:
+					  	  /* Minus token "-" */
+						    /* e.g. x-y; */
 						  code_recur(root->lnode);
 						  code_recur(root->rnode);
+						  printf("SUB\n");
+						  break;
+
+>>>>>>> handaling with expressions
+					  case DIV:
+					  	  /* Divide token "/" */
+						    /* e.g. x/y; */
+						  code_recur(root->lnode);
+						  code_recur(root->rnode);
+						  printf("DIV\n");
 						  break;
 
 					  case STAR:
 					  	  /* multiply token "*" */
+<<<<<<< HEAD
 							leaf = (leafnode*) root->lnode;
 							switch(leaf->hdr.type) {
 								case(TN_INT):
@@ -727,18 +751,25 @@ int  code_recur(treenode *root)
 							printf("MUL\n");
 								
 						break;
+=======
+						    /* e.g. x*y; */
+>>>>>>> handaling with expressions
 						  code_recur(root->lnode);
 						  code_recur(root->rnode);
+						  printf("MUL\n");
 						  break;
 
 					  case AND:
 					  	  /* And token "&&" */
+							/* e.g x&&y */
 						  code_recur(root->lnode);
 						  code_recur(root->rnode);
+						  printf("AND\n");
 						  break;
 
 					  case OR:
 					  	  /* Or token "||" */
+							/* e.g x&&y */
 						  code_recur(root->lnode);
 						  code_recur(root->rnode);
 						  printf("OR\n");
@@ -748,6 +779,7 @@ int  code_recur(treenode *root)
 					  	  /* Not token "!" */
 						  code_recur(root->lnode);
 						  code_recur(root->rnode);
+						  printf("NOT\n");
 						  break;
 
 					  case GRTR:
@@ -776,12 +808,14 @@ int  code_recur(treenode *root)
 					  	  /* Equal token "==" */
 						  code_recur(root->lnode);
 						  code_recur(root->rnode);
+						  printf("EQU\n");
 						  break;
 
 					  case NOT_EQ:
 					  	  /* Not equal token "!=" */
 						  code_recur(root->lnode);
 						  code_recur(root->rnode);
+						  printf("NEQ\n");
 						  break;
 
 					  case LESS_EQ:

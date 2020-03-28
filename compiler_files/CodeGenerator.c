@@ -47,14 +47,13 @@ void add_variable_to_symbol_table(VariableNode** head_ref, Variable var_to_add)
 	var_node->next = (*head_ref);
 	var_node->data = var_to_add;
 	var_node->data.address = CODE_INIT_FRAME_IN_BYTES + symbolTalble->variables_counter;
-	
-	
-	// printf("         <add_variable_to_symbol_table()> new_var identifier is: %s\n", var_node->data.identifier);
-	// printf("         <add_variable_to_symbol_table()> new_var type is: %d\n", var_node->data.type);
-	// printf("         <add_variable_to_symbol_table()> new_var address is: %d\n", var_node->data.address);
-	// if (var_node->data.is_value_set == 1){ 
-	// 	printf("         <add_variable_to_symbol_table()> new_var value is: %d\n", var_node->data.data_as_int);
-	// }
+		
+	printf("         <add_variable_to_symbol_table()> new_var identifier is: %s\n", var_node->data.identifier);
+	printf("         <add_variable_to_symbol_table()> new_var type is: %d\n", var_node->data.type);
+	printf("         <add_variable_to_symbol_table()> new_var address is: %d\n", var_node->data.address);
+	if (var_node->data.is_value_set == 1){ 
+		printf("         <add_variable_to_symbol_table()> new_var value is: %d\n", var_node->data.data_as_int);
+	}
 
 	(*head_ref) = var_node;
 }
@@ -127,6 +126,7 @@ int  code_recur(treenode *root)
 					{
 						// printf("Need to load variable identified as: %s%s\n", leaf->data.sval->str, " from memory");
 						src_var = get_variable_from_table(leaf->data.sval->str);
+						// if you remove this comment you should check b = a<6;
 						printf("LDC %d\n", src_var.address);
 					}
 					/*
@@ -159,13 +159,13 @@ int  code_recur(treenode *root)
 					printf("LDC %d\n", leaf->data.ival);
 					break;
 
-				// case TN_REAL:
-				// 	/*
-				// 	*	In order to get the real value you have to use:
-				// 	*	leaf->data.dval
-				// 	*/
-				// 	// printf("%f\n", leaf->data.dval);
-				// 	break;
+				case TN_REAL:
+					/*
+					*	In order to get the real value you have to use:
+					*	leaf->data.dval
+					*/
+					printf("LDC %f\n", leaf->data.dval);
+					break;
 				default:
 					printf("barak unhandled leaf bro, it's type is: %d\n", leaf->hdr.type);
 			}
@@ -178,7 +178,17 @@ int  code_recur(treenode *root)
 					if (ifn->else_n == NULL) {
 						/* if case */
 						code_recur(ifn->cond);
+						switch (ifn->cond->hdr.which){
+							case LEAF_T:
+								printf("AND\n");
+							break;
+							default:
+								printf("BBBBB\n type is: %d\n", ifn->cond->hdr.which);
+							break;
+						}
+						printf("FJP end_if\n");
 						code_recur(ifn->then_n);
+						printf("end_if:\n");
 					}
 					else {
 						code_recur(ifn->cond);
@@ -273,32 +283,34 @@ int  code_recur(treenode *root)
 						/* Look at the output AST structure! */
 						// printf("left: %s\n", ((leafnode*)root->rnode->lnode)->data.sval);
 						// printf("right: %d\n", ((leafnode*)root->rnode->rnode)->data.ival);
-						switch (((leafnode*)root->rnode->rnode)->hdr.type){
-							case TN_INT:
-								printf("LDC %d\n", ((leafnode*)root->rnode->rnode)->data.ival);
-							break;
-							case TN_REAL:
-								printf("LDC %f\n", ((leafnode*)root->rnode->rnode)->data.dval);
-							break;
-							case TN_IDENT:
-								src_var = get_variable_from_table(((leafnode*)root->rnode->rnode)->data.sval->str);
-								if (src_var.address != UKNOWN_VARIABLE->address)
-								{
-									// printf("LDC %d\n", src_var.address);
-								}
-								else
-									printf("ERROR, variable wasn't found! var identifier is: %s\n", ((leafnode*)root->rnode->rnode)->data.sval->str);
-							break;
-							case TN_EXPR:
-								if (root->rnode != NULL)
-									code_recur(root->rnode);
-								else
-									printf("TN_EXPR RIGHT IS NULL\n");
-								break;
-							default:
-								printf("ERROR, default, case is not handled! case is is: %d\n", ((leafnode*)root->rnode->rnode)->hdr.type);
-							break;
-						}
+						// switch (((leafnode*)root->rnode->rnode)->hdr.type) {
+						// 	case TN_INT:
+						// 		printf("LDC %d\n", ((leafnode*)root->rnode->rnode)->data.ival);
+						// 	break;
+						// 	case TN_REAL:
+						// 		printf("LDC %f\n", ((leafnode*)root->rnode->rnode)->data.dval);
+						// 	break;
+						// 	case TN_IDENT:
+						// 		src_var = get_variable_from_table(((leafnode*)root->rnode->rnode)->data.sval->str);
+						// 		if (src_var.address != UKNOWN_VARIABLE->address)
+						// 		{
+						// 			// printf("LDC %d\n", src_var.address);
+						// 		}
+						// 		else
+						// 			printf("ERROR, variable wasn't found! var identifier is: %s\n", ((leafnode*)root->rnode->rnode)->data.sval->str);
+						// 	break;
+						// 	case TN_EXPR:
+						// 		if (root->rnode != NULL)
+						// 			code_recur(root->rnode);
+						// 		else
+						// 			printf("TN_EXPR RIGHT IS NULL\n");
+						// 		break;
+						// 	default:
+						// 		printf("ERROR, default, case is not handled! case is is: %d\n", ((leafnode*)root->rnode->rnode)->hdr.type);
+						// 	break;
+						// }
+						code_recur(root->lnode);
+						code_recur(root->rnode);
 						printf("PRINT\n");
 					}
 					else {
@@ -373,22 +385,22 @@ int  code_recur(treenode *root)
 				case TN_DECL:
 					// printf("I should add you to the symbol table, but first of all, i need to parse you to a variable\n");
 					// printf("Lets find some data:\n");
-					left_node = (treenode *)root->lnode;
-					right_node = (treenode *)root->rnode;
-					leaf = (leafnode*) root->rnode;
-					if (left_node->hdr.type == TN_TYPE_LIST)
-					{
-						if (right_node->hdr.type == TN_IDENT && right_node->hdr.which == LEAF_T)
-						{
-							target_var = get_variable_from_table(leaf->data.sval->str);		
-							if (target_var.address != UKNOWN_VARIABLE->address) {
-								// no need to print in the beggining
-								// printf("LDC %d\n", target_var.address);
-							}
-							else
-								printf("ERROR variable hasn't found in symbol table!\n");
-						}
-					}
+					// left_node = (treenode *)root->lnode;
+					// right_node = (treenode *)root->rnode;
+					// leaf = (leafnode*) root->rnode;
+					// if (left_node->hdr.type == TN_TYPE_LIST)
+					// {
+						// if (right_node->hdr.type == TN_IDENT && right_node->hdr.which == LEAF_T)
+						// {
+						// 	target_var = get_variable_from_table(leaf->data.sval->str);		
+						// 	if (target_var.address != UKNOWN_VARIABLE->address) {
+						// 		// no need to print in the beggining
+						// 		// printf("LDC %d\n", target_var.address);
+						// 	}
+						// 	else
+						// 		printf("ERROR variable hasn't found in symbol table! var id is: %s\n", leaf->data.sval->str);
+						// }
+					// }
 				break;
 				case TN_DECL_LIST:
 					/* Maybe you will use it later */
@@ -516,91 +528,128 @@ int  code_recur(treenode *root)
 					break;
 
 				case TN_ASSIGN:
-					leaf = (leafnode*) root->lnode;
-					target_var = get_variable_from_table(leaf->data.sval->str);
-					if(root->hdr.tok == EQ){
-						/* Regular assignment "=" */
-						/* e.g. x = 5; */
-						// printf("%s", leaf->data.sval->str);
-						/*
-						ldc 5   -> int x;
-						ldc 10     int x = 10;
-						sto
-						ldc 5      load value of x 
-						ind
-						print	   print value of X = 10;
-						*/
-						// printf("   in TN_ASSIGN NODE, need to understand wether it's complicated such as a+=b, or a =b \n");
-						leaf = (leafnode*) root->rnode;
-						switch(leaf->hdr.type) {
-							case(TN_INT):
-								// printf(" = %d\n", leaf->data.ival);
-								printf("LDC %d\n", target_var.address);
-								printf("LDC %d\n", leaf->data.dval);
-								printf("STO\n");
-							break;
-							case TN_EXPR:
-								// printf("GOT TO THE TN_EXPR: \n");
-								// printf("NEED TO IMPLEMENT EXPRESSION SUCH AS a = a + 6\n");
-								// printf("IND \n");
-								// printf("LDC %d\n", leaf->data.ival);
-								code_recur(root->lnode);
-								printf("IND\n");
-								code_recur(root->rnode);
-							break;
-							// case(TN_REAL):
-								// printf(" = %f\n", leaf->data.dval);
-							// break;
-							// case(TN_IDENT):
-								// printf(" this is classic initialization without an assignment like int x;\n");
-								// printf("Need to check symbol-table for the address of: %s\n", target_var.identifier);
-								// break;
-							default:
-								printf("ERROR, type is: %d\n", leaf->hdr.type);
-								break;
-						}
-						
-					}
-					else if (root->hdr.tok == PLUS_EQ){
-						/* Plus equal assignment "+=" */
-						/* e.g. x += 5; */
-						leaf = (leafnode*) root->rnode;
-						src_var= get_variable_from_table(leaf->data.sval->str);
-						printf("LDC %d\n", target_var.address);
-						printf("LDC %d\n", src_var.address);
-						printf("ADD\n");
-					}
-					else if (root->hdr.tok == MINUS_EQ){
-						/* Minus equak assigment "-=" */
-						/* e.g. x-= 5; */
-						leaf = (leafnode*) root->rnode;
-						src_var= get_variable_from_table(leaf->data.sval->str);
-						printf("LDC %d\n", target_var.address);
-						printf("LDC %d\n", src_var.address);
-						printf("SUB\n");
-					}
-					else if (root->hdr.tok == STAR_EQ){
-						/* Multiply equal assignment "*=" */
-						/* e.g. x *= 5; */
-						leaf = (leafnode*) root->rnode;
-						src_var = get_variable_from_table(leaf->data.sval->str);
-						// printf("   in TN_ASSIGN case *=, need to preform:  \n");
-						printf("LDC %d\n", target_var.address);
-						printf("LDC %d\n", src_var.address);
-						printf("MUL\n");
-					}
-					else if (root->hdr.tok == DIV_EQ){
-						/* Divide equal assignment "/=" */
-						/* e.g. x /= 5; */
-						leaf = (leafnode*) root->rnode;
-						src_var = get_variable_from_table(leaf->data.sval->str);
-						// printf("   in TN_ASSIGN case *=, need to preform:  \n");
-						printf("LDC %d\n", target_var.address);
-						printf("LDC %d\n", src_var.address);
-						printf("DIV\n");
-					}
-					break;
+					switch(root->hdr.tok)
+					{
+						case EQ:
+							/* Regular assignment "=" */
+							/* e.g. x = 5; */												
+							if (root->lnode != NULL)
+							{
+								// Means this is an assignment to a variable, so lets identify target variable, it's the left leaf of the node
+								// printf("%s", leaf->data.sval->str);
+								leaf = (leafnode*) root->lnode;
+								target_var = get_variable_from_table(leaf->data.sval->str);
+								
+								if (root->rnode != NULL && root->rnode->hdr.which == LEAF_T)
+								{
+									// printf("   in TN_ASSIGN NODE, need to understand wether it's complicated such as a+=b, or a =b \n");
+									// Were looking at the right child to define if we add value of variable or imidiate value
+									leaf = (leafnode*) root->rnode;
+									switch(leaf->hdr.type)
+									{
+										case TN_REAL:
+											// printf("ASSIGNEMENT OF REAL\n");
+											code_recur(root->lnode);
+											code_recur(root->rnode);
+											printf("STO\n");
+										break;
+											// case(TN_INT):
+						// 		// printf(" = %d\n", leaf->data.ival);
+						// 		printf("LDC %d\n", target_var.address);
+						// 		printf("LDC %d\n", leaf->data.dval);
+						// 		printf("STO\n");
+						// 	break;
+										case TN_EXPR:
+											printf("GOT TO THE TN_EXPR: \n");
+											// printf("NEED TO IMPLEMENT EXPRESSION SUCH AS a = a + 6\n");
+											// printf("IND \n");
+											// printf("LDC %d\n", leaf->data.ival);
+											// code_recur(root->lnode);
+											// printf("IND\n");
+											// code_recur(root->rnode);
+										break;
 
+						// 	// case(TN_IDENT):
+						// 		// printf(" this is classic initialization without an assignment like int x;\n");
+						// 		// printf("Need to check symbol-table for the address of: %s\n", target_var.identifier);
+						// 		// break;
+						// 	default:
+						// 		printf("ERROR, type is: %d\n", leaf->hdr.type);
+						// 		break;
+										default:
+											printf("BUG, unhandled hdr.type, value: %d\n", leaf->hdr.type);
+										break;
+									}
+								}
+								else if (root->rnode != NULL && root->rnode->hdr.which == NODE_T)
+								{
+									code_recur(root->lnode);
+									code_recur(root->rnode);
+									// printf("STO\n");
+								}
+								/*
+								ldc 5   -> int x;
+								ldc 10     int x = 10;
+								sto
+								ldc 5      load value of x 
+								ind
+								print	   print value of X = 10;
+								*/
+							}
+						break;
+						case PLUS_EQ:
+							/* Plus equal assignment "+=" */
+							/* e.g. x += 5; */
+							code_recur(root->lnode);
+						  	code_recur(root->rnode);
+							// printf("LDC %d\n", target_var.address);
+							// printf("LDC %d\n", src_var.address);
+							// leaf = (leafnode*) root->rnode;
+							// src_var= get_variable_from_table(leaf->data.sval->str);
+							printf("ADD\n");
+						break;
+						case MINUS_EQ:
+							/* Minus equak assigment "-=" */
+							/* e.g. x-= 5; */
+							// printf("LDC %d\n", target_var.address);
+							// printf("LDC %d\n", src_var.address);
+							// leaf = (leafnode*) root->rnode;
+							// src_var= get_variable_from_table(leaf->data.sval->str);
+							code_recur(root->lnode);
+						  	code_recur(root->rnode);
+							printf("SUB\n");
+						break;
+						case STAR_EQ:
+							/* Multiply equal assignment "*=" */
+							/* e.g. x *= 5; */
+							// printf("   in TN_ASSIGN case *=, need to preform:  \n");
+							// printf("LDC %d\n", target_var.address);
+							// leaf = (leafnode*) root->rnode;
+							// src_var = get_variable_from_table(leaf->data.sval->str);
+							// printf("LDC %d\n", src_var.address);
+							code_recur(root->lnode);
+						  	code_recur(root->rnode);
+							printf("MUL\n");
+						break;
+						case DIV_EQ:
+							/* Divide equal assignment "/=" */
+							/* e.g. x /= 5; */
+							// leaf = (leafnode*) root->rnode;
+							// src_var = get_variable_from_table(leaf->data.sval->str);
+							// // printf("   in TN_ASSIGN case *=, need to preform:  \n");
+							// printf("LDC %d\n", target_var.address);
+							// printf("LDC %d\n", src_var.address);
+							code_recur(root->lnode);
+						  	code_recur(root->rnode);
+							printf("DIV\n");
+						break;
+						default:
+							printf("BUG, didn't handle assigment token: %d\n, ", root->hdr.tok);
+						break;
+					}
+						
+
+				break;
 				case TN_EXPR:
 					switch (root->hdr.tok) {
 					  case CASE:
@@ -630,6 +679,7 @@ int  code_recur(treenode *root)
 
 					  case MINUS:
 					  	  /* Minus token "-" */
+							// todo refactor
 						  leaf = (leafnode*) root->lnode;
 						  src_var = get_variable_from_table(leaf->data.sval->str);
 						  printf("LDC %d\n", src_var.address);
@@ -642,8 +692,7 @@ int  code_recur(treenode *root)
 								default:
 									printf("ERROR, unhandled type: %d\n", leaf->hdr.type);
 									break;
-							}
-								
+							}	
 						break;
 					  case DIV:
 					  	  /* Divide token "/" */
@@ -704,13 +753,23 @@ int  code_recur(treenode *root)
 					  case GRTR:
 					  	  /* Greater token ">" */
 						  code_recur(root->lnode);
+						  if (root->lnode->hdr.type == TN_IDENT)
+							printf("IND \n");
 						  code_recur(root->rnode);
+						  if (root->rnode->hdr.type == TN_IDENT)
+							printf("IND \n");
+						  printf("GRT\n");
 						  break;
 
 					  case LESS:
 					  	  /* Less token "<" */
 						  code_recur(root->lnode);
+						  if (root->lnode->hdr.type == TN_IDENT)
+							printf("IND \n");
 						  code_recur(root->rnode);
+						  if (root->rnode->hdr.type == TN_IDENT)
+							printf("IND \n");
+						  printf("LES\n");
 						  break;
 						  
 					  case EQUAL:
@@ -729,12 +788,14 @@ int  code_recur(treenode *root)
 					  	  /* Less or equal token "<=" */
 						  code_recur(root->lnode);
 						  code_recur(root->rnode);
+						  printf("LEQ\n");
 						  break;
 
 					  case GRTR_EQ:
 					  	  /* Greater or equal token ">=" */
 						  code_recur(root->lnode);
 						  code_recur(root->rnode);
+						  printf("GEQ\n");
 						  break;
 
 					  default:
@@ -956,7 +1017,8 @@ void print_symbol_table(treenode *root) {
 
 		break;
 		default:
-			printf("Barak, unrecognized which: %d\n", root->hdr.which);
+			// printf("Barak, unrecognized which: %d\n", root->hdr.which);
+			break;
 	}
 }
 

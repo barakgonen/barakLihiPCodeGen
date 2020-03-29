@@ -179,6 +179,14 @@ int  code_recur(treenode *root)
 					if (ifn->else_n == NULL) {
 						/* if case */
 						code_recur(ifn->cond);
+						switch (ifn->cond->hdr.type){
+							case TN_IDENT:
+								printf("IND\n");
+							break;
+							default:
+								printf("BBBBB\n type is: %d\n", ifn->cond->hdr.which);
+							break;
+						}
 						switch (ifn->cond->hdr.which){
 							case LEAF_T:
 								printf("AND\n");

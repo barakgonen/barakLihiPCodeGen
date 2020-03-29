@@ -129,7 +129,7 @@ int  code_recur(treenode *root)
 						src_var = get_variable_from_table(leaf->data.sval->str);
 						// if you remove this comment you should check b = a<6;
 						printf("LDC %d\n", src_var.address);
-					}				
+					}
 					/*
 					*	In order to get the identifier name you have to use:
 					*	leaf->data.sval->str
@@ -385,26 +385,10 @@ int  code_recur(treenode *root)
 					
 				case TN_DECL:
 					code_recur(root->lnode);
-					code_recur(root->rnode);				
-					// printf("I should add you to the symbol table, but first of all, i need to parse you to a variable\n");
-					// printf("Lets find some data:\n");
-					// left_node = (treenode *)root->lnode;
-					// right_node = (treenode *)root->rnode;
-					// leaf = (leafnode*) root->rnode;
-					// if (left_node->hdr.type == TN_TYPE_LIST)
-					// {
-						// if (right_node->hdr.type == TN_IDENT && right_node->hdr.which == LEAF_T)
-						// {
-						// 	target_var = get_variable_from_table(leaf->data.sval->str);		
-						// 	if (target_var.address != UKNOWN_VARIABLE->address) {
-						// 		// no need to print in the beggining
-						// 		// printf("LDC %d\n", target_var.address);
-						// 	}
-						// 	else
-						// 		printf("ERROR variable hasn't found in symbol table! var id is: %s\n", leaf->data.sval->str);
-						// }
-					// }
+					code_recur(root->rnode);
 					break;
+					
+				break;
 				case TN_DECL_LIST:
 					/* Maybe you will use it later */
 					code_recur(root->lnode);
@@ -536,89 +520,20 @@ int  code_recur(treenode *root)
 						case EQ:
 							/* Regular assignment "=" */
 							/* e.g. x = 5; */		
-							printf("b;ab;a\n");
-							if (root->lnode != NULL)
-							{
-								// Means this is an assignment to a variable, so lets identify target variable, it's the left leaf of the node
-								// printf("%s", leaf->data.sval->str);
-								leaf = (leafnode*) root->lnode;
-								target_var = get_variable_from_table(leaf->data.sval->str);
-								
-								if (root->rnode != NULL && root->rnode->hdr.which == LEAF_T)
-								{
-									// printf("   in TN_ASSIGN NODE, need to understand wether it's complicated such as a+=b, or a =b \n");
-									// Were looking at the right child to define if we add value of variable or imidiate value
-									leaf = (leafnode*) root->rnode;
-									switch(leaf->hdr.type)
-									{
-										case TN_REAL:
-											// printf("ASSIGNEMENT OF REAL\n");
-											code_recur(root->lnode);
-											code_recur(root->rnode);
-											printf("STO\n");
-										break;
-										case TN_INT:
-											// printf(" = %d\n", leaf->data.ival);
-											code_recur(root->lnode);
-											code_recur(root->rnode);
-											printf("STO\n");
-										break;
-										case TN_EXPR:
-											printf("GOT TO THE TN_EXPR: \n");
-											// printf("NEED TO IMPLEMENT EXPRESSION SUCH AS a = a + 6\n");
-											// printf("IND \n");
-											// printf("LDC %d\n", leaf->data.ival);
-											// code_recur(root->lnode);
-											// printf("IND\n");
-											// code_recur(root->rnode);
-										break;
-
-						// 	// case(TN_IDENT):
-						// 		// printf(" this is classic initialization without an assignment like int x;\n");
-						// 		// printf("Need to check symbol-table for the address of: %s\n", target_var.identifier);
-						// 		// break;
-						// 	default:
-						// 		printf("ERROR, type is: %d\n", leaf->hdr.type);
-						// 		break;
-										default:
-											printf("BUG, unhandled hdr.type, value: %d\n", leaf->hdr.type);
-										break;
-									}
-								}
-								else if (root->rnode != NULL && root->rnode->hdr.which == NODE_T)
-								{
-									code_recur(root->lnode);
-									code_recur(root->rnode);
-									printf("STO\n");
-								}
-								/*
-								ldc 5   -> int x;
-								ldc 10     int x = 10;
-								sto
-								ldc 5      load value of x 
-								ind
-								print	   print value of X = 10;
-								*/
-							}
+							code_recur(root->lnode);
+							code_recur(root->rnode);
+							printf("STO\n");
 						break;
 						case PLUS_EQ:
 							/* Plus equal assignment "+=" */
 							/* e.g. x += 5; */
 							code_recur(root->lnode);
 						  	code_recur(root->rnode);
-							// printf("LDC %d\n", target_var.address);
-							// printf("LDC %d\n", src_var.address);
-							// leaf = (leafnode*) root->rnode;
-							// src_var= get_variable_from_table(leaf->data.sval->str);
 							printf("ADD\n");
 						break;
 						case MINUS_EQ:
 							/* Minus equak assigment "-=" */
 							/* e.g. x-= 5; */
-							// printf("LDC %d\n", target_var.address);
-							// printf("LDC %d\n", src_var.address);
-							// leaf = (leafnode*) root->rnode;
-							// src_var= get_variable_from_table(leaf->data.sval->str);
 							code_recur(root->lnode);
 						  	code_recur(root->rnode);
 							printf("SUB\n");
@@ -665,32 +580,36 @@ int  code_recur(treenode *root)
 
 					  case INCR:
 						  /* Increment token "++" */
-						  /* e.g. x++; */
 						  code_recur(root->lnode);
 						  code_recur(root->rnode);
-						  printf("INC\n");
 						  break;
 
 					  case DECR:
 						  /* Decrement token "--" */
-						  /* e.g. x--; */
 						  code_recur(root->lnode);
 						  code_recur(root->rnode);
-						  printf("DEC\n");
 						  break;
 
 					  case PLUS:
 					  	  /* Plus token "+" */
-						  /* e.g. x+y; */
 						  code_recur(root->lnode);
-						  if (root->lnode->hdr.type == TN_IDENT) {
-							  printf("IND\n");
+						  if (root->lnode != NULL)
+						  {
+							if(root->lnode->hdr.type == TN_IDENT)
+							{
+								printf("IND\n");
+							}
 						  }
 						  code_recur(root->rnode);
-						  if (root->rnode->hdr.type == TN_IDENT) {
-							  printf("IND\n");
+						  if (root->rnode != NULL)
+						  {
+							if(root->rnode->hdr.type == TN_IDENT)
+							{
+								printf("IND\n");
+							}
 						  }
-						  printf("ADD\n");
+  						 printf("ADD\n");
+
 						break;
 
 					  case MINUS:
@@ -706,9 +625,9 @@ int  code_recur(treenode *root)
 						  }
 						  printf("SUB\n");
 						  break;
+
 					  case DIV:
 					  	  /* Divide token "/" */
-						    /* e.g. x/y; */
 						  code_recur(root->lnode);
 						  if (root->lnode->hdr.type == TN_IDENT) {
 							  printf("IND\n");
@@ -722,7 +641,28 @@ int  code_recur(treenode *root)
 
 					  case STAR:
 					  	  /* multiply token "*" */
-						    /* e.g. x*y; */
+							// leaf = (leafnode*) root->lnode;
+							// switch(leaf->hdr.type) {
+							// 	case(TN_INT):
+							// 		printf("LDC %d\n", leaf->data.ival);
+							// 	break;
+							// 	default:
+							// 		printf("ERROR, unhandled type: %d\n", leaf->hdr.type);
+							// 		break;
+							// }
+							// leaf = (leafnode*) root->rnode;
+							// switch(leaf->hdr.type) {
+							// 	case(TN_INT):
+							// 		printf("LDC %d\n", leaf->data.ival);
+							// 	break;
+							// 	case TN_IDENT:
+							// 		// printf("LDC %d\n", get_variable_from_table(leaf->data.sval->str).address);
+							// 		// printf("STO\n");
+							// 	break;
+							// 	default:
+							// 		printf("ERROR, unhandled type: %d\n", leaf->hdr.type);
+							// 		break;
+							// }
 						  code_recur(root->lnode);
 						  if (root->lnode->hdr.type == TN_IDENT) {
 							  printf("IND\n");
@@ -733,9 +673,9 @@ int  code_recur(treenode *root)
 						  }
 						  printf("MUL\n");
 						  break;
+
 					  case AND:
 					  	  /* And token "&&" */
-							/* e.g x&&y */
 						  code_recur(root->lnode);
 						  if (root->lnode->hdr.type == TN_IDENT) {
 							  printf("IND\n");
@@ -746,10 +686,8 @@ int  code_recur(treenode *root)
 						  }
 						  printf("AND\n");
 						break;
-
 					  case OR:
 					  	  /* Or token "||" */
-							/* e.g x&&y */
 						  code_recur(root->lnode);
 						  if (root->lnode->hdr.type == TN_IDENT) {
 							  printf("IND\n");
@@ -765,7 +703,6 @@ int  code_recur(treenode *root)
 					  	  /* Not token "!" */
 						  code_recur(root->lnode);
 						  code_recur(root->rnode);
-						  printf("NOT\n");
 						  break;
 
 					  case GRTR:
@@ -794,14 +731,12 @@ int  code_recur(treenode *root)
 					  	  /* Equal token "==" */
 						  code_recur(root->lnode);
 						  code_recur(root->rnode);
-						  printf("EQU\n");
 						  break;
 
 					  case NOT_EQ:
 					  	  /* Not equal token "!=" */
 						  code_recur(root->lnode);
 						  code_recur(root->rnode);
-						  printf("NEQ\n");
 						  break;
 
 					  case LESS_EQ:
@@ -906,15 +841,8 @@ void print_symbol_table(treenode *root) {
 						leaf = (leafnode *) left_node->lnode;
 						var->type = leaf->hdr.type;
 						leaf = (leafnode *) right_node;
-						// printf("BAKBAK SIZE IS: %d\n", sizeof(leaf->data.str));
-						// printf("BAKBAK strlen IS: %d\n", strlen(leaf->data.str));
-						// var->identifier = malloc(strlen(leaf->data.str) + 1);
-						// strcpy(var->identifier, leaf->data.str);
-						// printf("size of identifier is: %d\n", sizeof(leaf->data.sval));
 						var->identifier = leaf->data.sval->str;
-						// var->data_as_int = malloc(sizeof(int));
 						var->is_value_set = 0;
-						// strcpy(var->identifier, leaf->data.sval->str);
 						add_variable_to_symbol_table(&symbolTalble->vars, *var);
 					}
 					else if (left_node->hdr.type == TN_TYPE_LIST &&right_node->hdr.type == TN_ASSIGN)
@@ -929,13 +857,13 @@ void print_symbol_table(treenode *root) {
 							case TN_INT:
 								// printf("right child is int\n");
 								// printf("value = %d\n", leaf->data.u_ival);
-								var->is_value_set = 1;
+								var->is_value_set = 0;
 								var->data_as_int = leaf->data.u_ival;
 								// var->integer_data = leaf->data.u_ival;
 								// sprintf(var->value, "%d", leaf->data.u_ival);
 								break;
 							case (TN_REAL):
-								var->is_value_set = 1;
+								var->is_value_set = 0;
 								var->data_as_double = leaf->data.dval;
 								// printf("value = %f\n", leaf->data.dval);
 								// sprintf(var->value, "%f", leaf->data.dval);
@@ -948,6 +876,7 @@ void print_symbol_table(treenode *root) {
 						}
 						// printf("adding var to symbol table: %s\n", var->identifier);
 						add_variable_to_symbol_table(&symbolTalble->vars, *var);
+
 					}
 					else
 					{
@@ -992,7 +921,7 @@ void print_symbol_table(treenode *root) {
 					// printf("%d\n", root->rnode->hdr.type);
 					break;
 				case TN_TYPE_LIST:
-					// printf("   TN_TYPE_LIST\n");
+					printf("   TN_TYPE_LIST\n");
 					break;
 				case TN_DECL_LIST:
 					print_symbol_table(root->lnode);
@@ -1023,7 +952,7 @@ void print_symbol_table(treenode *root) {
 					}
 				break;
 				case TN_ASSIGN:
-					printf("   TN_ASSIGN, relevant for PCode generation\n");
+					// printf("   TN_ASSIGN, relevant for PCode generation\n");
 				break;
 				case TN_FUNC_CALL:
 				break;

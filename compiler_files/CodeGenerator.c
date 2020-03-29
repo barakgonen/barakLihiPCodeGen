@@ -495,6 +495,12 @@ int  code_recur(treenode *root)
 					break;
 
 				case TN_ASSIGN:
+					if (root->lnode != NULL && root->lnode->hdr.type == TN_IDENT)
+					{
+						target_var = get_variable_from_table(((leafnode*)root->lnode)->data.sval->str);
+						if (target_var.address != UKNOWN_VARIABLE->address)
+							printf("LDC %d\n", target_var.address);
+					}
 					switch(root->hdr.tok)
 					{
 						case EQ:
@@ -508,29 +514,65 @@ int  code_recur(treenode *root)
 							/* Plus equal assignment "+=" */
 							/* e.g. x += 5; */
 							code_recur(root->lnode);
-						  	code_recur(root->rnode);
+							if(root->lnode != NULL && root->lnode->hdr.type == TN_IDENT)
+							{
+								printf("IND\n");
+							}
+							code_recur(root->rnode);
+							if(root->rnode != NULL && root->rnode->hdr.type == TN_IDENT)
+							{
+								printf("IND\n");
+							}
 							printf("ADD\n");
+							printf("STO\n");
 						break;
 						case MINUS_EQ:
 							/* Minus equak assigment "-=" */
 							/* e.g. x-= 5; */
 							code_recur(root->lnode);
-						  	code_recur(root->rnode);
+							if(root->lnode != NULL && root->lnode->hdr.type == TN_IDENT)
+							{
+								printf("IND\n");
+							}
+							code_recur(root->rnode);
+							if(root->rnode != NULL && root->rnode->hdr.type == TN_IDENT)
+							{
+								printf("IND\n");
+							}
 							printf("SUB\n");
+							printf("STO\n");
 						break;
 						case STAR_EQ:
 							/* Multiply equal assignment "*=" */
 							/* e.g. x *= 5; */
 							code_recur(root->lnode);
+							if(root->lnode != NULL && root->lnode->hdr.type == TN_IDENT)
+							{
+								printf("IND\n");
+							}
 						  	code_recur(root->rnode);
+							if(root->rnode != NULL && root->rnode->hdr.type == TN_IDENT)
+							{
+								printf("IND\n");
+							}
 							printf("MUL\n");
+							printf("STO\n");
 						break;
 						case DIV_EQ:
 							/* Divide equal assignment "/=" */
 							/* e.g. x /= 5; */
 							code_recur(root->lnode);
+							if(root->lnode != NULL && root->lnode->hdr.type == TN_IDENT)
+							{
+								printf("IND\n");
+							}
 						  	code_recur(root->rnode);
+							if(root->rnode != NULL && root->rnode->hdr.type == TN_IDENT)
+							{
+								printf("IND\n");
+							}
 							printf("DIV\n");
+							printf("STO\n");
 						break;
 						default:
 							printf("BUG, didn't handle assigment token: %d\n, ", root->hdr.tok);

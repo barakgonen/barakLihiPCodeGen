@@ -536,6 +536,7 @@ int  code_recur(treenode *root)
 						case EQ:
 							/* Regular assignment "=" */
 							/* e.g. x = 5; */		
+							printf("b;ab;a\n");
 							if (root->lnode != NULL)
 							{
 								// Means this is an assignment to a variable, so lets identify target variable, it's the left leaf of the node
@@ -654,7 +655,8 @@ int  code_recur(treenode *root)
 
 				break;
 				case TN_EXPR:
-					switch (root->hdr.tok) {
+					switch (root->hdr.tok) 
+					{
 					  case CASE:
 					      /* you should not get here */
 						  code_recur(root->lnode);
@@ -689,20 +691,32 @@ int  code_recur(treenode *root)
 							  printf("IND\n");
 						  }
 						  printf("ADD\n");
-						  break;
+						break;
 
 					  case MINUS:
 					  	  /* Minus token "-" */
 						  /* e.g. x-y; */
 						  code_recur(root->lnode);
+						  if (root->lnode->hdr.type == TN_IDENT) {
+							  printf("IND\n");
+						  }
 						  code_recur(root->rnode);
+						  if (root->rnode->hdr.type == TN_IDENT) {
+							  printf("IND\n");
+						  }
 						  printf("SUB\n");
 						  break;
 					  case DIV:
 					  	  /* Divide token "/" */
 						    /* e.g. x/y; */
 						  code_recur(root->lnode);
+						  if (root->lnode->hdr.type == TN_IDENT) {
+							  printf("IND\n");
+						  }
 						  code_recur(root->rnode);
+						  if (root->rnode->hdr.type == TN_IDENT) {
+							  printf("IND\n");
+						  }
 						  printf("DIV\n");
 						  break;
 
@@ -710,22 +724,40 @@ int  code_recur(treenode *root)
 					  	  /* multiply token "*" */
 						    /* e.g. x*y; */
 						  code_recur(root->lnode);
+						  if (root->lnode->hdr.type == TN_IDENT) {
+							  printf("IND\n");
+						  }
 						  code_recur(root->rnode);
+						  if (root->rnode->hdr.type == TN_IDENT) {
+							  printf("IND\n");
+						  }
 						  printf("MUL\n");
 						  break;
 					  case AND:
 					  	  /* And token "&&" */
 							/* e.g x&&y */
 						  code_recur(root->lnode);
+						  if (root->lnode->hdr.type == TN_IDENT) {
+							  printf("IND\n");
+						  }
 						  code_recur(root->rnode);
+						  if (root->rnode->hdr.type == TN_IDENT) {
+							  printf("IND\n");
+						  }
 						  printf("AND\n");
-						  break;
+						break;
 
 					  case OR:
 					  	  /* Or token "||" */
 							/* e.g x&&y */
 						  code_recur(root->lnode);
+						  if (root->lnode->hdr.type == TN_IDENT) {
+							  printf("IND\n");
+						  }
 						  code_recur(root->rnode);
+						  if (root->rnode->hdr.type == TN_IDENT) {
+							  printf("IND\n");
+						  }
 						  printf("OR\n");
 						  break;
 						
@@ -791,7 +823,7 @@ int  code_recur(treenode *root)
 						code_recur(root->rnode);
 						break;
 					}
-					break;
+				break;
 
 				case TN_WHILE:
 					/* While case */
@@ -813,6 +845,7 @@ int  code_recur(treenode *root)
 				default:
 					code_recur(root->lnode);
 					code_recur(root->rnode);
+					break;
 			}
 			break;
 
@@ -908,7 +941,6 @@ void print_symbol_table(treenode *root) {
 								// sprintf(var->value, "%f", leaf->data.dval);
 								break;
 							case TN_EXPR:
-								var->is_value_set = 0;
 							break;
 							default:
 								printf("defaultInSym my type is: %d\n", leaf->hdr.type);

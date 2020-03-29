@@ -549,59 +549,80 @@ int  code_recur(treenode *root)
 					  case INCR:
 						  /* Increment token "++" */
 						  code_recur(root->lnode);
+						  if(root->lnode != NULL && root->lnode->hdr.type == TN_IDENT)
+						  {
+							  printf("IND\n");
+						  }
 						  code_recur(root->rnode);
+						  if(root->rnode != NULL && root->rnode->hdr.type == TN_IDENT)
+						  {
+							  printf("IND\n");
+						  }
+						  printf("INC\n");
 						  break;
 
 					  case DECR:
 						  /* Decrement token "--" */
 						  code_recur(root->lnode);
+						  if(root->lnode != NULL && root->lnode->hdr.type == TN_IDENT)
+						  {
+							  printf("IND\n");
+						  }
 						  code_recur(root->rnode);
+						  if(root->rnode != NULL && root->rnode->hdr.type == TN_IDENT)
+						  {
+							  printf("IND\n");
+						  }
+						  printf("DEC\n");
 						  break;
 
 					  case PLUS:
 					  	  /* Plus token "+" */
 						  code_recur(root->lnode);
-						  if (root->lnode != NULL)
+						  if(root->lnode != NULL && root->lnode->hdr.type == TN_IDENT)
 						  {
-							if(root->lnode->hdr.type == TN_IDENT)
-							{
-								printf("IND\n");
-							}
+							  printf("IND\n");
 						  }
 						  code_recur(root->rnode);
-						  if (root->rnode != NULL)
+						  if(root->rnode != NULL && root->rnode->hdr.type == TN_IDENT)
 						  {
-							if(root->rnode->hdr.type == TN_IDENT)
-							{
-								printf("IND\n");
-							}
+							  printf("IND\n");
 						  }
   						 printf("ADD\n");
-
 						break;
-
 					  case MINUS:
 					  	  /* Minus token "-" */
 						  /* e.g. x-y; */
 						  code_recur(root->lnode);
-						  if (root->lnode->hdr.type == TN_IDENT) {
+						  if(root->lnode != NULL && root->lnode->hdr.type == TN_IDENT)
+						  {
 							  printf("IND\n");
 						  }
 						  code_recur(root->rnode);
-						  if (root->rnode->hdr.type == TN_IDENT) {
+						  if(root->rnode != NULL && root->rnode->hdr.type == TN_IDENT)
+						  {
 							  printf("IND\n");
 						  }
-						  printf("SUB\n");
+						  if (root->lnode == NULL)
+						  {
+						  	printf("NEG\n");
+						  }
+						  else
+						  {
+						  	printf("SUB\n");
+						  }
 						  break;
 
 					  case DIV:
 					  	  /* Divide token "/" */
 						  code_recur(root->lnode);
-						  if (root->lnode->hdr.type == TN_IDENT) {
+						  if(root->lnode != NULL && root->lnode->hdr.type == TN_IDENT)
+						  {
 							  printf("IND\n");
 						  }
 						  code_recur(root->rnode);
-						  if (root->rnode->hdr.type == TN_IDENT) {
+						  if(root->rnode != NULL && root->rnode->hdr.type == TN_IDENT)
+						  {
 							  printf("IND\n");
 						  }
 						  printf("DIV\n");
@@ -609,34 +630,14 @@ int  code_recur(treenode *root)
 
 					  case STAR:
 					  	  /* multiply token "*" */
-							// leaf = (leafnode*) root->lnode;
-							// switch(leaf->hdr.type) {
-							// 	case(TN_INT):
-							// 		printf("LDC %d\n", leaf->data.ival);
-							// 	break;
-							// 	default:
-							// 		printf("ERROR, unhandled type: %d\n", leaf->hdr.type);
-							// 		break;
-							// }
-							// leaf = (leafnode*) root->rnode;
-							// switch(leaf->hdr.type) {
-							// 	case(TN_INT):
-							// 		printf("LDC %d\n", leaf->data.ival);
-							// 	break;
-							// 	case TN_IDENT:
-							// 		// printf("LDC %d\n", get_variable_from_table(leaf->data.sval->str).address);
-							// 		// printf("STO\n");
-							// 	break;
-							// 	default:
-							// 		printf("ERROR, unhandled type: %d\n", leaf->hdr.type);
-							// 		break;
-							// }
 						  code_recur(root->lnode);
-						  if (root->lnode->hdr.type == TN_IDENT) {
+						  if(root->lnode != NULL && root->lnode->hdr.type == TN_IDENT)
+						  {
 							  printf("IND\n");
 						  }
 						  code_recur(root->rnode);
-						  if (root->rnode->hdr.type == TN_IDENT) {
+						  if(root->rnode != NULL && root->rnode->hdr.type == TN_IDENT)
+						  {
 							  printf("IND\n");
 						  }
 						  printf("MUL\n");
@@ -645,11 +646,13 @@ int  code_recur(treenode *root)
 					  case AND:
 					  	  /* And token "&&" */
 						  code_recur(root->lnode);
-						  if (root->lnode->hdr.type == TN_IDENT) {
+						  if(root->lnode != NULL && root->lnode->hdr.type == TN_IDENT)
+						  {
 							  printf("IND\n");
 						  }
 						  code_recur(root->rnode);
-						  if (root->rnode->hdr.type == TN_IDENT) {
+						  if(root->rnode != NULL && root->rnode->hdr.type == TN_IDENT)
+						  {
 							  printf("IND\n");
 						  }
 						  printf("AND\n");
@@ -657,67 +660,119 @@ int  code_recur(treenode *root)
 					  case OR:
 					  	  /* Or token "||" */
 						  code_recur(root->lnode);
-						  if (root->lnode->hdr.type == TN_IDENT) {
+						  if(root->lnode != NULL && root->lnode->hdr.type == TN_IDENT)
+						  {
 							  printf("IND\n");
 						  }
 						  code_recur(root->rnode);
-						  if (root->rnode->hdr.type == TN_IDENT) {
+						  if(root->rnode != NULL && root->rnode->hdr.type == TN_IDENT)
+						  {
 							  printf("IND\n");
 						  }
 						  printf("OR\n");
 						  break;
 						
 					  case NOT:
-					  	  /* Not token "!" */
-						  code_recur(root->lnode);
+					  	  /* Not token "!" */						  code_recur(root->lnode);
+						  if(root->lnode != NULL && root->lnode->hdr.type == TN_IDENT)
+						  {
+							  printf("IND\n");
+						  }
 						  code_recur(root->rnode);
+						  if(root->rnode != NULL && root->rnode->hdr.type == TN_IDENT)
+						  {
+							  printf("IND\n");
+						  }
+						  printf("NOT\n");
 						  break;
 
 					  case GRTR:
 					  	  /* Greater token ">" */
 						  code_recur(root->lnode);
-						  if (root->lnode->hdr.type == TN_IDENT)
-							printf("IND \n");
+						  if(root->lnode != NULL && root->lnode->hdr.type == TN_IDENT)
+						  {
+							  printf("IND\n");
+						  }
 						  code_recur(root->rnode);
-						  if (root->rnode->hdr.type == TN_IDENT)
-							printf("IND \n");
+						  if(root->rnode != NULL && root->rnode->hdr.type == TN_IDENT)
+						  {
+							  printf("IND\n");
+						  }
 						  printf("GRT\n");
 						  break;
 
 					  case LESS:
 					  	  /* Less token "<" */
 						  code_recur(root->lnode);
-						  if (root->lnode->hdr.type == TN_IDENT)
-							printf("IND \n");
+						  if(root->lnode != NULL && root->lnode->hdr.type == TN_IDENT)
+						  {
+							  printf("IND\n");
+						  }
 						  code_recur(root->rnode);
-						  if (root->rnode->hdr.type == TN_IDENT)
-							printf("IND \n");
+						  if(root->rnode != NULL && root->rnode->hdr.type == TN_IDENT)
+						  {
+							  printf("IND\n");
+						  }
 						  printf("LES\n");
 						  break;
 						  
 					  case EQUAL:
 					  	  /* Equal token "==" */
 						  code_recur(root->lnode);
+						  if(root->lnode != NULL && root->lnode->hdr.type == TN_IDENT)
+						  {
+							  printf("IND\n");
+						  }
 						  code_recur(root->rnode);
+						  if(root->rnode != NULL && root->rnode->hdr.type == TN_IDENT)
+						  {
+							  printf("IND\n");
+						  }
+						  printf("EQU\n");
 						  break;
 
 					  case NOT_EQ:
 					  	  /* Not equal token "!=" */
 						  code_recur(root->lnode);
+						  if(root->lnode != NULL && root->lnode->hdr.type == TN_IDENT)
+						  {
+							  printf("IND\n");
+						  }
 						  code_recur(root->rnode);
+						  if(root->rnode != NULL && root->rnode->hdr.type == TN_IDENT)
+						  {
+							  printf("IND\n");
+						  }
+						  printf("NEQ\n");
 						  break;
 
 					  case LESS_EQ:
 					  	  /* Less or equal token "<=" */
 						  code_recur(root->lnode);
+						  if(root->lnode != NULL && root->lnode->hdr.type == TN_IDENT)
+						  {
+							  printf("IND\n");
+						  }
 						  code_recur(root->rnode);
+						  if(root->rnode != NULL && root->rnode->hdr.type == TN_IDENT)
+						  {
+							  printf("IND\n");
+						  }
 						  printf("LEQ\n");
 						  break;
 
 					  case GRTR_EQ:
 					  	  /* Greater or equal token ">=" */
 						  code_recur(root->lnode);
+						  if(root->lnode != NULL && root->lnode->hdr.type == TN_IDENT)
+						  {
+							  printf("IND\n");
+						  }
 						  code_recur(root->rnode);
+						  if(root->rnode != NULL && root->rnode->hdr.type == TN_IDENT)
+						  {
+							  printf("IND\n");
+						  }
 						  printf("GEQ\n");
 						  break;
 

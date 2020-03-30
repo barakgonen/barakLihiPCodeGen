@@ -1,9 +1,9 @@
 #include <stdio.h>
 
 void main() {
-	int x;
-	float y;
-	double z; 
+	int x = 1;
+	float y = 1.1;
+	double z = 1.12345678; 
 
 	printf("%d\n", x);
 	printf("%f\n", y);

@@ -827,8 +827,12 @@ int  code_recur(treenode *root)
 
 				case TN_WHILE:
 					/* While case */
+					printf("while_statement:\n");
 					code_recur(root->lnode);
+					printf("FJP end_while\n");
 					code_recur(root->rnode);
+					printf("UJP while_statement\n");
+					printf("end_while:\n");
 					break;
 
 				case TN_DOWHILE:

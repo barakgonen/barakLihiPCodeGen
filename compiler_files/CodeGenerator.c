@@ -49,12 +49,12 @@ void add_variable_to_symbol_table(VariableNode** head_ref, Variable var_to_add)
 	var_node->data = var_to_add;
 	var_node->data.address = CODE_INIT_FRAME_IN_BYTES + symbolTalble->variables_counter;
 		
-	printf("         <add_variable_to_symbol_table()> new_var identifier is: %s\n", var_node->data.identifier);
-	printf("         <add_variable_to_symbol_table()> new_var type is: %d\n", var_node->data.type);
-	printf("         <add_variable_to_symbol_table()> new_var address is: %d\n", var_node->data.address);
-	if (var_node->data.is_value_set == 1){ 
-		printf("         <add_variable_to_symbol_table()> new_var value is: %d\n", var_node->data.data_as_int);
-	}
+	// printf("         <add_variable_to_symbol_table()> new_var identifier is: %s\n", var_node->data.identifier);
+	// printf("         <add_variable_to_symbol_table()> new_var type is: %d\n", var_node->data.type);
+	// printf("         <add_variable_to_symbol_table()> new_var address is: %d\n", var_node->data.address);
+	// if (var_node->data.is_value_set == 1){ 
+	// 	printf("         <add_variable_to_symbol_table()> new_var value is: %d\n", var_node->data.data_as_int);
+	// }
 
 	(*head_ref) = var_node;
 }
@@ -290,36 +290,8 @@ int  code_recur(treenode *root)
 						/* The expression that you need to print is located in */
 						/* the currentNode->right->right sub tree */
 						/* Look at the output AST structure! */
-						// printf("left: %s\n", ((leafnode*)root->rnode->lnode)->data.sval);
-						// printf("right: %d\n", ((leafnode*)root->rnode->rnode)->data.ival);
-						// switch (((leafnode*)root->rnode->rnode)->hdr.type) {
-						// 	case TN_INT:
-						// 		printf("LDC %d\n", ((leafnode*)root->rnode->rnode)->data.ival);
-						// 	break;
-						// 	case TN_REAL:
-						// 		printf("LDC %f\n", ((leafnode*)root->rnode->rnode)->data.dval);
-						// 	break;
-						// 	case TN_IDENT:
-						// 		src_var = get_variable_from_table(((leafnode*)root->rnode->rnode)->data.sval->str);
-						// 		if (src_var.address != UKNOWN_VARIABLE->address)
-						// 		{
-						// 			// printf("LDC %d\n", src_var.address);
-						// 		}
-						// 		else
-						// 			printf("ERROR, variable wasn't found! var identifier is: %s\n", ((leafnode*)root->rnode->rnode)->data.sval->str);
-						// 	break;
-						// 	case TN_EXPR:
-						// 		if (root->rnode != NULL)
-						// 			code_recur(root->rnode);
-						// 		else
-						// 			printf("TN_EXPR RIGHT IS NULL\n");
-						// 		break;
-						// 	default:
-						// 		printf("ERROR, default, case is not handled! case is is: %d\n", ((leafnode*)root->rnode->rnode)->hdr.type);
-						// 	break;
-						// }
-						// code_recur(root->lnode);
-						// code_recur(root->rnode);
+						code_recur(root->lnode);
+						code_recur(root->rnode);
 						printf("PRINT\n");
 					}
 					else {
@@ -523,12 +495,12 @@ int  code_recur(treenode *root)
 					break;
 
 				case TN_ASSIGN:
-					if (root->lnode != NULL && root->lnode->hdr.type == TN_IDENT)
-					{
-						target_var = get_variable_from_table(((leafnode*)root->lnode)->data.sval->str);
-						if (target_var.address != UKNOWN_VARIABLE->address)
-							printf("LDC %d\n", target_var.address);
-					}
+					// if (root->lnode != NULL && root->lnode->hdr.type == TN_IDENT)
+					// {
+					// 	target_var = get_variable_from_table(((leafnode*)root->lnode)->data.sval->str);
+					// 	if (target_var.address != UKNOWN_VARIABLE->address)
+					// 		// printf("LDC!!! %d\n", target_var.address);
+					// }
 					switch(root->hdr.tok)
 					{
 						case EQ:
@@ -618,6 +590,9 @@ int  code_recur(treenode *root)
 
 					  case INCR:
 						  /* Increment token "++" */
+						  leaf = (leafnode*) root->lnode;
+						  target_var = get_variable_from_table(leaf->data.sval->str);
+						  printf("LDC %d\n", target_var.address);
 						  code_recur(root->lnode);
 						  if(root->lnode != NULL && root->lnode->hdr.type == TN_IDENT)
 						  {
@@ -629,10 +604,14 @@ int  code_recur(treenode *root)
 							  printf("IND\n");
 						  }
 						  printf("INC\n");
+						  printf("STO\n");
 						  break;
 
 					  case DECR:
 						  /* Decrement token "--" */
+						  leaf = (leafnode*) root->lnode;
+						  target_var = get_variable_from_table(leaf->data.sval->str);
+						  printf("LDC %d\n", target_var.address);
 						  code_recur(root->lnode);
 						  if(root->lnode != NULL && root->lnode->hdr.type == TN_IDENT)
 						  {
@@ -644,6 +623,7 @@ int  code_recur(treenode *root)
 							  printf("IND\n");
 						  }
 						  printf("DEC\n");
+						  printf("STO\n");
 						  break;
 
 					  case PLUS:

@@ -290,8 +290,36 @@ int  code_recur(treenode *root)
 						/* The expression that you need to print is located in */
 						/* the currentNode->right->right sub tree */
 						/* Look at the output AST structure! */
-						code_recur(root->lnode);
-						code_recur(root->rnode);
+						// printf("left: %s\n", ((leafnode*)root->rnode->lnode)->data.sval);
+						// printf("right: %d\n", ((leafnode*)root->rnode->rnode)->data.ival);
+						// switch (((leafnode*)root->rnode->rnode)->hdr.type) {
+						// 	case TN_INT:
+						// 		printf("LDC %d\n", ((leafnode*)root->rnode->rnode)->data.ival);
+						// 	break;
+						// 	case TN_REAL:
+						// 		printf("LDC %f\n", ((leafnode*)root->rnode->rnode)->data.dval);
+						// 	break;
+						// 	case TN_IDENT:
+						// 		src_var = get_variable_from_table(((leafnode*)root->rnode->rnode)->data.sval->str);
+						// 		if (src_var.address != UKNOWN_VARIABLE->address)
+						// 		{
+						// 			// printf("LDC %d\n", src_var.address);
+						// 		}
+						// 		else
+						// 			printf("ERROR, variable wasn't found! var identifier is: %s\n", ((leafnode*)root->rnode->rnode)->data.sval->str);
+						// 	break;
+						// 	case TN_EXPR:
+						// 		if (root->rnode != NULL)
+						// 			code_recur(root->rnode);
+						// 		else
+						// 			printf("TN_EXPR RIGHT IS NULL\n");
+						// 		break;
+						// 	default:
+						// 		printf("ERROR, default, case is not handled! case is is: %d\n", ((leafnode*)root->rnode->rnode)->hdr.type);
+						// 	break;
+						// }
+						// code_recur(root->lnode);
+						// code_recur(root->rnode);
 						printf("PRINT\n");
 					}
 					else {
@@ -827,12 +855,12 @@ int  code_recur(treenode *root)
 
 				case TN_WHILE:
 					/* While case */
-					printf("while_statement:\n");
+					printf("while_statement_%d%s\n", root->hdr.line, ":");
 					code_recur(root->lnode);
-					printf("FJP end_while\n");
+					printf("FJP end_while_%d\n", root->hdr.line);
 					code_recur(root->rnode);
-					printf("UJP while_statement\n");
-					printf("end_while:\n");
+					printf("UJP while_statement_%d\n", root->hdr.line);
+					printf("end_while_%d%s\n", root->hdr.line, ":");
 					break;
 
 				case TN_DOWHILE:
@@ -908,7 +936,19 @@ void print_symbol_table(treenode *root) {
 					{
 						// printf("Found a decleration node!!! \n");
 						leaf = (leafnode *) left_node->lnode;
-						var->type = leaf->hdr.type;
+						switch(leaf->hdr.tok)
+						{
+							case FLOAT:
+							case DOUBLE:
+								var->type = TN_REAL;
+							break;
+							case INT:
+								var->type = TN_INT;
+							break;
+							default:
+								printf("UNHANDLED TOKEN, value is: %d\n", leaf->hdr.tok);
+							break;
+						};
 						leaf = (leafnode *) right_node;
 						var->identifier = leaf->data.sval->str;
 						var->is_value_set = 0;

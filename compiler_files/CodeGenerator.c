@@ -181,20 +181,23 @@ int  code_recur(treenode *root)
 						code_recur(ifn->cond);
 						switch (ifn->cond->hdr.type){
 							case TN_IDENT:
+								leaf = (leafnode *)ifn->cond;
+								src_var = get_variable_from_table(leaf->data.sval->str);
+								printf("LDC %d\n", src_var.address);
 								printf("IND\n");
 							break;
 							default:
 								printf("BBBBB\n type is: %d\n", ifn->cond->hdr.which);
 							break;
 						}
-						switch (ifn->cond->hdr.which){
-							case LEAF_T:
-								printf("AND\n");
-							break;
-							default:
-								printf("BBBBB\n type is: %d\n", ifn->cond->hdr.which);
-							break;
-						}
+						// switch (ifn->cond->hdr.which){
+						// 	case LEAF_T:
+						// 		printf("AND\n");
+						// 	break;
+						// 	default:
+						// 		printf("BBBBB\n type is: %d\n", ifn->cond->hdr.which);
+						// 	break;
+						// }
 						printf("FJP end_if\n");
 						code_recur(ifn->then_n);
 						printf("end_if:\n");

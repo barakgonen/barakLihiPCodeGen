@@ -283,6 +283,7 @@ int  code_recur(treenode *root)
 
 				case TN_FUNC_CALL:
 					/* Function call */
+					printf("@@@\n");
 					if (strcmp(((leafnode*)root->lnode)->data.sval->str, "printf") == 0) {
 						/* printf case */
 						/* The expression that you need to print is located in */
@@ -388,6 +389,7 @@ int  code_recur(treenode *root)
 
 				case TN_STEMNT_LIST:
 					/* Maybe you will use it later */
+					printf("hello\n");
 					code_recur(root->lnode);
 					code_recur(root->rnode);
 					break;
@@ -395,6 +397,7 @@ int  code_recur(treenode *root)
 				case TN_STEMNT:
 					/* Maybe you will use it later */
 					// printf("BARAK THIS IS THE STATEMENT BRO\n");
+					printf("lalala\n");
 					code_recur(root->lnode);
 					code_recur(root->rnode);
 					break;
@@ -657,12 +660,11 @@ int  code_recur(treenode *root)
 									root->rnode == NULL)
 						  {
 							leaf = (leafnode*) root->lnode;
-							src_var = get_variable_from_table(leaf->data.sval->str);
-							printf("LDC %d\n", src_var.address);
+							printf("LDC %d\n", get_variable_from_table(leaf->data.sval->str));
 							printf("IND\n");
 							printf("STO\n");
-							printf("LDC %d\n", src_var.address);
-							printf("LDC %d\n", src_var.address);
+							printf("LDC %d\n", get_variable_from_table(leaf->data.sval->str));
+							printf("LDC %d\n", get_variable_from_table(leaf->data.sval->str));
 							printf("IND\n");
 							printf("DEC\n");
 						  }

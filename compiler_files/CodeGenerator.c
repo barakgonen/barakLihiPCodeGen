@@ -341,7 +341,13 @@ int  code_recur(treenode *root)
 					// printf("before\n");
 					code_recur(root->rnode);
 					// printf("after\n");
-					if (root->rnode != NULL && root->rnode->hdr.type == TN_IDENT)
+					if (root->rnode != NULL && root->rnode->hdr.type == TN_EXPR && root->rnode->rnode != NULL)
+					{
+						leaf = (leafnode *)root->rnode->rnode;
+						printf("LDC %d\n", get_variable_from_table(leaf->data.sval->str));
+					}
+					if (root->rnode != NULL && 
+						(root->rnode->hdr.type == TN_IDENT || root->rnode->hdr.type == TN_EXPR))
 						printf("IND\n");
 					break;
 
@@ -638,14 +644,15 @@ int  code_recur(treenode *root)
 						 }
 						  else if (root->lnode == NULL && root->rnode != NULL)
 						  {
+							// printf("OUR CASE!\n");
 							leaf = (leafnode*) root->rnode;
 							printf("LDC %d\n", get_variable_from_table(leaf->data.sval->str));
 							printf("LDC %d\n", get_variable_from_table(leaf->data.sval->str));
 							printf("IND\n");
 							printf("INC\n");
 							printf("STO\n");
-							printf("LDC %d\n", get_variable_from_table(leaf->data.sval->str));
-							printf("IND\n");
+							// printf("LDC %d\n", get_variable_from_table(leaf->data.sval->str));
+							// printf("IND\n");
 						  }
 						  else if (root->lnode != NULL && 
 						  			((leafnode*)root->lnode)->hdr.type == TN_IDENT && 
@@ -654,6 +661,8 @@ int  code_recur(treenode *root)
 							leaf = (leafnode*) root->lnode;
 							printf("LDC %d\n", get_variable_from_table(leaf->data.sval->str));
 							printf("IND\n");
+							printf("STO\n");
+							// printf("IND\n");
 							printf("LDC %d\n", get_variable_from_table(leaf->data.sval->str));
 							printf("LDC %d\n", get_variable_from_table(leaf->data.sval->str));
 							printf("IND\n");
@@ -673,13 +682,12 @@ int  code_recur(treenode *root)
 						  else if (root->lnode == NULL && root->rnode != NULL)
 						  {
 							leaf = (leafnode*) root->rnode;
+							leaf = (leafnode*) root->rnode;
 							printf("LDC %d\n", get_variable_from_table(leaf->data.sval->str));
 							printf("LDC %d\n", get_variable_from_table(leaf->data.sval->str));
 							printf("IND\n");
 							printf("DEC\n");
 							printf("STO\n");
-							printf("LDC %d\n", get_variable_from_table(leaf->data.sval->str));
-							printf("IND\n");
 						  }
 						  else if (root->lnode != NULL && 
 						  			((leafnode*)root->lnode)->hdr.type == TN_IDENT && 
@@ -688,6 +696,8 @@ int  code_recur(treenode *root)
 							leaf = (leafnode*) root->lnode;
 							printf("LDC %d\n", get_variable_from_table(leaf->data.sval->str));
 							printf("IND\n");
+							printf("STO\n");
+							// printf("IND\n");
 							printf("LDC %d\n", get_variable_from_table(leaf->data.sval->str));
 							printf("LDC %d\n", get_variable_from_table(leaf->data.sval->str));
 							printf("IND\n");

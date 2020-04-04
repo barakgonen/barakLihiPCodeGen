@@ -28,14 +28,14 @@ void main() {
     x = (x==5)?(11):(22); //x=22
     printf("%d\n",x);
     ++x;
-    // for(a=1;a>=1;x--){
-    //     for(a=1;a>0;--x) {
-    //         if (a-- > 0)
-    //             printf("%d\n", x); //print 23
-    //         if (x)
-    //             printf("%d\n",x); //print 23
-    //     }
-    // }
+    // // for(a=1;a>=1;x--){
+    // //     for(a=1;a>0;--x) {
+    // //         if (a-- > 0)
+    // //             printf("%d\n", x); //print 23
+    // //         if (x)
+    // //             printf("%d\n",x); //print 23
+    // //     }
+    // // }
     printf("%d\n",x); //print 21
     a=35;
     b=550;
@@ -78,18 +78,18 @@ void main() {
     a = a*4;
     printf("%.2f\n",a); //print 4.00
     b = 1;
-    // do{
-    //     printf("%.2f\n",--a); //print 3,2,1,0
-    //     if(a&&b){
-    //         printf("%d\n",555); //print 555,555,555
-    //     }
-    // }while(a||0);
+    // // do{
+    // //     printf("%.2f\n",--a); //print 3,2,1,0
+    // //     if(a&&b){
+    // //         printf("%d\n",555); //print 555,555,555
+    // //     }
+    // // }while(a||0);
 
-    // for(a=1;a<3;a++) {
-    //     if (!b)
-    //         printf("%d\n", 111);
-    //     b -= b; //b=0. print 111
-    // }
+    // // for(a=1;a<3;a++) {
+    // //     if (!b)
+    // //         printf("%d\n", 111);
+    // //     b -= b; //b=0. print 111
+    // // }
     a=1;
     b=1;
     if(a==b)
@@ -102,11 +102,11 @@ void main() {
         printf("%.2f\n",a);
     if(a>=b)
         printf("%.2f\n",a*4); //print 4.00
-    while (a<=2)
-        printf("%.2f\n",++a); //print 2.00 , 3.00
+    // while (a<=2)
+    //     printf("%.2f\n",++a); //print 2.00 , 3.00
 
-    a=1;
-    printf("%.2f\n",+a); // print 1.00
+    // a=1;
+    // printf("%.2f\n",+a); // print 1.00
 
     return;
 }

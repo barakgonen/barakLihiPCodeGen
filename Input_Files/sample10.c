@@ -13,9 +13,9 @@ void main() {
 	e /= b;
 
 	printf("%d\n", a);			// V
-	printf("%f\n", c);			// V
-	printf("%f\n", d);			// V
-	printf("%f\n", e);			// V
+	printf("%d\n", c);			// V
+	printf("%d\n", d);			// V
+	printf("%d\n", e);			// V
 	printf("%d\n", b);			// V
 	return;
 }

@@ -202,26 +202,30 @@ int  code_recur(treenode *root)
 						// 		printf("BBBBB\n type is: %d\n", ifn->cond->hdr.which);
 						// 	break;
 						// }
-						printf("FJP end_if\n");
+						printf("FJP end_if_%d\n", root->hdr.line);
 						code_recur(ifn->then_n);
-						printf("end_if:\n");
+						printf("end_if_%d%s\n", root->hdr.line, ":");
 					}
 					else {
 						code_recur(ifn->cond);
-						printf("FJP else\n");
+						printf("FJP else_%d\n", root->hdr.line);
 						code_recur(ifn->then_n);
-						printf("ujp end\n");
-						printf("else:\n");
+						printf("ujp end_%d\n", root->hdr.line);
+						printf("else_%d%s\n", root->hdr.line, ":");
 						code_recur(ifn->else_n);
-						printf("end:\n");
+						printf("end_%d%s\n", root->hdr.line, ":");
 					}
 					return 0;
 
 				case TN_COND_EXPR:
-					printf("good luck!\n");
 					code_recur(ifn->cond);
+					printf("FJP else_condition_%d\n", root->hdr.line);
 					code_recur(ifn->then_n);
+					printf("ujp after_condition_%d\n", root->hdr.line);
+					printf("else_condition_%d%s\n", root->hdr.line, ":");
 					code_recur(ifn->else_n);
+					printf("ujp after_condition_%d\n", root->hdr.line);
+					printf("after_condition_%d%s\n", root->hdr.line, ":");
 					break;
 
 				default:
@@ -662,7 +666,7 @@ int  code_recur(treenode *root)
 
 					  case DECR:
 						  /* Decrement token "--" */
-						 						 if (root->lnode == NULL && root->rnode == NULL)
+						 if (root->lnode == NULL && root->rnode == NULL)
 						 {
 						    leaf = (leafnode*) root;
 						 }

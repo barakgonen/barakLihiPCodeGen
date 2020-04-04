@@ -48,7 +48,7 @@ void main() {
 	x = x < y;
 	printf("%d\n", x);
 	//	GREQ
-	printf("%d\n", x);
+	printf("%f\n", x);
 	y = x < (z <= y);
 	printf("%f\n", y);
 	z = (x <= y) > (z <= x);
@@ -60,13 +60,16 @@ void main() {
 	printf("%f\n", y);
 	z = (x <= y) >= (z < x);
 	printf("%f\n", z);
-	//	INC
+	// INC
+	printf("%d\n", x);
 	x = x++;
-	printf("%f\n", x);
+	printf("%d\n", x);
+	x += 1;
+	printf("%d\n", x);
 	x++;
-	printf("%f\n", x);
+	printf("%d\n", x);
 	++x;
-	printf("%f\n", x);
+	printf("%d\n", x);
 	y = y++;
 	printf("%f\n", y);
 	y++;
@@ -81,11 +84,13 @@ void main() {
 	printf("%f\n", z);
 	// DEC
 	x = x--;
-	printf("%f\n", x);
+	printf("%d\n", x);
 	x--;
-	printf("%f\n", x);
+	printf("%d\n", x);
 	--x;
-	printf("%f\n", x);
+	x -= 2;
+	printf("%d\n", x);
+	printf("%d\n", x);
 	y = y--;
 	printf("%f\n", y);
 	y--;

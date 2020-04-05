@@ -6,6 +6,7 @@ void main() {
     float y = 7.7;
     // double z = 1.12345678;
     double b;
+    // double c= -345.12;
     printf("%f\n", x);
     printf("%f\n", y);
     x = ++y;
@@ -74,5 +75,30 @@ void main() {
     printf("%f\n", a);
     printf("%f\n",a--);
     printf("%f\n", a);
+    // MUL by neg
+    b = b * -1.1212;
+    printf("%f\n", b);
+    b = -23213.3243 * b;
+    printf("%f\n", b);
+    x *= (b*-213) + 16;
+    printf("%f\n", b);
+    b = (-b) * (-(-b));
+    printf("%f\n", b);
+    // DIV by neg
+    b -= -b/(-234.43);
+    printf("%f\n", b);
+    x = 10;
+    b = -2;
+    x+=x/b+12;
+    printf("%f\n", x);
+    printf("%f\n", b);
+    b/=(-123/x)-1000;
+    printf("%f\n",b);
+    b/=(b*-12)/(-11);
+    printf("%f\n",b);
+    printf("%f\n",x);
+    b/=x++;
+    printf("%f\n",b);
+    printf("%f\n",x);
     return;
 }

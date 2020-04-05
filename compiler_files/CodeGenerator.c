@@ -1036,8 +1036,12 @@ int code_recur(treenode *root)
 
 		case TN_DOWHILE:
 			/* Do-While case */
+			printf("do_while_statement_%d%s\n", root->hdr.line, ":");
 			code_recur(root->rnode);
 			code_recur(root->lnode);
+			printf("FJP end_do_while_%d\n", root->hdr.line);
+			printf("UJP do_while_statement_%d\n", root->hdr.line);
+			printf("end_do_while_%d%s\n", root->hdr.line, ":");
 			break;
 
 		case TN_LABEL:

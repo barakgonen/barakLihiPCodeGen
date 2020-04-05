@@ -78,12 +78,12 @@ void main() {
     a = a*4;
     printf("%.2f\n",a); //print 4.00
     b = 1;
-    // // do{
-    // //     printf("%.2f\n",--a); //print 3,2,1,0
-    // //     if(a&&b){
-    // //         printf("%d\n",555); //print 555,555,555
-    // //     }
-    // // }while(a||0);
+    do{
+        printf("%.2f\n",--a); //print 3,2,1,0
+        if(a&&b){
+            printf("%d\n",555); //print 555,555,555
+        }
+    }while(a||0);
 
     // // for(a=1;a<3;a++) {
     // //     if (!b)

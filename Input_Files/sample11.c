@@ -74,10 +74,10 @@ void main() {
     a = a/12;
     printf("%.2f\n",a); //print 0.50
     a = 2*a;
-    printf("%.2f\n",a); //print 1.00
-    a = a*4;
-    printf("%.2f\n",a); //print 4.00
-    b = 1;
+    // printf("%.2f\n",a); //print 1.00
+    // a = a*4;
+    // printf("%.2f\n",a); //print 4.00
+    // b = 1;
     // // do{
     // //     printf("%.2f\n",--a); //print 3,2,1,0
     // //     if(a&&b){
@@ -90,18 +90,18 @@ void main() {
     // //         printf("%d\n", 111);
     // //     b -= b; //b=0. print 111
     // // }
-    a=1;
-    b=1;
-    if(a==b)
-        printf("%.2f\n",a); //print 1.00
-    if(a==1)
-        printf("%.2f\n",a+a); //print 2.00
-    if(0==a) //false
-        printf("%.2f\n",a);
-    if(a!=b) //false
-        printf("%.2f\n",a);
-    if(a>=b)
-        printf("%.2f\n",a*4); //print 4.00
+    // a=1;
+    // b=1;
+    // if(a==b)
+    //     printf("%.2f\n",a); //print 1.00
+    // if(a==1)
+    //     printf("%.2f\n",a+a); //print 2.00
+    // if(0==a) //false
+    //     printf("%.2f\n",a);
+    // if(a!=b) //false
+    //     printf("%.2f\n",a);
+    // if(a>=b)
+    //     printf("%.2f\n",a*4); //print 4.00
     // while (a<=2)
     //     printf("%.2f\n",++a); //print 2.00 , 3.00
 

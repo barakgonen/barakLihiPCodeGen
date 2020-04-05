@@ -28,14 +28,14 @@ void main() {
     x = (x==5)?(11):(22); //x=22
     printf("%d\n",x);
     ++x;
-    // // for(a=1;a>=1;x--){
-    // //     for(a=1;a>0;--x) {
-    // //         if (a-- > 0)
-    // //             printf("%d\n", x); //print 23
-    // //         if (x)
-    // //             printf("%d\n",x); //print 23
-    // //     }
-    // // }
+    for(a=1;a>=1;x--){
+        for(a=1;a>0;--x) {
+            if (a-- > 0)
+                printf("%d\n", x); //print 23
+            if (x)
+                printf("%d\n",x); //print 23
+        }
+    }
     printf("%d\n",x); //print 21
     a=35;
     b=550;
@@ -85,11 +85,11 @@ void main() {
         }
     }while(a||0);
 
-    // // for(a=1;a<3;a++) {
-    // //     if (!b)
-    // //         printf("%d\n", 111);
-    // //     b -= b; //b=0. print 111
-    // // }
+    for(a=1;a<3;a++) {
+        if (!b)
+            printf("%d\n", 111);
+        b -= b; //b=0. print 111
+    }
     a=1;
     b=1;
     if(a==b)

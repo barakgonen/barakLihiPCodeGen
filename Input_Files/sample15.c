@@ -15,10 +15,10 @@ void main() {
     x = ++x;
     printf("%f\n", x);
     printf("%f\n", y);
-    x = y++;
+    // x = y++;
     printf("%f\n", x);
     printf("%f\n", y);
-    x = x++;
+    // x = x++;
     printf("%f\n", x);
     printf("%f\n", y);
     b = 1;
@@ -62,7 +62,7 @@ void main() {
     if (a >= b)
         printf("%f\n", 4 * a); //print 4.00
     printf("%f\n", x);
-    x = y++;
+    // x = y++;
     printf("%f\n", y);
     printf("%f\n", x);
     printf("%f\n", y);
@@ -92,12 +92,12 @@ void main() {
     x+=x/b+12;
     printf("%f\n", x);
     printf("%f\n", b);
-    b/=(-123/x)-1000;
+    // b/=(-123/x)-1000;
     printf("%f\n",b);
-    b/=(b*-12)/(-11);
+    // b/=(b*-12)/(-11);
     printf("%f\n",b);
     printf("%f\n",x);
-    b/=x++;
+    // b/=x++;
     printf("%f\n",b);
     printf("%f\n",x);
     return;

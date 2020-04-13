@@ -11,7 +11,8 @@ void main() {
     x=1;
     b=1;
     a = 5;
-    e = a--; //e=5. a=4
+    // e = a--; //e=5. a=4
+    e = 8.6;
     printf("%.2f\n",e); //print 5.00
     printf("%d\n",b++); //print: 1. b=2.
     printf("%.2f\n",--a); //print 3.00 = a
@@ -71,8 +72,8 @@ void main() {
     printf("%.2f\n",a); //print 1.00
     a = 6/a;
     printf("%.2f\n",a); //print 6.00
-    a = a/12;
-    printf("%.2f\n",a); //print 0.50
+    // a = a/12;
+    // printf("%.2f\n",a); //print 0.50
     a = 2*a;
     printf("%.2f\n",a); //print 1.00
     a = a*4;

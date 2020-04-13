@@ -10,7 +10,8 @@ void main() {
     x=1;
     b=1;
     a = 5;
-    e = a--; //e=5. a=4 store to a and than decrement  
+    e = 7;
+    // e = a--; //e=5. a=4 store to a and than decrement  
     printf("%.2f\n",e); //print 5.00
     printf("%d\n",b++); //print: 1. b=2.
     printf("%.2f\n",--a); //print 3.00 = a
@@ -39,7 +40,7 @@ void main() {
         printf("%.2f\n",++a); //print 2.00 , 3.00
 
     a=1;
-    printf("%.2f\n",+a); // print 1.00
+    printf("%.2f\n",a); // print 1.00
 	
 	return;
 }

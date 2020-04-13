@@ -560,7 +560,7 @@ int code_recur(treenode *root)
 				}
 				printf("ADD\n");
 				printf("STO\n");
-				;
+			break;
 			case MINUS_EQ:
 				/* Minus equak assigment "-=" */
 				/* e.g. x-= 5; */
@@ -649,7 +649,7 @@ int code_recur(treenode *root)
 					printf("LDC %d\n", get_variable_from_table(leaf->data.sval->str));
 					printf("LDC %d\n", get_variable_from_table(leaf->data.sval->str));
 					printf("IND\n");
-					printf("INC\n");
+					printf("INC 1\n");
 					printf("STO\n");
 					printf("LDC %d\n", get_variable_from_table(leaf->data.sval->str));
 					printf("IND\n");
@@ -664,7 +664,7 @@ int code_recur(treenode *root)
 					printf("LDC %d\n", get_variable_from_table(leaf->data.sval->str));
 					printf("LDC %d\n", get_variable_from_table(leaf->data.sval->str));
 					printf("IND\n");
-					printf("INC\n");
+					printf("INC 1\n");
 					printf("STO\n");
 				}
 				break;
@@ -683,7 +683,7 @@ int code_recur(treenode *root)
 					printf("LDC %d\n", get_variable_from_table(leaf->data.sval->str));
 					printf("LDC %d\n", get_variable_from_table(leaf->data.sval->str));
 					printf("IND\n");
-					printf("DEC\n");
+					printf("DEC 1\n");
 					printf("STO\n");
 					printf("LDC %d\n", get_variable_from_table(leaf->data.sval->str));
 					printf("IND\n");
@@ -698,7 +698,7 @@ int code_recur(treenode *root)
 					printf("LDC %d\n", get_variable_from_table(leaf->data.sval->str));
 					printf("LDC %d\n", get_variable_from_table(leaf->data.sval->str));
 					printf("IND\n");
-					printf("DEC\n");
+					printf("DEC 1\n");
 					printf("STO\n");
 				}
 				break;

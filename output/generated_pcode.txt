@@ -1,0 +1,21 @@
+﻿LDC 5
+LDC 1
+STO
+while_statement_6:
+LDC 5
+IND
+LDC 0
+OR
+LDC 2
+LDC 5
+LES
+AND
+FJP end_while_6
+LDC 1
+PRINT
+LDC 2
+PRINT
+UJP while_statement_6
+end_while_6:
+LDC 3
+PRINT

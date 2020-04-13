@@ -26,9 +26,9 @@ $sample_number_file = "$pwd//output/sample_number.txt"
 $exe = "$pwd/$program_name.exe"
 
 Write-Host "About To Execute Command:", $command
-Write-Host "Running on the following sample: "$input_file_path
 if ($command -ne "")
 {
+    Write-Host "Running on the following sample: "$input_file_path
     &$exe -$command $input_file_path
 }
 

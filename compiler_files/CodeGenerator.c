@@ -79,6 +79,8 @@ void remove_variable_from_symbol_table(const char *name)
 *	Input: treenode (AST)
 *	Output: prints the Pcode on the console
 */
+char break_dest[50] = "";
+int last_loop_end_lable_line_num = -1;
 int code_recur(treenode *root)
 {
 	if (symbolTalble == NULL)
@@ -229,6 +231,8 @@ int code_recur(treenode *root)
 			/* For case*/
 			/* e.g. for(i=0;i<5;i++) { ... } */
 			/* Look at the output AST structure! */
+			last_loop_end_lable_line_num = root->hdr.line;
+			strcpy(break_dest, "end_of_for_");
 			code_recur(forn->init);
 			printf("entering_for_%d%s\n", root->hdr.line, ":");
 			code_recur(forn->test);
@@ -454,6 +458,7 @@ int code_recur(treenode *root)
 			else if (root->hdr.tok == BREAK)
 			{
 				/* break jump - for HW2! */
+				printf("UJP %s%d\n", break_dest, last_loop_end_lable_line_num);
 				code_recur(root->lnode);
 				code_recur(root->rnode);
 			}
@@ -960,6 +965,8 @@ int code_recur(treenode *root)
 
 		case TN_WHILE:
 			/* While case */
+			last_loop_end_lable_line_num = root->hdr.line;
+			strcpy(break_dest, "end_while_");
 			printf("while_statement_%d%s\n", root->hdr.line, ":");
 			code_recur(root->lnode);
 			printf("FJP end_while_%d\n", root->hdr.line);
@@ -970,6 +977,8 @@ int code_recur(treenode *root)
 
 		case TN_DOWHILE:
 			/* Do-While case */
+			last_loop_end_lable_line_num = root->hdr.line;
+			strcpy(break_dest, "end_do_while_");
 			printf("do_while_statement_%d%s\n", root->hdr.line, ":");
 			code_recur(root->rnode);
 			code_recur(root->lnode);

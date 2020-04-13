@@ -1,11 +1,8 @@
 param([string]$command = $Args[0], [Int32]$number = $Args[1])
 
 Function Pcode_Exe {
-    rm $output_file_path
     &$exe -$command $input_file_path | Out-File -Encoding utf8 $output_file_path
     gcc -w -o $test_program_name $input_file_path
-    rm $test_program_output_path
-    rm $sample_number_file
     $sample_number | Out-File -Encoding utf8 $sample_number_file
     .\output\test_program.exe | Out-File -Encoding utf8 $test_program_output_path
     node .\code\bla.js
@@ -25,8 +22,14 @@ $sample_number_file = "$pwd//output/sample_number.txt"
 &$gcc_path -w -o $program_name $compiler_files*.c
 $exe = "$pwd/$program_name.exe"
 
-if ($command -ne "")
+if ($command -eq "Pcode")
 {
+    Write-Host "About To Execute Command:", $command
+    Write-Host "Running on the following sample: "$input_file_path
+    Pcode_Exe
+
+}
+elseif ($command -ne "") {
     Write-Host "About To Execute Command:", $command
     Write-Host "Running on the following sample: "$input_file_path
     &$exe -$command $input_file_path

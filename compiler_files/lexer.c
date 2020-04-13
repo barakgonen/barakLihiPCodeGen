@@ -1357,12 +1357,12 @@ YY_LINENO_REWIND_TO(yy_cp - 1);
 YY_DO_BEFORE_ACTION; /* set up yytext again */
 YY_RULE_SETUP
 #line 214 "lexer.l"
-{ /* C++ style comment */
-                         if (cpp_comment_warn){
-                             cpp_comment_warn = 0;
-                             yywarn("C++ style comment encountered");
-                         }
-                     }
+// { /* C++ style comment */
+                    //      if (cpp_comment_warn){
+                    //          cpp_comment_warn = 0;
+                    //          yywarn("C++ style comment encountered");
+                    //      }
+                    //  }
 	YY_BREAK
 case 6:
 YY_RULE_SETUP

@@ -175,7 +175,9 @@ function doit() {
                 for (var i = 0; i < actual_lines.length; i++) {
                     actual_data = str2val(actual_lines[i])
                     expected_data = str2val(expected_lines[i])
-                    if (Math.abs(actual_data - expected_data) > 0.001) {
+                    if (Math.abs(actual_data - expected_data) > 0.001 ||
+                        (isNaN(actual_data) && !isNaN(expected_data)) || 
+                        (!isNaN(actual_data) && isNaN(expected_data)))  {
                         console.log("FAILED actual: " + actual_data + " expected: " + expected_data);
                         has_passed = false;
                         break;

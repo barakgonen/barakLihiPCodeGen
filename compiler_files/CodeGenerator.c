@@ -520,13 +520,7 @@ int code_recur(treenode *root)
 					(root->rnode->hdr.tok == INCR || root->rnode->hdr.tok == DECR) &&
 					strcmp(((leafnode *)root->rnode->lnode)->data.sval->str, ((leafnode *)root->lnode)->data.sval->str) == 0)
 				{
-					printf("LDC %d\n", get_variable_from_table(((leafnode *)root->lnode)->data.sval->str));
-					printf("IND\n");
-					printf("LDC 1\n");
-					if (root->rnode->hdr.tok == INCR)
-						printf("ADD\n");
-					else
-						printf("SUB\n");
+					// because of c++ and c diffrences: x=x++ increments x in c++ and does nothing in c
 				}
 				else
 				{

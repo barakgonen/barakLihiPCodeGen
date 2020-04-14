@@ -1,5 +1,4 @@
 #include "CodeGenerator.h"
-#include <string.h>
 
 const int CODE_INIT_FRAME_IN_BYTES = 4;
 typedef struct variable *varPtr;

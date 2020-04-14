@@ -472,7 +472,22 @@ int code_recur(treenode *root)
 		case TN_SWITCH:
 			/* Switch case - for HW2! */
 			code_recur(root->lnode);
+			if(root->lnode!=NULL)
+			{
+				if(root->lnode->hdr.type == TN_IDENT)
+				{
+					printf("LDC %d\n", get_variable_from_table(((leafnode *)root->lnode)->data.sval->str));
+					printf("IND\n");
+				}
+				else
+				{
+					code_recur(root->lnode);
+				}
+			}
+			last_loop_end_lable_line_num = root->hdr.line;
+			strcpy(break_dest, "end_switch_");
 			code_recur(root->rnode);
+			printf("end_switch_%d%s\n", root->hdr.line, ":");
 			break;
 
 		case TN_INDEX:
@@ -635,8 +650,10 @@ int code_recur(treenode *root)
 			{
 			case CASE:
 				/* you should not get here */
+				printf("DPL\n");
 				code_recur(root->lnode);
 				code_recur(root->rnode);
+				printf("EQU \n");				
 				break;
 
 			case INCR:
@@ -988,7 +1005,9 @@ int code_recur(treenode *root)
 
 		case TN_LABEL:
 			code_recur(root->lnode);
+			printf("FJP case_%d\n", root->hdr.line);
 			code_recur(root->rnode);
+			printf("case_%d%s\n", root->hdr.line, ":");
 			break;
 
 		default:

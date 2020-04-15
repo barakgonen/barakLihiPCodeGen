@@ -25,7 +25,7 @@ struct blaTYpe
     int blabbbbBBBbbb; 
     int blaccccccc; 
     float bladdDDDDD; 
-    int blaEeEeEeE; 
+    double blaEeEeEeE; 
     double blafFfFFfFFFFFFFFFF; 
     int blagggggggggggggggggggggggg; 
     int hhhhhhhh; 
@@ -41,11 +41,11 @@ struct blaTYpe
 
 void main()
 {
-    struct blaTYpe a;
-    struct blaTYpe b;
-    struct bakBAK ccccccc;
-    struct bakBAK DD;
-    struct blaTYpe e;
-    struct bakBAK aa;
+    // struct blaTYpe a;
+    // struct blaTYpe b;
+    // struct bakBAK ccccccc;
+    // struct bakBAK DD;
+    // struct blaTYpe e;
+    // struct bakBAK aa;
     return;
 }

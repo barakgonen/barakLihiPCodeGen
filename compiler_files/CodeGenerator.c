@@ -1103,7 +1103,8 @@ int code_recur(treenode *root)
 }
 
 char struct_definition[5000] = "";
-const char SUPPERATOR = '~';
+const char SUPPERATOR = '!';
+const char PAIR_SUP = '~';
 /*
 *	This function prints all the variables on your symbol table with their data
 *	Input: treenode (AST)
@@ -1212,6 +1213,24 @@ void print_symbol_table(treenode *root)
 		case TN_FUNC_DECL:
 			break;
 		case TN_TYPE_LIST:
+			if (root->lnode != NULL)
+			{
+				leaf = (leafnode *)(root->lnode);
+				switch (leaf->hdr.tok){
+					case INT:
+						strcat(struct_definition, "298");
+						strncat(struct_definition, &PAIR_SUP, 1);
+					break;
+					case FLOAT:
+						strcat(struct_definition, "296");
+						strncat(struct_definition, &PAIR_SUP, 1);
+					case DOUBLE:
+					break;
+					default:
+						printf("Unhandled leaf token, it's: %d\n", leaf->hdr.tok);
+					break;
+				}
+			}
 			break;
 		case TN_DECL_LIST:
 			print_symbol_table(root->lnode);
@@ -1236,7 +1255,7 @@ void print_symbol_table(treenode *root)
 			break;
 		case TN_COMP_DECL:
 			/* struct component declaration - for HW2 */
-			// print_symbol_table(root->lnode); // todo: fixmeLAter.. it's for typeing
+			print_symbol_table(root->lnode);
 			print_symbol_table(root->rnode);
 			break;
 		case TN_FIELD_LIST:

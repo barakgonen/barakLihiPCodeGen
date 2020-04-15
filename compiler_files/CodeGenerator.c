@@ -1,72 +1,78 @@
 #include "CodeGenerator.h"
-
+#include <string.h>
 #define NR_BUCKETS 1024
 
-struct StructObject {
-    char* key;
-    void* value;
-    struct StructObject* next;
-
+struct StructObject
+{
+	char *key;
+	void *value;
+	struct StructObject *next;
 };
 
-struct StructsMapper {
-    struct StructObject* buckets[NR_BUCKETS];
-    void (*free_key)(char*);
-    void (*free_value)(void*);
-    unsigned int (*hash)(const char* key);
-    int (*cmp)(const char* first, const char* second);
+struct StructsMapper
+{
+	struct StructObject *buckets[NR_BUCKETS];
+	void (*free_key)(char *);
+	void (*free_value)(void *);
+	unsigned int (*hash)(const char *key);
+	int (*cmp)(const char *first, const char *second);
 };
 
-void* get(struct StructsMapper* table, const char* key)
+void *get(struct StructsMapper *table, const char *key)
 {
-    unsigned int bucket = table->hash(key) % NR_BUCKETS;
-    struct StructObject* node;
-    node = table->buckets[bucket];
-    while (node) {
-        if (table->cmp(key, node->key) == 0)
-            return node->value;
-        node = node->next;
-    }
-    return NULL;
-}
-int insert(struct StructsMapper* table, char* key, void* value)
-{
-    unsigned int bucket = table->hash(key) % NR_BUCKETS;
-    struct StructObject** tmp;
-    struct StructObject* node;
-
-    tmp = &table->buckets[bucket];
-    while (*tmp) {
-        if (table->cmp(key, (*tmp)->key) == 0)
-            break;
-        tmp = &(*tmp)->next;
-    }
-    if (*tmp) {
-        if (table->free_key != NULL)
-            table->free_key((*tmp)->key);
-        if (table->free_value != NULL)
-            table->free_value((*tmp)->value);
-        node = *tmp;
-    }
-    else {
-        node = malloc(sizeof * node);
-        if (node == NULL)
-            return -1;
-        node->next = NULL;
-        *tmp = node;
-    }
-    node->key = key;
-    node->value = value;
-
-    return 0;
+	struct StructObject *node;
+	node = table->buckets[0];
+	while (node)
+	{
+		if (table->cmp(key, node->key) == 0)
+			return node->value;
+		node = node->next;
+	}
+	return NULL;
 }
 
-unsigned int foo_strhash(const char* str)
+int insert(struct StructsMapper *table, char *key, void *value)
 {
-    unsigned int hash = 0;
-    for (; *str; str++)
-        hash = 31 * hash + *str;
-    return hash;
+	struct StructObject **tmp;
+	struct StructObject *node;
+
+	node = malloc(sizeof *node);
+	if (node == NULL)
+		return -1;
+
+	tmp = &table->buckets[0];
+	while (*tmp)
+	{
+		if (table->cmp(key, (*tmp)->key) == 0)
+			break;
+		tmp = &(*tmp)->next;
+	}
+	if (*tmp)
+	{
+		if (table->free_key != NULL)
+			table->free_key((*tmp)->key);
+		if (table->free_value != NULL)
+			table->free_value((*tmp)->value);
+		node = *tmp;
+	}
+	else
+	{
+		while ((*tmp) != NULL)
+			tmp = (*tmp)->next;
+	}
+	node->key = strdup(key);
+	node->value = strdup(value);
+	(*tmp) = node;
+
+	return 0;
+}
+
+unsigned int foo_strhash(const char *str)
+{
+	unsigned int hash = 0;
+	for (; *str; str++)
+		hash = 31 * hash + *str;
+	return hash;
 }
 
 const int CODE_INIT_FRAME_IN_BYTES = 4;
@@ -147,7 +153,7 @@ void remove_variable_from_symbol_table(const char *name)
 *	Input: treenode (AST)
 *	Output: prints the Pcode on the console
 */
-struct StructsMapper tbl = { {0},NULL,NULL,foo_strhash,strcmp };
+struct StructsMapper tbl = {{0}, NULL, NULL, foo_strhash, strcmp};
 
 char break_dest[50] = "";
 int last_loop_end_lable_line_num = -1;
@@ -543,9 +549,9 @@ int code_recur(treenode *root)
 		case TN_SWITCH:
 			/* Switch case - for HW2! */
 			code_recur(root->lnode);
-			if(root->lnode!=NULL)
+			if (root->lnode != NULL)
 			{
-				if(root->lnode->hdr.type == TN_IDENT)
+				if (root->lnode->hdr.type == TN_IDENT)
 				{
 					printf("LDC %d\n", get_variable_from_table(((leafnode *)root->lnode)->data.sval->str));
 					printf("IND\n");
@@ -650,7 +656,7 @@ int code_recur(treenode *root)
 				}
 				printf("ADD\n");
 				printf("STO\n");
-			break;
+				break;
 			case MINUS_EQ:
 				/* Minus equak assigment "-=" */
 				/* e.g. x-= 5; */
@@ -724,7 +730,7 @@ int code_recur(treenode *root)
 				printf("DPL\n");
 				code_recur(root->lnode);
 				code_recur(root->rnode);
-				printf("EQU \n");				
+				printf("EQU \n");
 				break;
 
 			case INCR:
@@ -1096,8 +1102,7 @@ int code_recur(treenode *root)
 	return SUCCESS;
 }
 
-
-char struct_definition[500] = "";
+char struct_definition[5000] = "";
 const char SUPPERATOR = '~';
 /*
 *	This function prints all the variables on your symbol table with their data
@@ -1137,16 +1142,25 @@ void print_symbol_table(treenode *root)
 
 			if (left_node->hdr.type == TN_TYPE_LIST)
 			{
-				if (left_node->lnode != NULL && 
+				if (left_node->lnode != NULL &&
 					left_node->lnode->hdr.type == TN_OBJ_DEF)
 				{
 					left_node = (treenode *)left_node->lnode;
 					strcpy(struct_definition, "");
-					right_node = (treenode*) left_node->rnode;
-					if (right_node!=NULL)
+					right_node = (treenode *)left_node->rnode;
+					if (right_node != NULL)
 					{
 						print_symbol_table(right_node);
-						insert(&tbl, ((leafnode *)left_node->lnode)->data.sval->str, struct_definition);
+						if (insert(&tbl, ((leafnode *)left_node->lnode)->data.sval->str, struct_definition) == 0)
+						{
+							printf("Inserted KEY IS: %s\n", ((leafnode *)left_node->lnode)->data.sval->str);
+							printf("Inserted value IS: %s\n", struct_definition);
+						}
+						else
+						{
+							printf("KIBINIMAT\n");
+							/* code */
+						}
 					}
 				}
 				else
@@ -1164,13 +1178,15 @@ void print_symbol_table(treenode *root)
 						break;
 					case STRUCT:
 						varType = TN_OBJ_DEF;
-						if (left_node->lnode != NULL){
+						if (left_node->lnode != NULL)
+						{
 							leaf = (leafnode *)left_node->lnode->lnode;
 							printf("Intitlizing new instance of type: %s \n", leaf->data.sval->str); // lihis code must be here
 							printf("Need to parse the following string to variables: %s\n", get(&tbl, leaf->data.sval->str));
 							// must say something about memory size!
 						}
-						else{
+						else
+						{
 							printf("Error accoured, couldn't identify structs name in initialization, maybe tree's structure had modified\n");
 						}
 						break;
@@ -1207,7 +1223,7 @@ void print_symbol_table(treenode *root)
 			if (root->rnode != NULL)
 				print_symbol_table(root->rnode);
 			break;
-		
+
 		case TN_STEMNT:
 			if (root->lnode != NULL)
 				print_symbol_table(root->lnode);
@@ -1240,16 +1256,17 @@ void print_symbol_table(treenode *root)
 		break;
 
 	case LEAF_T:
-		switch (root->hdr.tok){
-			case IDENT:
-				strcat(struct_definition, ((leafnode *)root)->data.sval->str);
-				strncat(struct_definition, &SUPPERATOR, 1); 
+		switch (root->hdr.tok)
+		{
+		case IDENT:
+			strcat(struct_definition, ((leafnode *)root)->data.sval->str);
+			strncat(struct_definition, &SUPPERATOR, 1);
 			break;
-			default:
-				printf("UNHANDLED LEAF TOKEN is: %d\n", root->hdr.tok);
+		default:
+			printf("UNHANDLED LEAF TOKEN is: %d\n", root->hdr.tok);
 			break;
 		}
-	break;
+		break;
 
 	default:
 		break;

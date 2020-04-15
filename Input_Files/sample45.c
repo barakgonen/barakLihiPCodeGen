@@ -1,33 +1,34 @@
 #include <stdio.h>
+#include <stdlib.h>
 
-struct blaTYpe
-{
-    int a;
-    int bbbbBBBbbb; 
-    int ccccccc; 
-    float dd; 
-    int EeEeEeE; 
-    double fFfFFfFFFFFFFFFF; 
-    int gggggggggggggggggggggggg; 
-    int hhhhhhhh; 
-    double iIIIIIIIIIIIIIi; 
-    int jjjjjjjjjjJJjjjjjjjj; 
-    char kkkkkkkkKKKKKKKKKKkkkkkkkkkkk; 
-    int lllllllllLLllllllll; 
-    // struct blaTYpe *instanceOfPointerToBla;
-};
 
 struct bakBAK
 {
-    int a;
-    int b; 
-    int c; 
-    float dd; 
-    int EeEeEeE; 
-    double fFfFFfFFFFFFFFFF; 
-    int gggggggggggggggggggggggg; 
+    int Ba;
+    int Bb; 
+    int Bc; 
+    float Bdd; 
+    int BEeEeEeE; 
+    double BfFfFFfFFFFFFFFFF; 
+    int Bgggggggggggggggggggggggg; 
+    int Bhhhhhhhh; 
+    double BiIIIIIIIIIIIIIi; 
+    int BjjjjjjjjjjJJjjjjjjjj; 
+    char BkkkkkkkkKKKKKKKKKKkkkkkkkkkkk; 
+    // int lllllllllLLllllllll; 
+    // struct blaTYpe *instanceOfPointerToBla;
+};
+
+struct blaTYpe
+{
+    int blaAAAA;
+    int blabbbbBBBbbb; 
+    int blaccccccc; 
+    float bladdDDDDD; 
+    int blaEeEeEeE; 
+    double blafFfFFfFFFFFFFFFF; 
+    int blagggggggggggggggggggggggg; 
     int hhhhhhhh; 
-    double iIIIIIIIIIIIIIi; 
     int jjjjjjjjjjJJjjjjjjjj; 
     char kkkkkkkkKKKKKKKKKKkkkkkkkkkkk; 
     int lllllllllLLllllllll; 
@@ -46,7 +47,5 @@ void main()
     struct bakBAK DD;
     struct blaTYpe e;
     struct bakBAK aa;
-    // ["instanceOfbla~blaTYpe%a", "instanceOfbla~blaTYpe%b", "instanceOfbla~blaTYpe%instanceOfPointerToBla"];
-
     return;
 }

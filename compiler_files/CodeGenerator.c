@@ -1,5 +1,7 @@
 #include "CodeGenerator.h"
 #include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
 #define NR_BUCKETS 1024
 
 struct StructObject
@@ -20,14 +22,33 @@ struct StructsMapper
 
 void *get(struct StructsMapper *table, const char *key)
 {
-	struct StructObject *node;
+	int i=0;
+		struct StructObject *node;
 	node = table->buckets[0];
 	while (node)
 	{
+		// printf("size of node->key is: %d\n", strlen(node->key));
+		// printf("size of key is: %d\n", strlen(key));
 		if (table->cmp(key, node->key) == 0)
 			return node->value;
+		// else
+		// {
+		// 	// printf("%s != %s\n", key ,node->key);
+		// 	// while(i<strlen(key)&&i<strlen(node->key))
+		// 	// {
+		// 	// 	printf("^^^^^^^%c\n",key[i]);
+		// 	// 	printf("$$$ %c\n",node->key[i]);
+		// 	// 	i++;
+		// 	// }
+		// 	// if(i<strlen(key))
+		// 	// {
+		// 	// 	printf("^^^^^^^%c\n",key[i]);
+		// 	// }
+		// }
+			
 		node = node->next;
 	}
+	printf("Returning nulll :(\n");
 	return NULL;
 }
 
@@ -1105,6 +1126,58 @@ int code_recur(treenode *root)
 char struct_definition[5000] = "";
 const char SUPPERATOR = '!';
 const char PAIR_SUP = '~';
+const char STR_END = '\0';
+void add_struct_to_symbolTable(char *string, char *structIdnt)
+{
+	int i = 0;
+	char name[100] = "";
+	char typeC[100] = "";
+	int type = 0;
+	tn_t vartype = 0;
+	printf("the string is: %s\n", string);
+	// printf("the length of the string is- %d \n", strlen(string));
+	while (i < strlen(string))
+	{
+		if (string[i] == PAIR_SUP)
+		{
+			type = atoi(typeC);
+			switch (type)
+			{
+			case 0:
+				break;
+			case INT:
+				vartype = TN_INT;
+				break;
+			case DOUBLE:
+			case FLOAT:
+				vartype = TN_REAL;
+				break;
+			default:
+				printf("UNHANDLED TOKEN%d\n", type);
+				break;
+			};
+			strcpy(typeC, "");
+			i++;
+			strncat(name, structIdnt, strlen(structIdnt));
+			strncat(name, &SUPPERATOR, 1);
+
+			while (string[i] != SUPPERATOR)
+			{
+				strncat(name, &string[i], 1);
+				i++;
+			}
+			printf("name is:%s\n", name);
+			symbolTalble->vars = add_variable_to_symbol_table(name, vartype, symbolTalble->vars);
+			strcpy(name, "");
+		}
+		else
+		{
+			strncat(typeC, &string[i], 1);
+		}
+		i++;
+	}
+}
+
 /*
 *	This function prints all the variables on your symbol table with their data
 *	Input: treenode (AST)
@@ -1140,7 +1213,6 @@ void print_symbol_table(treenode *root)
 		case TN_DECL:
 			left_node = (treenode *)root->lnode;
 			right_node = (treenode *)root->rnode;
-
 			if (left_node->hdr.type == TN_TYPE_LIST)
 			{
 				if (left_node->lnode != NULL &&
@@ -1154,8 +1226,8 @@ void print_symbol_table(treenode *root)
 						print_symbol_table(right_node);
 						if (insert(&tbl, ((leafnode *)left_node->lnode)->data.sval->str, struct_definition) == 0)
 						{
-							printf("Inserted KEY IS: %s\n", ((leafnode *)left_node->lnode)->data.sval->str);
-							printf("Inserted value IS: %s\n", struct_definition);
+							// printf("Inserted KEY IS: %s\n", ((leafnode *)left_node->lnode)->data.sval->str);
+							// printf("Inserted value IS: %s\n", struct_definition);
 						}
 						else
 						{
@@ -1183,7 +1255,31 @@ void print_symbol_table(treenode *root)
 						{
 							leaf = (leafnode *)left_node->lnode->lnode;
 							printf("Intitlizing new instance of type: %s \n", leaf->data.sval->str); // lihis code must be here
-							printf("Need to parse the following string to variables: %s\n", get(&tbl, leaf->data.sval->str));
+							printf("Key is: %s\n", get(&tbl, leaf->data.sval->str));
+							add_struct_to_symbolTable(get(&tbl, leaf->data.sval->str), ((leafnode*)right_node)->data.sval->str);
+							printf("the address of a!blaAAAA is:%d\n",get_variable_from_table("a!blaAAAA"));
+							printf("the address of a!blabbbbBBBbbb is:%d\n",get_variable_from_table("a!blabbbbBBBbbb"));
+							printf("the address of a!blaccccccc is:%d\n",get_variable_from_table("a!blaccccccc"));
+							printf("the address of a!bladdDDDDD is:%d\n",get_variable_from_table("a!bladdDDDDD"));
+							printf("the address of a!blaEeEeEeE is:%d\n",get_variable_from_table("a!blaEeEeEeE"));
+							printf("the address of a!blablafFfFFfFFFFFFFFFF is:%d\n",get_variable_from_table("a!blafFfFFfFFFFFFFFFF"));
+							printf("the address of a!blagggggggggggggggggggggggg is:%d\n",get_variable_from_table("a!blagggggggggggggggggggggggg"));
+							printf("the address of a!hhhhhhhh is:%d\n",get_variable_from_table("a!hhhhhhhh"));
+							printf("the address of a!jjjjjjjjjjJJjjjjjjjj is:%d\n",get_variable_from_table("a!jjjjjjjjjjJJjjjjjjjj"));
+							printf("the address of a!kkkkkkkkKKKKKKKKKKkkkkkkkkkkk is:%d\n",get_variable_from_table("a!kkkkkkkkKKKKKKKKKKkkkkkkkkkkk"));
+							printf("the address of a!lllllllllLLllllllll is:%d\n",get_variable_from_table("a!lllllllllLLllllllll"));
+							//blafFfFFfFFFFFFFFFF
+							printf("the address of b!blaAAAA is:%d\n",get_variable_from_table("b!blaAAAA"));
+							printf("the address of b!blabbbbBBBbbb is:%d\n",get_variable_from_table("b!blabbbbBBBbbb"));
+							printf("the address of b!blaccccccc is:%d\n",get_variable_from_table("b!blaccccccc"));
+							printf("the address of b!bladdDDDDD is:%d\n",get_variable_from_table("b!bladdDDDDD"));
+							printf("the address of b!blaEeEeEeE is:%d\n",get_variable_from_table("b!blaEeEeEeE"));
+							printf("the address of b!blablafFfFFfFFFFFFFFFF is:%d\n",get_variable_from_table("b!blafFfFFfFFFFFFFFFF"));
+							printf("the address of b!blagggggggggggggggggggggggg is:%d\n",get_variable_from_table("b!blagggggggggggggggggggggggg"));
+							printf("the address of b!hhhhhhhh is:%d\n",get_variable_from_table("b!hhhhhhhh"));
+							printf("the address of b!jjjjjjjjjjJJjjjjjjjj is:%d\n",get_variable_from_table("b!jjjjjjjjjjJJjjjjjjjj"));
+							printf("the address of b!kkkkkkkkKKKKKKKKKKkkkkkkkkkkk is:%d\n",get_variable_from_table("b!kkkkkkkkKKKKKKKKKKkkkkkkkkkkk"));
+							printf("the address of b!lllllllllLLllllllll is:%d\n",get_variable_from_table("b!lllllllllLLllllllll"));
 							// must say something about memory size!
 						}
 						else
@@ -1216,18 +1312,19 @@ void print_symbol_table(treenode *root)
 			if (root->lnode != NULL)
 			{
 				leaf = (leafnode *)(root->lnode);
-				switch (leaf->hdr.tok){
-					case INT:
-						strcat(struct_definition, "298");
-						strncat(struct_definition, &PAIR_SUP, 1);
+				switch (leaf->hdr.tok)
+				{
+				case INT:
+					strcat(struct_definition, "298");
+					strncat(struct_definition, &PAIR_SUP, 1);
 					break;
-					case FLOAT:
-						strcat(struct_definition, "296");
-						strncat(struct_definition, &PAIR_SUP, 1);
-					case DOUBLE:
+				case FLOAT:
+				case DOUBLE:
+					strcat(struct_definition, "296");
+					strncat(struct_definition, &PAIR_SUP, 1);
 					break;
-					default:
-						printf("Unhandled leaf token, it's: %d\n", leaf->hdr.tok);
+				default:
+					printf("Unhandled leaf token, it's: %d\n", leaf->hdr.tok);
 					break;
 				}
 			}
@@ -1257,6 +1354,8 @@ void print_symbol_table(treenode *root)
 			/* struct component declaration - for HW2 */
 			print_symbol_table(root->lnode);
 			print_symbol_table(root->rnode);
+			strncat(struct_definition, &STR_END, 1);
+			
 			break;
 		case TN_FIELD_LIST:
 			print_symbol_table(root->lnode);

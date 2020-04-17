@@ -2,7 +2,12 @@ param([string]$command = $Args[0], [string]$Input_File_Path = $Args[1])
 
 Function Pcode_Exe {
     &$exe -$command $Input_File_Path | Out-File -Encoding utf8 $output_file_path
-    gcc -w -o $test_program_name $Input_File_Path
+    if ($should_use_modified -eq "true"){
+        gcc -w -o $test_program_name $modifided_input_file
+    }
+    else {
+        gcc -w -o $test_program_name $Input_File_Path
+    }
     .\output\test_program.exe | Out-File -Encoding utf8 $test_program_output_path
     $sample_number | Out-File -Encoding utf8 $sample_number_file
     node .\code\bla.js
@@ -24,6 +29,7 @@ $output_file_path = "$pwd//output/generated_pcode.txt"
 $test_program_name = "$pwd//output/test_program"
 $test_program_output_path = "$pwd//output/test_program_output.txt"
 $sample_number_file = "$pwd//output/sample_number.txt"
+$modifided_input_file = ""
 
 &$gcc_path -w -o $program_name $compiler_files*.c
 $exe = "$pwd/$program_name.exe"
@@ -40,11 +46,22 @@ if ($command -eq "HW1"){
 }
 elseif($command -eq "HW2"){
     Get-ChildItem "Input_Files/HW2" -Filter *.c -Recurse | Sort-Object | Foreach-Object {
+        if ($_ -match "MOD") { 
+            break;
+        }
         $content = $_.FullName
         $Input_File_Path = $content
         $sample_number=$content.Split('\', 8)[7]
+        $n = $sample_number.Split('\',3)[2] -replace '\D+(\d+)','$1'.Split('.')[0]
+        if ($n -eq "2.c")
+        {
+            $should_use_modified = "true";
+            $modifided_input_file = "Input_Files/HW2/sample2MOD.c"
+        }
         $command = "Pcode"
         Pcode_Exe
+        $should_use_modified = "false";
+        $modifided_input_file = "";
     }
     exit
 }
@@ -71,12 +88,12 @@ elseif ($command -ne "") {
     &$exe -$command $Input_File_Path
 }
 
-Write-Host "Running sanity for all possible input files in the project"
-$command = "Pcode"
+# Write-Host "Running sanity for all possible input files in the project"
+# $command = "Pcode"
 
-Get-ChildItem "Input_Files/" -Filter *.c -Recurse | Foreach-Object {
-    $content = $_.FullName
-    $Input_File_Path = $content
-    $sample_number=$content.Split('\', 8)[7]
-    Pcode_Exe
-}
+# Get-ChildItem "Input_Files/" -Filter *.c -Recurse | Foreach-Object {
+#     $content = $_.FullName
+#     $Input_File_Path = $content
+#     $sample_number=$content.Split('\', 8)[7]
+#     Pcode_Exe
+# }

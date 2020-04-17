@@ -218,46 +218,54 @@ function parse(code) {
 }
 
 function doit() {
+    fs.readFile(".\\output\\sample_number.txt", 'utf8', function (err, data) {
+        data = split(data, '\n').map(function (element) {
+            return element.toLowerCase().trim();
+        });
+        data = data.slice(0, -1);
+        console.log("Running Sanity for: " + data)
+    })
     fs.readFile(".\\output\\generated_pcode.txt", 'utf8', function (err, data) {
-        actual_result = parse(data);
-        fs.readFile(".\\output\\test_program_output.txt", 'utf8', function (err, expected_result) {
-            expected_lines = split(expected_result, '\n').map(function (element) {
-                return element.toLowerCase().trim();
-            });
-            actual_lines = split(actual_result, '\n').map(function (element) {
-                return element.toLowerCase().trim();
-            });
-            has_passed = true;
-            expected_lines = expected_lines.slice(0, -1);
-            actual_lines = actual_lines.slice(0, -1);
-            actual_size = actual_lines.length;
-            expected_size = expected_lines.length;
-            if (actual_size === expected_size) {
-                for (var i = 0; i < actual_lines.length; i++) {
-                    actual_data = str2val(actual_lines[i])
-                    expected_data = str2val(expected_lines[i])
-                    if (Math.abs(actual_data - expected_data) > 0.001 ||
-                        (isNaN(actual_data) && !isNaN(expected_data)) || 
-                        (!isNaN(actual_data) && isNaN(expected_data)))  {
-                        console.log("FAILED actual: " + actual_data + " expected: " + expected_data);
-                        has_passed = false;
-                        break;
-                    }
-                }
-            }
-            else {
-                has_passed = false;
-                console.log("Failed because there is no match with outputs lines size");
-            }
-
-            fs.readFile(".\\output\\sample_number.txt", 'utf8', function (err, data) {
-                data = split(data, '\n').map(function (element) {
+            actual_result = parse(data);
+            
+            fs.readFile(".\\output\\test_program_output.txt", 'utf8', function (err, expected_result) {
+                expected_lines = split(expected_result, '\n').map(function (element) {
                     return element.toLowerCase().trim();
                 });
-                data = data.slice(0, -1);
-                outPutMessage = "Sanity for sample: " + data;
+                actual_lines = split(actual_result, '\n').map(function (element) {
+                    return element.toLowerCase().trim();
+                });
+                has_passed = true;
+                expected_lines = expected_lines.slice(0, -1);
+                actual_lines = actual_lines.slice(0, -1);
+                actual_size = actual_lines.length;
+                expected_size = expected_lines.length;
+                if (actual_size === expected_size) {
+                    for (var i = 0; i < actual_lines.length; i++) {
+                        actual_data = str2val(actual_lines[i])
+                        expected_data = str2val(expected_lines[i])
+                        if (Math.abs(actual_data - expected_data) > 0.001 ||
+                        (isNaN(actual_data) && !isNaN(expected_data)) || 
+                        (!isNaN(actual_data) && isNaN(expected_data)))  {
+                            console.log("FAILED actual: " + actual_data + " expected: " + expected_data);
+                            has_passed = false;
+                            break;
+                        }
+                    }
+                }
+                else {
+                    has_passed = false;
+                    console.log("Failed because there is no match with outputs lines size");
+                }
+                
+                fs.readFile(".\\output\\sample_number.txt", 'utf8', function (err, data) {
+                    data = split(data, '\n').map(function (element) {
+                        return element.toLowerCase().trim();
+                    });
+                    data = data.slice(0, -1);
+                    outPutMessage = "Sanity for: " + data;
                 if (!has_passed)
-                    console.log("ERROR!!!!!! " + outPutMessage + " has failed");
+                    console.error("ERROR!!!!!! " + outPutMessage + " has failed");
                 else
                     console.log(outPutMessage + " passed Successfully ;)");
             })

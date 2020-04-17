@@ -2,6 +2,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+
 #define NR_BUCKETS 1024
 
 struct StructObject
@@ -22,8 +23,8 @@ struct StructsMapper
 
 void *get(struct StructsMapper *table, const char *key)
 {
-	int i=0;
-		struct StructObject *node;
+	int i = 0;
+	struct StructObject *node;
 	node = table->buckets[0];
 	while (node)
 	{
@@ -45,7 +46,7 @@ void *get(struct StructsMapper *table, const char *key)
 		// 	// 	printf("^^^^^^^%c\n",key[i]);
 		// 	// }
 		// }
-			
+
 		node = node->next;
 	}
 	printf("Returning nulll :(\n");
@@ -162,6 +163,30 @@ int get_variable_from_table(char *identifier)
 	while (curNode != NULL && strcmp(curNode->str, identifier) != 0)
 		curNode = curNode->next;
 	return (curNode != NULL) ? curNode->address : -1;
+}
+
+tn_t get_variable_type_from_symbol_table(char *identifier)
+{
+	// printf("id is: %s\n", identifier);
+	varPtr curNode;
+	curNode = symbolTalble->vars;
+
+	// Iterate till last element until key is not found
+	while (curNode != NULL && strcmp(curNode->str, identifier) != 0)
+		curNode = curNode->next;
+	return (curNode != NULL) ? curNode->type : -1;
+}
+
+void update_pointer_target(char *srcIdentifier, int targetAddress)
+{
+	varPtr curNode;
+	curNode = symbolTalble->vars;
+
+	// Iterate till last element until key is not found
+	while (curNode != NULL && strcmp(curNode->str, srcIdentifier) != 0)
+		curNode = curNode->next;
+	if (curNode != NULL)
+		curNode->address = targetAddress;
 }
 
 void remove_variable_from_symbol_table(const char *name)
@@ -386,14 +411,45 @@ int code_recur(treenode *root)
 				/* Look at the output AST structure! */
 				// code_recur(root->lnode);
 				code_recur(root->rnode);
-				if (root->rnode != NULL &&
-					root->rnode->rnode != NULL &&
-					root->rnode->rnode->hdr.type == TN_IDENT)
+				right_node = root->rnode;
+				left_node = root->lnode;
+				if (right_node != NULL)
 				{
-					leaf = (leafnode *)root->rnode->rnode;
-					printf("LDC %d\n", get_variable_from_table(leaf->data.sval->str));
-					printf("IND\n");
+					if (right_node->hdr.type == TN_EXPR_LIST &&
+							 right_node->rnode != NULL &&
+							 right_node->rnode->hdr.type == TN_DEREF &&
+							 right_node->rnode->rnode != NULL)
+					{
+						// printf("need to print *a\n"); // need to print the address that the pointer points to
+						leaf = (leafnode *)right_node->rnode->rnode;
+						printf("LDC %d\n", get_variable_from_table(leaf->data.sval->str));
+					}
+					// 	if (ru
+					// 		root->rnode->hdr.type == TN_EXPR &&
+					// 		root->rnode->rnode != NULL &&
+					// 		root->rnode->rnode->hdr.type == TN_IDENT)
+					// {
+					// 	switch (root->rnode->rnode->hdr.which)
+					// 	{
+					// 	case TN_BLOCK:
+					// 		leaf = (leafnode *)root->rnode->rnode->rnode;
+					// 		printf("LDC %d\n", get_variable_from_table(leaf->data.sval->str));
+					// 		break;
+					// 	default:
+					// 		printf("Unhandled which: %d\n", root->rnode->rnode->hdr.which);
+					// 		break;
+					// 	}
+					// }
+
+					else if (right_node->rnode != NULL &&
+							 right_node->rnode->hdr.type == TN_IDENT)
+					{
+						leaf = (leafnode *)root->rnode->rnode;
+						printf("LDC %d\n", get_variable_from_table(leaf->data.sval->str));
+						printf("IND\n");
+					}
 				}
+
 				printf("PRINT\n");
 			}
 			else
@@ -596,8 +652,23 @@ int code_recur(treenode *root)
 
 		case TN_DEREF:
 			/* pointer derefrence - for HW2! */
-			code_recur(root->lnode);
-			code_recur(root->rnode);
+			if (root->lnode != NULL){
+				code_recur(root->lnode);
+			}
+			if (root->rnode != NULL){
+				code_recur(root->rnode);
+				leaf = ((leafnode*)root->rnode);
+				printf("ldc %d\n", get_variable_from_table(leaf->data.sval->str));
+				printf("ind\n");
+			}
+			// if (root->lnode == NULL &&
+			// 	root->rnode != NULL &&
+			// 	root->rnode->hdr.which == LEAF_T)
+			// {
+			// 	printf("QQQQQQQQQQQQQQQQQQQLDC %d\n", get_variable_from_table(((leafnode *)root->rnode)->data.sval->str));
+			// 	printf("QQQQQQQQQQQQQQQQQQQIND\n");
+			// }
+
 			break;
 
 		case TN_SELECT:
@@ -635,9 +706,27 @@ int code_recur(treenode *root)
 					root->rnode->hdr.type == TN_EXPR &&
 					root->rnode->lnode != NULL && root->rnode->rnode == NULL &&
 					(root->rnode->hdr.tok == INCR || root->rnode->hdr.tok == DECR) &&
+					root->rnode->lnode->hdr.type != TN_DEREF &&
 					strcmp(((leafnode *)root->rnode->lnode)->data.sval->str, ((leafnode *)root->lnode)->data.sval->str) == 0)
 				{
 					// because of c++ and c diffrences: x=x++ increments x in c++ and does nothing in c
+				}
+				else if (root->lnode != NULL &&
+						 root->rnode != NULL &&
+						 root->lnode->hdr.type == TN_IDENT &&
+						 root->rnode->hdr.type == TN_EXPR &&
+						 root->rnode->lnode == NULL &&
+						 root->rnode->rnode != NULL &&
+						 root->rnode->rnode->hdr.type == TN_IDENT)
+				{
+					printf("LDC %d\n", get_variable_from_table(((leafnode *)root->rnode->rnode)->data.sval->str));
+					printf("IND\n");
+					// printf("lod %d\n", get_variable_from_table(((leafnode *)root->rnode->rnode)->data.sval->str));
+					// printf("Updating %s\n", ((leafnode *)root->lnode)->data.sval->str);
+					// printf("to point to this var's address: %s\n", ((leafnode *)root->rnode->rnode)->data.sval->str);
+					// printf("which is: %d\n", get_variable_from_table(((leafnode *)root->rnode->rnode)->data.sval->str));
+					// update_pointer_target(((leafnode *)root->lnode)->data.sval->str, get_variable_from_table(((leafnode *)root->rnode->rnode)->data.sval->str));
+					// printf("The new address of pc is: %d\n", get_variable_from_table(((leafnode *)root->lnode)->data.sval->str));
 				}
 				else
 				{
@@ -655,7 +744,6 @@ int code_recur(treenode *root)
 						(root->rnode->hdr.tok == INCR || root->rnode->hdr.tok == DECR))
 						printf("STO\n");
 				}
-
 				printf("STO\n");
 				break;
 			case PLUS_EQ:
@@ -742,7 +830,7 @@ int code_recur(treenode *root)
 				printf("BUG, didn't handle assigment token: %d\n, ", root->hdr.tok);
 				break;
 			}
-			break;
+			break;	
 		case TN_EXPR:
 			switch (root->hdr.tok)
 			{
@@ -781,6 +869,32 @@ int code_recur(treenode *root)
 					printf("LDC %d\n", get_variable_from_table(leaf->data.sval->str));
 					printf("IND\n");
 					printf("LDC %d\n", get_variable_from_table(leaf->data.sval->str));
+					printf("LDC %d\n", get_variable_from_table(leaf->data.sval->str));
+					printf("IND\n");
+					printf("INC 1\n");
+					printf("STO\n");
+				}
+				// else if (root->lnode == NULL &&
+				// 		 root->rnode != NULL &&
+				// 		 root->rnode->hdr.type == TN_DEREF)
+				// {
+				// 	leaf = (leafnode *)root->rnode;
+				// 	printf("LDC %d\n", get_variable_from_table(leaf->data.sval->str));
+				// 	printf("LDC %d\n", get_variable_from_table(leaf->data.sval->str));
+				// 	printf("IND\n");
+				// 	printf("INC 1\n");
+				// 	printf("STO\n");
+				// 	printf("LDC %d\n", get_variable_from_table(leaf->data.sval->str));
+				// 	printf("IND\n");
+				// }
+				else if (root->lnode != NULL &&
+						 ((leafnode *)root->lnode)->hdr.type == TN_DEREF &&
+						 root->rnode == NULL)
+				{
+					leaf = (leafnode *)root->lnode->rnode;
+					printf("LDC %d\n", get_variable_from_table(leaf->data.sval->str));
+					// printf("IND\n");
+					// printf("LDC %d\n", get_variable_from_table(leaf->data.sval->str));
 					printf("LDC %d\n", get_variable_from_table(leaf->data.sval->str));
 					printf("IND\n");
 					printf("INC 1\n");
@@ -1069,7 +1183,6 @@ int code_recur(treenode *root)
 				}
 				printf("GEQ\n");
 				break;
-
 			default:
 				code_recur(root->lnode);
 				code_recur(root->rnode);
@@ -1236,6 +1349,13 @@ void print_symbol_table(treenode *root)
 						}
 					}
 				}
+				else if (right_node != NULL &&
+						 right_node->hdr.type == TN_DECL &&
+						 right_node->lnode != NULL &&
+						 right_node->lnode->hdr.type == TN_PNTR &&
+						 right_node->rnode != NULL &&
+						 ((leafnode *)right_node->rnode)->hdr.type == TN_IDENT)
+					symbolTalble->vars = add_variable_to_symbol_table(((leafnode *)right_node->rnode)->data.sval->str, TN_PNTR, symbolTalble->vars);
 				else
 				{
 					leaf = (leafnode *)left_node->lnode;
@@ -1254,32 +1374,32 @@ void print_symbol_table(treenode *root)
 						if (left_node->lnode != NULL)
 						{
 							leaf = (leafnode *)left_node->lnode->lnode;
-							printf("Intitlizing new instance of type: %s \n", leaf->data.sval->str); // lihis code must be here
-							printf("Key is: %s\n", get(&tbl, leaf->data.sval->str));
-							add_struct_to_symbolTable(get(&tbl, leaf->data.sval->str), ((leafnode*)right_node)->data.sval->str);
-							printf("the address of a!blaAAAA is:%d\n",get_variable_from_table("a!blaAAAA"));
-							printf("the address of a!blabbbbBBBbbb is:%d\n",get_variable_from_table("a!blabbbbBBBbbb"));
-							printf("the address of a!blaccccccc is:%d\n",get_variable_from_table("a!blaccccccc"));
-							printf("the address of a!bladdDDDDD is:%d\n",get_variable_from_table("a!bladdDDDDD"));
-							printf("the address of a!blaEeEeEeE is:%d\n",get_variable_from_table("a!blaEeEeEeE"));
-							printf("the address of a!blablafFfFFfFFFFFFFFFF is:%d\n",get_variable_from_table("a!blafFfFFfFFFFFFFFFF"));
-							printf("the address of a!blagggggggggggggggggggggggg is:%d\n",get_variable_from_table("a!blagggggggggggggggggggggggg"));
-							printf("the address of a!hhhhhhhh is:%d\n",get_variable_from_table("a!hhhhhhhh"));
-							printf("the address of a!jjjjjjjjjjJJjjjjjjjj is:%d\n",get_variable_from_table("a!jjjjjjjjjjJJjjjjjjjj"));
-							printf("the address of a!kkkkkkkkKKKKKKKKKKkkkkkkkkkkk is:%d\n",get_variable_from_table("a!kkkkkkkkKKKKKKKKKKkkkkkkkkkkk"));
-							printf("the address of a!lllllllllLLllllllll is:%d\n",get_variable_from_table("a!lllllllllLLllllllll"));
+							// printf("Intitlizing new instance of type: %s \n", leaf->data.sval->str); // lihis code must be here
+							// printf("Key is: %s\n", get(&tbl, leaf->data.sval->str));
+							add_struct_to_symbolTable(get(&tbl, leaf->data.sval->str), ((leafnode *)right_node)->data.sval->str);
+							// printf("the address of a!blaAAAA is:%d\n", get_variable_from_table("a!blaAAAA"));
+							// printf("the address of a!blabbbbBBBbbb is:%d\n", get_variable_from_table("a!blabbbbBBBbbb"));
+							// printf("the address of a!blaccccccc is:%d\n", get_variable_from_table("a!blaccccccc"));
+							// printf("the address of a!bladdDDDDD is:%d\n", get_variable_from_table("a!bladdDDDDD"));
+							// printf("the address of a!blaEeEeEeE is:%d\n", get_variable_from_table("a!blaEeEeEeE"));
+							// printf("the address of a!blablafFfFFfFFFFFFFFFF is:%d\n", get_variable_from_table("a!blafFfFFfFFFFFFFFFF"));
+							// printf("the address of a!blagggggggggggggggggggggggg is:%d\n", get_variable_from_table("a!blagggggggggggggggggggggggg"));
+							// printf("the address of a!hhhhhhhh is:%d\n", get_variable_from_table("a!hhhhhhhh"));
+							// printf("the address of a!jjjjjjjjjjJJjjjjjjjj is:%d\n", get_variable_from_table("a!jjjjjjjjjjJJjjjjjjjj"));
+							// printf("the address of a!kkkkkkkkKKKKKKKKKKkkkkkkkkkkk is:%d\n", get_variable_from_table("a!kkkkkkkkKKKKKKKKKKkkkkkkkkkkk"));
+							// printf("the address of a!lllllllllLLllllllll is:%d\n", get_variable_from_table("a!lllllllllLLllllllll"));
 							//blafFfFFfFFFFFFFFFF
-							printf("the address of b!blaAAAA is:%d\n",get_variable_from_table("b!blaAAAA"));
-							printf("the address of b!blabbbbBBBbbb is:%d\n",get_variable_from_table("b!blabbbbBBBbbb"));
-							printf("the address of b!blaccccccc is:%d\n",get_variable_from_table("b!blaccccccc"));
-							printf("the address of b!bladdDDDDD is:%d\n",get_variable_from_table("b!bladdDDDDD"));
-							printf("the address of b!blaEeEeEeE is:%d\n",get_variable_from_table("b!blaEeEeEeE"));
-							printf("the address of b!blablafFfFFfFFFFFFFFFF is:%d\n",get_variable_from_table("b!blafFfFFfFFFFFFFFFF"));
-							printf("the address of b!blagggggggggggggggggggggggg is:%d\n",get_variable_from_table("b!blagggggggggggggggggggggggg"));
-							printf("the address of b!hhhhhhhh is:%d\n",get_variable_from_table("b!hhhhhhhh"));
-							printf("the address of b!jjjjjjjjjjJJjjjjjjjj is:%d\n",get_variable_from_table("b!jjjjjjjjjjJJjjjjjjjj"));
-							printf("the address of b!kkkkkkkkKKKKKKKKKKkkkkkkkkkkk is:%d\n",get_variable_from_table("b!kkkkkkkkKKKKKKKKKKkkkkkkkkkkk"));
-							printf("the address of b!lllllllllLLllllllll is:%d\n",get_variable_from_table("b!lllllllllLLllllllll"));
+							// printf("the address of b!blaAAAA is:%d\n", get_variable_from_table("b!blaAAAA"));
+							// printf("the address of b!blabbbbBBBbbb is:%d\n", get_variable_from_table("b!blabbbbBBBbbb"));
+							// printf("the address of b!blaccccccc is:%d\n", get_variable_from_table("b!blaccccccc"));
+							// printf("the address of b!bladdDDDDD is:%d\n", get_variable_from_table("b!bladdDDDDD"));
+							// printf("the address of b!blaEeEeEeE is:%d\n", get_variable_from_table("b!blaEeEeEeE"));
+							// printf("the address of b!blablafFfFFfFFFFFFFFFF is:%d\n", get_variable_from_table("b!blafFfFFfFFFFFFFFFF"));
+							// printf("the address of b!blagggggggggggggggggggggggg is:%d\n", get_variable_from_table("b!blagggggggggggggggggggggggg"));
+							// printf("the address of b!hhhhhhhh is:%d\n", get_variable_from_table("b!hhhhhhhh"));
+							// printf("the address of b!jjjjjjjjjjJJjjjjjjjj is:%d\n", get_variable_from_table("b!jjjjjjjjjjJJjjjjjjjj"));
+							// printf("the address of b!kkkkkkkkKKKKKKKKKKkkkkkkkkkkk is:%d\n", get_variable_from_table("b!kkkkkkkkKKKKKKKKKKkkkkkkkkkkk"));
+							// printf("the address of b!lllllllllLLllllllll is:%d\n", get_variable_from_table("b!lllllllllLLllllllll"));
 							// must say something about memory size!
 						}
 						else
@@ -1295,10 +1415,14 @@ void print_symbol_table(treenode *root)
 						leaf = (leafnode *)right_node;
 					else if (right_node->hdr.type == TN_ASSIGN)
 						leaf = (leafnode *)right_node->lnode;
-
 					symbolTalble->vars = add_variable_to_symbol_table(leaf->data.sval->str, varType, symbolTalble->vars);
 				}
 			}
+			else
+			{
+				printf("SALAM aLEICUM\n");
+			}
+
 			break;
 		case TN_BLOCK:
 			if (root->lnode != NULL)
@@ -1355,7 +1479,7 @@ void print_symbol_table(treenode *root)
 			print_symbol_table(root->lnode);
 			print_symbol_table(root->rnode);
 			strncat(struct_definition, &STR_END, 1);
-			
+
 			break;
 		case TN_FIELD_LIST:
 			print_symbol_table(root->lnode);

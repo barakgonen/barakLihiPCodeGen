@@ -8,6 +8,13 @@ Function Pcode_Exe {
     node .\code\bla.js
 }
 
+$path = "$pwd//output/"
+
+If (!(test-path $path))
+{
+    md $path
+}
+
 clear
 $sample_number = ""
 $program_name = "output/compiler"

@@ -200,7 +200,7 @@ void remove_variable_from_symbol_table(const char *name)
 *	Output: prints the Pcode on the console
 */
 struct StructsMapper tbl = {{0}, NULL, NULL, foo_strhash, strcmp};
-
+char struct_name[5000]="";
 char break_dest[50] = "";
 int last_loop_end_lable_line_num = -1;
 int code_recur(treenode *root)
@@ -229,8 +229,12 @@ int code_recur(treenode *root)
 			// 	break;
 
 		case TN_IDENT:
+			strcpy(struct_name, "");
+			strncat(struct_name, leaf->data.sval->str, strlen(leaf->data.sval->str));
+			printf("struct name is now: %s\n",struct_name);
 			if (strcmp(leaf->data.sval->str, "printf") != 0 && strcmp(leaf->data.sval->str, "main") != 0)
 			{
+				//lihi here
 				// printf("HEERE!!!\n");
 				// printf("Need to load variable identified as: %s%s\n", leaf->data.sval->str, " from memory");
 				// src_var = get_variable_from_table(leaf->data.sval->str);
@@ -684,12 +688,15 @@ int code_recur(treenode *root)
 				/* e.g. struct_variable.x; */
 				code_recur(root->lnode);
 				code_recur(root->rnode);
+				//str lihi pa
+				printf("LDC %d\n",get_variable_from_table(struct_name));
 			}
 			break;
 
 		case TN_ASSIGN:
 			if (root->lnode != NULL && root->lnode->hdr.type == TN_IDENT)
 			{
+				//lihi aki
 				if (get_variable_from_table(((leafnode *)root->lnode)->data.sval->str) != UKNOWN_VARIABLE->address)
 					printf("LDC %d\n", get_variable_from_table(((leafnode *)root->lnode)->data.sval->str));
 			}
@@ -732,6 +739,7 @@ int code_recur(treenode *root)
 				{
 					code_recur(root->lnode);
 					code_recur(root->rnode);
+					strncat(struct_name, leaf->data.sval->str, strlen(leaf->data.sval->str));
 					if (root->rnode != NULL && root->rnode->hdr.type == TN_IDENT)
 					{
 						// NO NEED TO GET THE IDENTIFIER HERE JUST NEED THE ADDRESS
@@ -1146,7 +1154,6 @@ int code_recur(treenode *root)
 
 	return SUCCESS;
 }
-
 char struct_definition[5000] = "";
 const char SUPPERATOR = '!';
 const char PAIR_SUP = '~';

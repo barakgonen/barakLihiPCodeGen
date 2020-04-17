@@ -58,6 +58,11 @@ elseif($command -eq "HW2"){
             $should_use_modified = "true";
             $modifided_input_file = "Input_Files/HW2/sample2MOD.c"
         }
+        elseif ($n -eq "5.c")
+        {
+            $should_use_modified = "true";
+            $modifided_input_file = "Input_Files/HW2/sample5MOD.c"
+        }
         $command = "Pcode"
         Pcode_Exe
         $should_use_modified = "false";

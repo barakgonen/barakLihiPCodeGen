@@ -134,6 +134,7 @@ varPtr add_variable_to_symbol_table(char *identifier, tn_t type, varPtr list)
 	strcpy(p->str, identifier);
 	p->type = type;
 
+	// printf("Key is: %s\n", identifier);
 	if (list == NULL)
 	{ /* in the case if "p" is the first element in the list */
 		p->next = 0;
@@ -425,6 +426,14 @@ int code_recur(treenode *root)
 						leaf = (leafnode *)right_node->rnode->rnode;
 						printf("LDC %d\n", get_variable_from_table(leaf->data.sval->str));
 					}
+					if (right_node->hdr.type == TN_EXPR_LIST && 
+						right_node->rnode != NULL && 
+						right_node->rnode->hdr.type == TN_SELECT){
+							// printf("NANANAN\n");
+							// printf("struct name is: %s\n", struct_name);
+							printf("LOD %d\n", get_variable_from_table(struct_name));
+							strcpy(struct_name, "");
+						}
 					// 	if (ru
 					// 		root->rnode->hdr.type == TN_EXPR &&
 					// 		root->rnode->rnode != NULL &&
@@ -745,7 +754,7 @@ int code_recur(treenode *root)
 				{
 					code_recur(root->lnode);
 					if (root->lnode != NULL && root->lnode->hdr.type == TN_SELECT){
-						printf("we would like to have the address of: %s\n", struct_name);
+						// printf("we would like to have the address of: %s\n", struct_name);
 						printf("LDC %d\n", get_variable_from_table(struct_name));
 						strcpy(struct_name, "");
 					}
@@ -1167,20 +1176,20 @@ char struct_definition[5000] = "";
 const char PAIR_SUP = '~';
 const char STR_END = '\0';
 int should_print_id = 1;
-void add_struct_to_symbolTable(char *string, char *structIdnt)
-{
-	int i = 0;
-	char name[100] = "";
-	char typeC[100] = "";
-	int type = 0;
+
+// 298~a!
+int add_simple_struct_to_symbol_table(char* string, char* structIdentifier, char* middleName, int start_index){
+	int i = start_index;
 	tn_t vartype = 0;
-	printf("the string is: %s\n", string);
-	//298~a!298~b!298~c!{%bb%298~aa!298~bb!298~cc!}
-	// printf("the length of the string is- %d \n", strlen(string));
-	while (i < strlen(string))
-	{
+	char typeC[1000] = "";
+	char name[1000] = "";
+	int type = 0;
+	int was_found = 0;
+
+	while(i < strlen(string) && was_found == 0){
 		if (string[i] == PAIR_SUP)
 		{
+			// printf("typeC is %s\n", typeC);
 			type = atoi(typeC);
 			switch (type)
 			{
@@ -1199,7 +1208,8 @@ void add_struct_to_symbolTable(char *string, char *structIdnt)
 			};
 			strcpy(typeC, "");
 			i++;
-			strncat(name, structIdnt, strlen(structIdnt));
+			strncat(name, structIdentifier, strlen(structIdentifier));
+			strncat(name, middleName, strlen(middleName));
 			strncat(name, &SUPPERATOR, 1);
 
 			while (string[i] != SUPPERATOR)
@@ -1207,15 +1217,114 @@ void add_struct_to_symbolTable(char *string, char *structIdnt)
 				strncat(name, &string[i], 1);
 				i++;
 			}
-			printf("name is:%s\n", name);
+			// printf("name is:%s\n", name);
+			strncat(name, &SUPPERATOR, 1);
 			symbolTalble->vars = add_variable_to_symbol_table(name, vartype, symbolTalble->vars);
 			strcpy(name, "");
+			was_found = 1;
 		}
 		else
 		{
 			strncat(typeC, &string[i], 1);
+			i++;
 		}
-		i++;
+	}
+	return i;
+}
+
+char old_middle_name[1000] = "";
+char curr_middle_name[1000] = "";
+
+void add_complex_data_type(char *string, char *structIdnt, int startIndex, int endIndex)
+{
+	int i = startIndex;
+	int complex_counter = 0;
+	int complex_start_index = 0;
+	int complex_end_index = 0;
+	int complex_identifier_start_index = 0;
+	int complex_identifier_end_index = 0;
+	// printf("=================I = Start index = %d\n", i);
+	// printf("=================END INDEX = %d\n", endIndex);
+	// 00000000001111111111222222222233333333334444444444555555555566666666667777
+	// 01234567890123456789012345678901234567890123456789012345678901234567890123
+	// 298~a!298~b!298~c!#%aa%298~aa!#%base%298~aa!298~bb!298~cc!#298~bb!298~cc!#
+	while(i < endIndex){
+		// printf("=========i is: %d\n", i);
+		if (string[i] == '%'){
+			strcpy(old_middle_name, curr_middle_name);
+			i++;
+			strncat(curr_middle_name, &SUPPERATOR, 1);
+			while (string[i] != '%')
+			{
+				strncat(curr_middle_name, &string[i], 1);
+				i++;
+			}
+			// printf("middle name is: %s\n", curr_middle_name);
+		}
+		else if (string[i] == '#') {
+			complex_start_index = i;
+			complex_counter = 1;
+			i++;
+			while(complex_counter != 0){
+				i++;
+				if (string[i] == '#') {
+					if (string[i + 1] != '%')
+						complex_counter--;
+					else
+						complex_counter++;
+				}
+			}
+			complex_end_index = i;
+			// printf("FOUND DECLERATION OF COMPLEX, which starts at: %d\n", complex_start_index);
+			// printf("                                  AND ENDS AT: %d\n", complex_end_index);
+			// printf("middle name is: %s\n", middle_name);
+			add_complex_data_type(string, structIdnt, complex_start_index + 1, complex_end_index);
+			strcpy(curr_middle_name, old_middle_name);
+			// while(complex_start_index < complex_end_index){
+			// 	complex_start_index = add_simple_struct_to_symbol_table(string, structIdnt, middle_name, complex_start_index);
+			// }
+		}
+		else{
+			// printf("before add_simple_struct_to_symbol_table, index of i is: %d\n", i);
+			i = add_simple_struct_to_symbol_table(string, structIdnt, curr_middle_name, i);
+			// printf("after add_simple_struct_to_symbol_table, index of i is: %d\n", i);
+		}
+	i++;
+	}
+}
+
+void add_struct_to_symbolTable(char *string, char *structIdnt)
+{
+	int i = 0;
+	int complex_counter = 0;
+	int complex_start_index = 0;
+	int complex_end_index = 0;
+	while (i < strlen(string))
+	{
+		if (string[i] == '#'){
+			complex_start_index = i;
+			complex_counter = 1;
+			i++;
+			while(complex_counter != 0){
+				i++;
+				if (string[i] == '#') {
+					if (string[i + 1] != '%')
+						complex_counter--;
+					else
+						complex_counter++;
+				}
+			}
+			complex_end_index = i;
+			// printf("FOUND DECLERATION OF COMPLEX, which starts at: %d\n", complex_start_index);
+			// printf("                                  AND ENDS AT: %d\n", complex_end_index);
+			// printf("CALLING TO A FRIEND WHICH WILL HANDLE IT!\n");
+			add_complex_data_type(string, structIdnt, complex_start_index + 1, complex_end_index);
+		}
+		else{
+			i = add_simple_struct_to_symbol_table(string, structIdnt, "", i);
+		}
+		// printf("ADTER i = %d\n", i);
+		i ++;
 	}
 }
 
@@ -1380,7 +1489,7 @@ void print_symbol_table(treenode *root)
 					{
 						if (get(&tbl, ((leafnode *)root->lnode->lnode)->data.sval->str) != NULL)
 						{
-							printf("ADDING THE FOLLOWING: %s\n", get(&tbl, ((leafnode *)root->lnode->lnode)->data.sval->str), strlen(get(&tbl, ((leafnode *)root->lnode->lnode)->data.sval->str)));
+							// printf("ADDING THE FOLLOWING: %s\n", get(&tbl, ((leafnode *)root->lnode->lnode)->data.sval->str), strlen(get(&tbl, ((leafnode *)root->lnode->lnode)->data.sval->str)));
 							strncat(struct_definition, get(&tbl, ((leafnode *)root->lnode->lnode)->data.sval->str), strlen(get(&tbl, ((leafnode *)root->lnode->lnode)->data.sval->str)));
 							strncat(struct_definition, "#", 1);
 						}
@@ -1456,10 +1565,10 @@ void print_symbol_table(treenode *root)
 		{
 		case IDENT:
 			if (should_print_id == 1){
-				printf("%s before \n", struct_definition);
+				// printf("%s before \n", struct_definition);
 				strcat(struct_definition, ((leafnode *)root)->data.sval->str);
 				strncat(struct_definition, &SUPPERATOR, 1);
-				printf("%s after \n", struct_definition);
+				// printf("%s after \n", struct_definition);
 				should_print_id = 1;
 			}
 			break;

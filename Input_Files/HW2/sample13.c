@@ -3,37 +3,17 @@
 
 struct BaseObject
 {
-    int aa;
-    int bb; 
-    int cc; 
-    // float Bdd; 
-    // int BEeEeEeE; 
-    // double BfFfFFfFFFFFFFFFF; 
-    // int Bgggggggggggggggggggggggg; 
-    // int Bhhhhhhhh; 
-    // double BiIIIIIIIIIIIIIi; 
-    // int BjjjjjjjjjjJJjjjjjjjj; 
-    // char BkkkkkkkkKKKKKKKKKKkkkkkkkkkkk; 
-    // int lllllllllLLllllllll; 
-    // struct blaTYpe *instanceOfPointerToBla;
+    int AAA;
+    int BBB; 
+    int CCC; 
 };
 
 struct bakBAK
 {
     int aa;
+    struct BaseObject base; 
     int bb; 
     int cc;
-    struct BaseObject base; 
-    // float Bdd; 
-    // int BEeEeEeE; 
-    // double BfFfFFfFFFFFFFFFF; 
-    // int Bgggggggggggggggggggggggg; 
-    // int Bhhhhhhhh; 
-    // double BiIIIIIIIIIIIIIi; 
-    // int BjjjjjjjjjjJJjjjjjjjj; 
-    // char BkkkkkkkkKKKKKKKKKKkkkkkkkkkkk; 
-    // int lllllllllLLllllllll; 
-    // struct blaTYpe *instanceOfPointerToBla;
 };
 
 struct blaTYpe
@@ -41,32 +21,29 @@ struct blaTYpe
     int a;
     int b; 
     int c;
-    struct bakBAK bb;
-    // float bladdDDDDD; 
-    // double blaEeEeEeE; 
-    // double blafFfFFfFFFFFFFFFF; 
-    // int blagggggggggggggggggggggggg; 
-    // int hhhhhhhh; 
-    // int jjjjjjjjjjJJjjjjjjjj; 
-    // char kkkkkkkkKKKKKKKKKKkkkkkkkkkkk; 
-    // int lllllllllLLllllllll; 
-    // struct blaTYpe *instanceOfPointerToBla;
+    struct bakBAK aa;
 };
 
-// map<string, list<string>> structsMapper = {
-//                                             ["blaType", "a+b+instanceOfPointerToBla"]
-// }
 
 void main()
 {
     struct blaTYpe a;
-    // a.bb.cc = 4; // 2
-    // a.b = 3; // 1
-    // a.b.a.a.a.a.a.a.a.a.a.a.a = 8; // N
-    // struct blaTYpe b;
-    // struct bakBAK ccccccc;
-    // struct bakBAK DD;
-    // struct blaTYpe e;
-    // struct bakBAK aa;
+    a.a = 1;
+    a.b = 2;
+    a.c = 3;
+    a.aa.aa = 4;
+    a.aa.bb = 5;
+    a.aa.cc = 6;
+    a.aa.base.AAA = 7;
+    a.aa.base.BBB = 8;
+    a.aa.base.CCC = 9;
+    printf("%d\n", a.a);
+    printf("%d\n", a.b);
+    printf("%d\n", a.aa.aa);
+    printf("%d\n", a.aa.bb);
+    printf("%d\n", a.aa.cc);
+    printf("%d\n", a.aa.base.AAA);
+    printf("%d\n", a.aa.base.BBB);
+    printf("%d\n", a.aa.base.CCC);
     return;
 }

@@ -13,6 +13,53 @@ Function Pcode_Exe {
     node .\code\bla.js
 }
 
+Function Run_Sanity_On_HW_1 {
+    Get-ChildItem "Input_Files/HW1" -Filter *.c -Recurse | Sort-Object | Foreach-Object {
+        $content = $_.FullName
+        $Input_File_Path = $content
+        $sample_number=$content.Split('\', 8)[7]
+        $command = "Pcode"
+        Pcode_Exe
+    }
+}
+
+Function Run_Sanity_On_HW_2 {
+    Get-ChildItem "Input_Files/HW2" -Filter *.c -Recurse | Sort-Object | Foreach-Object {
+        if ($_ -match "MOD") { 
+        }
+        else{
+            $content = $_.FullName
+            $Input_File_Path = $content
+            $sample_number=$content.Split('\', 8)[7]
+            $n = $sample_number.Split('\',3)[2] -replace '\D+(\d+)','$1'.Split('.')[0]
+            if ($n -eq "02.c")
+            {
+                $should_use_modified = "true"
+                $modifided_input_file = "Input_Files/HW2/sample02MOD.c"
+            }
+            elseif ($n -eq "05.c")
+            {
+                $should_use_modified = "true"
+                $modifided_input_file = "Input_Files/HW2/sample05MOD.c"
+            }
+            $command = "Pcode"
+            Pcode_Exe
+            $should_use_modified = "false";
+            $modifided_input_file = "";
+        }
+        
+    }
+}
+
+Function Run_Sanity_On_HW_3 {
+    Get-ChildItem "Input_Files/HW3" -Filter *.c -Recurse | Sort-Object | Foreach-Object {
+        $content = $_.FullName
+        $Input_File_Path = $content
+        $sample_number=$content.Split('\', 8)[7]
+        $command = "Pcode"
+        Pcode_Exe
+    }
+}
 $path = "$pwd//output/"
 
 If (!(test-path $path))
@@ -35,55 +82,22 @@ $modifided_input_file = ""
 $exe = "$pwd/$program_name.exe"
 
 if ($command -eq "HW1"){
-    Get-ChildItem "Input_Files/HW1" -Filter *.c -Recurse | Sort-Object | Foreach-Object {
-        $content = $_.FullName
-        $Input_File_Path = $content
-        $sample_number=$content.Split('\', 8)[7]
-        $command = "Pcode"
-        Pcode_Exe
-    }
+    Run_Sanity_On_HW_1
     exit
 }
 elseif($command -eq "HW2"){
-    Get-ChildItem "Input_Files/HW2" -Filter *.c -Recurse | Sort-Object | Foreach-Object {
-        if ($_ -match "MOD") { 
-            break;
-        }
-        $content = $_.FullName
-        $Input_File_Path = $content
-        $sample_number=$content.Split('\', 8)[7]
-        $n = $sample_number.Split('\',3)[2] -replace '\D+(\d+)','$1'.Split('.')[0]
-        if ($n -eq "2.c")
-        {
-            $should_use_modified = "true";
-            $modifided_input_file = "Input_Files/HW2/sample2MOD.c"
-        }
-        elseif ($n -eq "5.c")
-        {
-            $should_use_modified = "true";
-            $modifided_input_file = "Input_Files/HW2/sample5MOD.c"
-        }
-        $command = "Pcode"
-        Pcode_Exe
-        $should_use_modified = "false";
-        $modifided_input_file = "";
-    }
+    Run_Sanity_On_HW_2
     exit
 }
 elseif($command -eq "HW3"){
-    Get-ChildItem "Input_Files/HW3" -Filter *.c -Recurse | Sort-Object | Foreach-Object {
-        $content = $_.FullName
-        $Input_File_Path = $content
-        $sample_number=$content.Split('\', 8)[7]
-        $command = "Pcode"
-        Pcode_Exe
-    }
+    Run_Sanity_On_HW_3
     exit
 }
 elseif ($command -eq "Pcode")
 {
     Write-Host "About To Execute Command:", $command
     Write-Host "Running on the following sample: "$Input_File_Path
+    &$exe -$command $Input_File_Path
     $sample_number=$Input_File_Path
     Pcode_Exe
 }
@@ -93,12 +107,7 @@ elseif ($command -ne "") {
     &$exe -$command $Input_File_Path
 }
 
-# Write-Host "Running sanity for all possible input files in the project"
-# $command = "Pcode"
-
-# Get-ChildItem "Input_Files/" -Filter *.c -Recurse | Foreach-Object {
-#     $content = $_.FullName
-#     $Input_File_Path = $content
-#     $sample_number=$content.Split('\', 8)[7]
-#     Pcode_Exe
-# }
+Write-Host "Running sanity for all possible input files in the project"
+Run_Sanity_On_HW_1
+Run_Sanity_On_HW_2
+Run_Sanity_On_HW_3

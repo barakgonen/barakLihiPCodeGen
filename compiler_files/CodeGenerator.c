@@ -200,8 +200,9 @@ void remove_variable_from_symbol_table(const char *name)
 *	Output: prints the Pcode on the console
 */
 struct StructsMapper tbl = {{0}, NULL, NULL, foo_strhash, strcmp};
-char struct_name[5000]="";
+char struct_name[5000] = "";
 char break_dest[50] = "";
+const char SUPPERATOR = '!';
 int last_loop_end_lable_line_num = -1;
 int code_recur(treenode *root)
 {
@@ -229,9 +230,6 @@ int code_recur(treenode *root)
 			// 	break;
 
 		case TN_IDENT:
-			strcpy(struct_name, "");
-			strncat(struct_name, leaf->data.sval->str, strlen(leaf->data.sval->str));
-			printf("struct name is now: %s\n",struct_name);
 			if (strcmp(leaf->data.sval->str, "printf") != 0 && strcmp(leaf->data.sval->str, "main") != 0)
 			{
 				//lihi here
@@ -419,9 +417,9 @@ int code_recur(treenode *root)
 				if (right_node != NULL)
 				{
 					if (right_node->hdr.type == TN_EXPR_LIST &&
-							 right_node->rnode != NULL &&
-							 right_node->rnode->hdr.type == TN_DEREF &&
-							 right_node->rnode->rnode != NULL)
+						right_node->rnode != NULL &&
+						right_node->rnode->hdr.type == TN_DEREF &&
+						right_node->rnode->rnode != NULL)
 					{
 						// printf("need to print *a\n"); // need to print the address that the pointer points to
 						leaf = (leafnode *)right_node->rnode->rnode;
@@ -654,14 +652,15 @@ int code_recur(treenode *root)
 
 		case TN_DEREF:
 			/* pointer derefrence - for HW2! */
-			if (root->lnode != NULL){
+			if (root->lnode != NULL)
+			{
 				code_recur(root->lnode);
 			}
-			if (root->rnode != NULL){
+			if (root->rnode != NULL)
+			{
 				code_recur(root->rnode);
-				leaf = ((leafnode*)root->rnode);
+				leaf = ((leafnode *)root->rnode);
 				printf("LOD %d\n", get_variable_from_table(leaf->data.sval->str));
-
 			}
 			// if (root->lnode == NULL &&
 			// 	root->rnode != NULL &&
@@ -686,13 +685,20 @@ int code_recur(treenode *root)
 			{
 				/* Struct select case "." */
 				/* e.g. struct_variable.x; */
+				if (root->rnode->hdr.which == LEAF_T && root->lnode->hdr.which == LEAF_T)
+				{
+					strncat(struct_name, ((leafnode *)root->lnode)->data.sval->str, strlen(((leafnode *)root->lnode)->data.sval->str));
+					strncat(struct_name, &SUPPERATOR, 1);
+				}
 				code_recur(root->lnode);
 				code_recur(root->rnode);
-				//str lihi pa
-				printf("LDC %d\n",get_variable_from_table(struct_name));
+				if (((leafnode *)root->rnode) != NULL && ((leafnode *)root->rnode)->hdr.type == TN_IDENT)
+				{
+					strncat(struct_name, ((leafnode*)root->rnode)->data.sval->str, strlen(((leafnode*)root->rnode)->data.sval->str));
+					strncat(struct_name, &SUPPERATOR, 1);
+				}
 			}
-			break;
-
+		break;
 		case TN_ASSIGN:
 			if (root->lnode != NULL && root->lnode->hdr.type == TN_IDENT)
 			{
@@ -738,8 +744,13 @@ int code_recur(treenode *root)
 				else
 				{
 					code_recur(root->lnode);
+					if (root->lnode != NULL && root->lnode->hdr.type == TN_SELECT){
+						printf("we would like to have the address of: %s\n", struct_name);
+						printf("LDC %d\n", get_variable_from_table(struct_name));
+						strcpy(struct_name, "");
+					}
+					// strncat(struct_name, leaf->data.sval->str, strlen(leaf->data.sval->str));
 					code_recur(root->rnode);
-					strncat(struct_name, leaf->data.sval->str, strlen(leaf->data.sval->str));
 					if (root->rnode != NULL && root->rnode->hdr.type == TN_IDENT)
 					{
 						// NO NEED TO GET THE IDENTIFIER HERE JUST NEED THE ADDRESS
@@ -762,7 +773,6 @@ int code_recur(treenode *root)
 				{
 					leaf = (leafnode *)root->lnode;
 					printf("LOD %d\n", get_variable_from_table(leaf->data.sval->str));
-
 				}
 				code_recur(root->rnode);
 				if (root->rnode != NULL && root->rnode->hdr.type == TN_IDENT)
@@ -807,7 +817,6 @@ int code_recur(treenode *root)
 				{
 					leaf = (leafnode *)root->rnode;
 					printf("LOD %d\n", get_variable_from_table(leaf->data.sval->str));
-
 				}
 				printf("MUL\n");
 				printf("STO\n");
@@ -834,7 +843,7 @@ int code_recur(treenode *root)
 				printf("BUG, didn't handle assigment token: %d\n, ", root->hdr.tok);
 				break;
 			}
-			break;	
+			break;
 		case TN_EXPR:
 			switch (root->hdr.tok)
 			{
@@ -1155,9 +1164,9 @@ int code_recur(treenode *root)
 	return SUCCESS;
 }
 char struct_definition[5000] = "";
-const char SUPPERATOR = '!';
 const char PAIR_SUP = '~';
 const char STR_END = '\0';
+int should_print_id = 1;
 void add_struct_to_symbolTable(char *string, char *structIdnt)
 {
 	int i = 0;
@@ -1166,6 +1175,7 @@ void add_struct_to_symbolTable(char *string, char *structIdnt)
 	int type = 0;
 	tn_t vartype = 0;
 	printf("the string is: %s\n", string);
+	//298~a!298~b!298~c!{%bb%298~aa!298~bb!298~cc!}
 	// printf("the length of the string is- %d \n", strlen(string));
 	while (i < strlen(string))
 	{
@@ -1365,6 +1375,22 @@ void print_symbol_table(treenode *root)
 					strcat(struct_definition, "296");
 					strncat(struct_definition, &PAIR_SUP, 1);
 					break;
+				case STRUCT:
+					if (leaf->hdr.type == TN_OBJ_REF)
+					{
+						if (get(&tbl, ((leafnode *)root->lnode->lnode)->data.sval->str) != NULL)
+						{
+							printf("ADDING THE FOLLOWING: %s\n", get(&tbl, ((leafnode *)root->lnode->lnode)->data.sval->str), strlen(get(&tbl, ((leafnode *)root->lnode->lnode)->data.sval->str)));
+							strncat(struct_definition, get(&tbl, ((leafnode *)root->lnode->lnode)->data.sval->str), strlen(get(&tbl, ((leafnode *)root->lnode->lnode)->data.sval->str)));
+							strncat(struct_definition, "#", 1);
+						}
+					}
+					else
+					{
+						printf("NEED TO FIGURE IT OUT\n");
+					}
+
+					break;
 				default:
 					printf("Unhandled leaf token, it's: %d\n", leaf->hdr.tok);
 					break;
@@ -1394,9 +1420,19 @@ void print_symbol_table(treenode *root)
 			break;
 		case TN_COMP_DECL:
 			/* struct component declaration - for HW2 */
+			if (root->rnode != NULL & root->rnode->hdr.which == LEAF_T && 
+				root->lnode != NULL && root->lnode->hdr.type == TN_TYPE_LIST && 
+				root->lnode->lnode != NULL && root->lnode->lnode->hdr.type == TN_OBJ_REF){
+				strncat(struct_definition, "#", 1);
+				strncat(struct_definition, "%", 1);
+				strncat(struct_definition, ((leafnode*)root->rnode)->data.sval->str, strlen(((leafnode*)root->rnode)->data.sval->str));
+				strncat(struct_definition, "%", 1);
+				should_print_id = 0;
+			}
 			print_symbol_table(root->lnode);
 			print_symbol_table(root->rnode);
 			strncat(struct_definition, &STR_END, 1);
+			should_print_id = 1;
 
 			break;
 		case TN_FIELD_LIST:
@@ -1419,8 +1455,13 @@ void print_symbol_table(treenode *root)
 		switch (root->hdr.tok)
 		{
 		case IDENT:
-			strcat(struct_definition, ((leafnode *)root)->data.sval->str);
-			strncat(struct_definition, &SUPPERATOR, 1);
+			if (should_print_id == 1){
+				printf("%s before \n", struct_definition);
+				strcat(struct_definition, ((leafnode *)root)->data.sval->str);
+				strncat(struct_definition, &SUPPERATOR, 1);
+				printf("%s after \n", struct_definition);
+				should_print_id = 1;
+			}
 			break;
 		default:
 			printf("UNHANDLED LEAF TOKEN is: %d\n", root->hdr.tok);

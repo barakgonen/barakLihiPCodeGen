@@ -98,6 +98,7 @@ elseif ($command -eq "Pcode")
     Write-Host "About To Execute Command:", $command
     Write-Host "Running on the following sample: "$Input_File_Path
     &$exe -$command $Input_File_Path
+    exit
     $sample_number=$Input_File_Path
     Pcode_Exe
 }

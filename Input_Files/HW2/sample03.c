@@ -1,18 +1,41 @@
 #include <stdio.h>
 
+struct BaseOObject
+{
+    int qqqq;
+    int wwww; 
+    int eeee; 
+};
+struct BaseTObject
+{
+    int rrrr;
+    int tttt; 
+    int yyyy;
+	struct BaseOObject uuuuu;
+};
+struct BaseTTObject
+{
+    int iiii;
+    int oooo; 
+    int pppp; 
+	struct BaseTObject ssss;
+};
+
 struct BaseObject
 {
-    int AAA;
-    int BBB; 
-    int CCC; 
+    int dddd;
+    int ffff; 
+    int kkkk; 
+	struct BaseTTObject G;
 };
 
 void main() {
-	int i;
-	int b[10];
-	double c[11];
-	float d[12];
-	struct BaseObject e[13];
+	int i;   				// 5
+	int b[10];  			// start: 6 --> end  16
+	double c[11]; 			// start: 17 --> end 28
+	float d[12]; 			// start: 29 --> end 41
+	struct BaseObject e[31]; // start: 42 --> end 414
+
 
 	for (i = 0; i < 10; i++){
 		b[i] = i*2;
@@ -33,15 +56,22 @@ void main() {
 	for (i = 0; i < 12; i++){
 		printf("%f\n", d[i]);
 	}
-	for (i = 0; i < 13; i++){
-		e[i].AAA = i + 5;
-		e[i].BBB = i + 6;
-		e[i].CCC = i + 7;
+	
+	for (i = 0; i < 31; i++){
+		e[i].dddd = 123 + i;
+		e[i].ffff = 456 - i;
+		e[i].kkkk = 789 * i;
+		e[i].G.ssss.uuuuu.qqqq = 123 - (5 * i);
+		e[i].G.ssss.uuuuu.wwww = 456 + (7 / 7);
+		e[i].G.ssss.uuuuu.eeee = 789 - (i * -5);
 	}
-	for (i = 0; i < 13; i++){
-		printf("%f\n", e[i].AAA);
-		printf("%f\n", e[i].BBB);
-		printf("%f\n", e[i].CCC);
+	for (i = 0; i < 31; i++){
+		printf("%d\n", e[i].dddd);
+		printf("%d\n", e[i].ffff);
+		printf("%d\n", e[i].kkkk);
+		printf("%d\n", e[i].G.ssss.uuuuu.qqqq);
+		printf("%d\n", e[i].G.ssss.uuuuu.wwww);
+		printf("%d\n", e[i].G.ssss.uuuuu.eeee);
 	}
 	// pointer/
 	// int a[10][4];

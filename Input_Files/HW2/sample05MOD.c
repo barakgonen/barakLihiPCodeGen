@@ -6,11 +6,11 @@ void main() {
 	int** c;
 	int*** d;
 
-	b = &a;
-	c = &a;
-	d = &a;
+	b = a;
+	c = &b;
+	d = &c;
 
 	a[0] = 8;
-	printf("%d\n",(d)[0]);
+	printf("%d\n",(**d)[0]);
 	return;
 }

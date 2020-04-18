@@ -42,6 +42,16 @@ Function Run_Sanity_On_HW_2 {
                 $should_use_modified = "true"
                 $modifided_input_file = "Input_Files/HW2/sample05MOD.c"
             }
+            elseif ($n -eq "06.c")
+            {
+                $should_use_modified = "true"
+                $modifided_input_file = "Input_Files/HW2/sample06MOD.c"
+            }
+            elseif ($n -eq "09.c")
+            {
+                $should_use_modified = "true"
+                $modifided_input_file = "Input_Files/HW2/sample09MOD.c"
+            }
             $command = "Pcode"
             Pcode_Exe
             $should_use_modified = "false";

@@ -29,7 +29,23 @@ void main()
     // k = 5 * (*(c)++);
     // printf("%d\n", k);
     // printf("%d\n", c);
+    printf("%d\n", c);
     ++(*c);
+    printf("%d\n", c);
+
+    printf("%d\n", c);
+    (*c)++;
+    printf("%d\n", c);
+
+    // a=(*c)+2
+    // a =5 * (**d)
+
+    printf("%d\n", c);
+    *c++;
+    printf("%d\n", c);
+
+    printf("%d\n", c);
+    ++*c;
     printf("%d\n", c);
 
     return;

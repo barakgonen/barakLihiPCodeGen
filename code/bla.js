@@ -1,22 +1,12 @@
 var fs = require("fs");  // file system 
 
-
-
 var MAXVARS = 512
-
-function divide(a, b) {
-    if (a % 1 === 0 && b % 1 === 0) {
-        var c = Math.floor(a / b);
-        return c;
-    }
-    return a / b;
-}
 
 var BINARY = {
     'add': function (a, b) { return a + b },
     'sub': function (a, b) { return a - b },
     'mul': function (a, b) { return a * b },
-    'div': function (a, b) { return divide(a, b) },
+    'div': function (a, b) { return a / b },
     'equ': function (a, b) { return a == b },
     'neq': function (a, b) { return a != b },
     'les': function (a, b) { return a < b },
@@ -54,27 +44,10 @@ function str2val(s) {
     return s.indexOf('.') >= 0 ? parseFloat(s) : parseInt(s);
 }
 
-function val2str(v) {
-    if (typeof (v) == 'number')
-        return Math.round(v * 10000) / 10000
-    return v;
-}
-
-function ret(stack, mp) {
-    var frame = stack.slice(mp);
-    stack.splice(mp, frame.length);
-    return frame
-}
-
 function run(lines) {
-    var stack = new Array();
+    var stack = new Array(MAXVARS);
     var pc = 0;
-    var mp = 0;
-    var result="";
-
-    base = function (depth, mp) {
-        return depth > 0 ? base(depth - 1, stack[mp + 1]) : mp;
-    }
+    var result = "";
 
     while (pc < lines.length) {
         if (lines[pc].trim() == '') {
@@ -84,36 +57,12 @@ function run(lines) {
 
         var words = split(lines[pc], ' ');
         var cmd = words[0];
-        var depth = NaN;
-        var relativeAddress = NaN;
-
-        if (cmd == 'cupi' || cmd == 'mstf' || cmd == 'lda'
-            || cmd == 'lod' || cmd == 'str') {
-            depth = parseInt(words[words.length - 2]);
-            reladdr = parseInt(words[words.length - 1]);
-        }
 
         if (cmd in JUMPS) {
             var addr = parseInt(words[words.length - 1]);
             pc = JUMPS[cmd](stack, pc, addr);
             continue;
         }
-        if (cmd == 'cup') {
-            nparams = parseInt(words[words.length - 2]);
-            addr = parseInt(words[words.length - 1]);
-            mp = stack.length - nparams - 5;
-            stack[mp + 4] = pc;
-            pc = addr;
-            continue;
-        }
-        if (cmd == 'cupi') {
-            dynamic = stack[mp + 2];
-            desc = base(depth, dynamic) + reladdr;
-            stack[mp + 4] = pc;
-            pc = stack[desc];
-            continue;
-        }
-
         if (cmd in BINARY) {
             var b = stack.pop();
             var a = stack.pop();
@@ -126,7 +75,7 @@ function run(lines) {
         } else if (cmd == 'ind') {
             stack.push(stack[stack.pop()]);
         } else if (cmd == 'print' || cmd == 'out') {
-            result+=val2str(stack.pop())+"\n";
+            result += stack.pop() + '\n';
         } else if (cmd == 'sto') {
             var rval = stack.pop();
             var lval = stack.pop();
@@ -140,45 +89,9 @@ function run(lines) {
             stack[stack.length - 1] += parseInt(words[words.length - 1]);
         } else if (cmd == 'dpl') {
             stack.push(stack[stack.length - 1]);
-        } else if (cmd == 'mst') {
-            depth = parseInt(words[words.length - 1]);
-            stack.push(NaN, base(depth, mp), mp, NaN, NaN);
-        } else if (cmd == 'mstf') {
-            desc = base(depth, mp) + reladdr;
-            stack.push(NaN, stack[desc + 1], mp, NaN, NaN);
-        } else if (cmd == 'lda') {
-            addr = base(depth, mp) + reladdr;
-            stack.push(addr);
-        } else if (cmd == 'lod') {
-            addr = base(depth, mp) + reladdr;
-            stack.push(stack[addr]);
-        } else if (cmd == 'movs') {
-            src = stack.pop();
-            size = parseInt(words[words.length - 1]);
-            while (size--)
-                stack.push(stack[src++]);
-        } else if (cmd == 'ssp') {
-            spsize = mp + parseInt(words[words.length - 1]);
-            while (stack.length < spsize)
-                stack.push(NaN);
-        } else if (cmd == 'smp') {
-            nparams = parseInt(words[words.length - 1]);
-            mp = stack.length - nparams - 5;
-        } else if (cmd == 'retp') {
-            frame = ret(stack, mp);
-            mp = frame[2];
-            pc = frame[4];
-        } else if (cmd == 'retf') {
-            frame = ret(stack, mp);
-            stack.push(frame[0]);
-            mp = frame[2];
-            pc = frame[4];
-        } else if (cmd == 'stp') {
-            break;
         } else {
             throw ("unknown command at line " + pc + ": " + lines[pc]);
         }
-
         pc += 1;
     }
     return result;
@@ -226,44 +139,44 @@ function doit() {
         console.log("Running Sanity for: " + data)
     })
     fs.readFile(".\\output\\generated_pcode.txt", 'utf8', function (err, data) {
-            actual_result = parse(data);
-            
-            fs.readFile(".\\output\\test_program_output.txt", 'utf8', function (err, expected_result) {
-                expected_lines = split(expected_result, '\n').map(function (element) {
-                    return element.toLowerCase().trim();
-                });
-                actual_lines = split(actual_result, '\n').map(function (element) {
-                    return element.toLowerCase().trim();
-                });
-                has_passed = true;
-                expected_lines = expected_lines.slice(0, -1);
-                actual_lines = actual_lines.slice(0, -1);
-                actual_size = actual_lines.length;
-                expected_size = expected_lines.length;
-                if (actual_size === expected_size) {
-                    for (var i = 0; i < actual_lines.length; i++) {
-                        actual_data = str2val(actual_lines[i])
-                        expected_data = str2val(expected_lines[i])
-                        if (Math.abs(actual_data - expected_data) > 0.001 ||
-                        (isNaN(actual_data) && !isNaN(expected_data)) || 
-                        (!isNaN(actual_data) && isNaN(expected_data)))  {
-                            console.log("FAILED actual: " + actual_data + " expected: " + expected_data);
-                            has_passed = false;
-                            break;
-                        }
+        actual_result = parse(data);
+
+        fs.readFile(".\\output\\test_program_output.txt", 'utf8', function (err, expected_result) {
+            expected_lines = split(expected_result, '\n').map(function (element) {
+                return element.toLowerCase().trim();
+            });
+            actual_lines = split(actual_result, '\n').map(function (element) {
+                return element.toLowerCase().trim();
+            });
+            has_passed = true;
+            expected_lines = expected_lines.slice(0, -1);
+            actual_lines = actual_lines.slice(0, -1);
+            actual_size = actual_lines.length;
+            expected_size = expected_lines.length;
+            if (actual_size === expected_size) {
+                for (var i = 0; i < actual_lines.length; i++) {
+                    actual_data = str2val(actual_lines[i])
+                    expected_data = str2val(expected_lines[i])
+                    if (Math.abs(actual_data - expected_data) > 0.001 ||
+                        (isNaN(actual_data) && !isNaN(expected_data)) ||
+                        (!isNaN(actual_data) && isNaN(expected_data))) {
+                        console.log("FAILED actual: " + actual_data + " expected: " + expected_data);
+                        has_passed = false;
+                        break;
                     }
                 }
-                else {
-                    has_passed = false;
-                    console.log("Failed because there is no match with outputs lines size");
-                }
-                
-                fs.readFile(".\\output\\sample_number.txt", 'utf8', function (err, data) {
-                    data = split(data, '\n').map(function (element) {
-                        return element.toLowerCase().trim();
-                    });
-                    data = data.slice(0, -1);
-                    outPutMessage = "Sanity for: " + data;
+            }
+            else {
+                has_passed = false;
+                console.log("Failed because there is no match with outputs lines size");
+            }
+
+            fs.readFile(".\\output\\sample_number.txt", 'utf8', function (err, data) {
+                data = split(data, '\n').map(function (element) {
+                    return element.toLowerCase().trim();
+                });
+                data = data.slice(0, -1);
+                outPutMessage = "Sanity for: " + data;
                 if (!has_passed)
                     console.error("ERROR!!!!!! " + outPutMessage + " has failed");
                 else

@@ -35,6 +35,9 @@ void main() {
 	double c[11]; 			// start: 17 --> end 28
 	float d[12]; 			// start: 29 --> end 41
 	struct BaseObject e[31]; // start: 42 --> end 414
+	// pointer/
+	// int a[10][4];
+	// int three[5][5][5];
 
 
 	for (i = 0; i < 10; i++){
@@ -73,13 +76,16 @@ void main() {
 		printf("%d\n", e[i].G.ssss.uuuuu.wwww);
 		printf("%d\n", e[i].G.ssss.uuuuu.eeee);
 	}
-	// pointer/
-	// int a[10][4];
-	// int c[5][5][5];
 
 	// a[9][2] = 12;
-	// i = 9;
-	// b[7] = 2;
+	i = 9;
+	for (i = 0; i < 10; i++){
+		printf("%d\n", b[i]);
+	}
+	b[7] = 2;
+	for (i = 0; i < 10; i++){
+		printf("%d\n", b[i]);
+	}
 	// a[5][2] = 3;
 	// c[1][2][3] = 4;
 

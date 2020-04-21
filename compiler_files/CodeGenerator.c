@@ -140,10 +140,10 @@ varPtr add_variable_to_symbol_table(char *identifier, tn_t type, varPtr list)
 	strcpy(p->str, identifier);
 	p->type = type;
 	p->size = 1;
-	// printf("===============\n");
-	// printf("Key is: %s\n", p->str);
-	// printf("ADDR: %d\n", p->address);
-	// printf("===============\n");
+	printf("===============\n");
+	printf("Key is: %s\n", p->str);
+	printf("ADDR: %d\n", p->address);
+	printf("===============\n");
 	if (list == NULL)
 	{ /* in the case if "p" is the first element in the list */
 		p->next = 0;
@@ -245,16 +245,202 @@ void reverse_string(char *str)
 	return temp;
 }
 
-/*
-*	This recursive function is the main method for Code Generation
-*	Input: treenode (AST)
-*	Output: prints the Pcode on the console
-*/
+void reverse_by_chanks(char* str)
+{
+    char singleChankHolder[100] = "";
+    char temp2[100] = "";
+    char reversedString[100] = "";
+
+    for (int i = 0; i < strlen(str); i++)
+    {
+        strcpy(singleChankHolder, "");
+        do
+        {
+            strncat(singleChankHolder, &str[i], 1);
+            i++;
+
+        } while (str[i] != '!' && i < strlen(str));
+        strncat(singleChankHolder, &str[i], 1);
+        strcpy(temp2, reversedString);
+        strcpy(reversedString, singleChankHolder);
+        strncat(reversedString, temp2, strlen(temp2));
+    }
+    strcpy(str, reversedString);
+}
+
 struct StructsMapper tbl = {{0}, NULL, NULL, foo_strhash, strcmp};
 char struct_name[5000] = "";
 char break_dest[50] = "";
 const char SUPPERATOR = '!';
 int last_loop_end_lable_line_num = -1;
+
+int set_struct_name(treenode *root)
+{
+	char non_leafs[1000] = "";
+	strcpy(struct_name, "");
+	treenode *left_node;
+	treenode *right_node;
+	left_node = root->lnode;
+	right_node = root->rnode;
+	int should_continue_go_down = 1;
+	int index_flag = 0;
+
+	while (left_node != NULL && right_node != NULL &&
+		   should_continue_go_down)
+	{
+		// printf("ROUNDS\n");
+		if (left_node->hdr.type == TN_INDEX)
+			index_flag = 1;
+		if (left_node->hdr.which == LEAF_T && right_node->hdr.which == LEAF_T)
+		{
+			should_continue_go_down = 0;
+			// printf("struct name is %s\n", struct_name);
+			// printf("Setting should_continue_go_down to 0 \n");
+			switch (left_node->hdr.type)
+			{
+
+			case TN_IDENT:
+			
+				// printf("struct name h2-B: %s\n", struct_name);
+				strncat(struct_name, ((leafnode *)left_node)->data.sval->str, strlen(((leafnode *)left_node)->data.sval->str));
+				strncat(struct_name, &SUPPERATOR, 1);
+				// printf("Im ident! %s\n",((leafnode *)left_node)->data.sval->str);
+				if (index_flag != 1)
+				{
+					strncat(struct_name, ((leafnode *)right_node)->data.sval->str, strlen(((leafnode *)right_node)->data.sval->str));
+					strncat(struct_name, &SUPPERATOR, 1);
+					// printf("struct name h: %s\n", struct_name);
+				}
+				else
+				{
+					strncat(struct_name, "_0", 2);
+					// strncat(struct_name, &SUPPERATOR, 1);
+					// printf("struct name h1: %s\n", struct_name);
+				}
+
+				break;
+			default:
+				printf("Unhandled hdr type! %d\n", left_node->hdr.type);
+				break;
+			}
+			// printf("struct_name is %s\n", struct_name);
+		}
+
+		/* code */
+		if (should_continue_go_down != 0)
+		{
+			switch (((leafnode *)right_node)->hdr.type)
+			{
+				// case TN_SELECT:
+				// if (right_node->rnode != NULL && right_node->rnode->hdr.which == LEAF_T)
+				// {
+				// 	strncat(struct_name, ((leafnode *)right_node)->data.sval->str, strlen(((leafnode *)right_node)->data.sval->str));
+				// 	strncat(struct_name, &SUPPERATOR, 1);
+				// }
+				break;
+			case TN_INDEX:
+				break;
+			case TN_IDENT:
+				// printf("struct name h3: %s\n", struct_name);
+				strncat(non_leafs, ((leafnode *)right_node)->data.sval->str, strlen(((leafnode *)right_node)->data.sval->str));
+				strncat(non_leafs, &SUPPERATOR, 1);
+				// printf("struct name h4: %s\n", struct_name);
+				break;
+			default:
+				printf("Unhandled hdr type! %d\n", right_node->hdr.type);
+				break;
+			}
+
+			right_node = left_node->rnode;
+			left_node = left_node->lnode;
+		}
+
+		// printf("END!\n");
+	}
+
+	if (index_flag == 1){
+		// strncat(struct_name, &SUPPERATOR, 1);
+		// printf("struct name h2: %s\n", struct_name);
+	}
+
+	// printf("struct name is: %s\n", struct_name);
+	// printf("non-leafes %s\n", non_leafs);
+	reverse_by_chanks(non_leafs);
+	strncat(struct_name, non_leafs, strlen(non_leafs));
+	// printf("Struct name before!  %s\n", struct_name);
+	// printf("Struct name after!  %s\n", struct_name);
+	return index_flag;
+
+				// case TN_SELECT:
+			// 	if (left_node->lnode != NULL && left_node->lnode->hdr.which == LEAF_T)
+			// 	{
+			// 		strncat(struct_name, ((leafnode *)left_node->lnode)->data.sval->str, strlen(((leafnode *)left_node->lnode)->data.sval->str));
+			// 		strncat(struct_name, &SUPPERATOR, 1);
+			// 	}
+			// break;
+			// case TN_INDEX:
+			// 	strncat(struct_name, ((leafnode *)left_node)->data.sval->str, strlen(((leafnode *)left_node)->data.sval->str));
+			// 	strncat(struct_name, &SUPPERATOR, 1);
+			// 	strncat(struct_name, "0_", 2);
+			// 	break;
+	// printf("STRUCT NAME IS: %s\n", struct_name);
+	// if (root->rnode != NULL && root->lnode != NULL &&
+	// 	root->rnode->hdr.which == LEAF_T && root->rnode->hdr.type == TN_IDENT &&
+	// 	root->lnode->hdr.which == NODE_T && root->lnode->hdr.type == TN_INDEX){
+	// 		strncat(struct_name, ((leafnode *)root->rnode)->data.sval->str, strlen(((leafnode *)root->rnode)->data.sval->str));
+	// 		strncat(struct_name, &SUPPERATOR, 1);
+	// 		code_recur(root->lnode);
+	// 		// it means that the rnode is your inner field, such as e_0!INNER!
+	// 		// it means left->left is your id, such as e_!
+	// }
+	// // else if (root->lnode != NULL && root->lnode->hdr.type == TN_IDENT &&
+	// // 		root->rnode != NULL && root->rn)
+	// else if (root->rnode->hdr.which == LEAF_T && root->lnode->hdr.which == LEAF_T)
+	// {
+	// 	printf("Before: %s\n", struct_name);
+	// 	strncat(struct_name, ((leafnode *)root->lnode)->data.sval->str, strlen(((leafnode *)root->lnode)->data.sval->str));
+	// 	strncat(struct_name, &SUPPERATOR, 1);
+	// 	strncat(struct_name, ((leafnode *)root->rnode)->data.sval->str, strlen(((leafnode *)root->rnode)->data.sval->str));
+	// 	strncat(struct_name, &SUPPERATOR, 1);
+	// 	printf("after: %s\n", struct_name);
+	// }
+	// else if (((leafnode *)root->rnode) != NULL &&
+	// 			(((leafnode *)root->rnode)->hdr.type == TN_IDENT ||
+	// 					((leafnode *)root->rnode)->hdr.type == TN_SELECT))
+	// {
+	// 	code_recur(root->lnode);
+	// 	printf("!!!!Before: %s\n", struct_name);
+	// 	strncat(struct_name, ((leafnode *)root->rnode)->data.sval->str, strlen(((leafnode *)root->rnode)->data.sval->str));
+	// 	strncat(struct_name, &SUPPERATOR, 1);
+	// 	printf("!!!!after: %s\n", struct_name);
+	// }
+
+	// else if (root->lnode != NULL && root->lnode->hdr.type == TN_SELECT){
+	// 	// printf("i dont know what to do son \n");
+	// 	code_recur(root->lnode);
+	// 	code_recur(root->rnode);
+	// }
+	// else
+	// {
+
+	// }
+
+	// code_recur(root->lnode);
+	// code_recur(root->rnode);
+	// else if (((leafnode *)root->rnode) != NULL && (((leafnode *)root->rnode)->hdr.type == TN_IDENT || ((leafnode *)root->rnode)->hdr.type != TN_INDEX))
+	// {
+	// 	// printf("!!!!Before: %s\n", struct_name);
+	// 	strncat(struct_name, ((leafnode *)root->rnode)->data.sval->str, strlen(((leafnode *)root->rnode)->data.sval->str));
+	// 	strncat(struct_name, &SUPPERATOR, 1);
+	// 	// printf("!!!!after: %s\n", struct_name);
+	// }
+}
+
+/*
+*	This recursive function is the main method for Code Generation
+*	Input: treenode (AST)
+*	Output: prints the Pcode on the console
+*/
 int code_recur(treenode *root)
 {
 	if (symbolTalble == NULL)
@@ -747,11 +933,11 @@ int code_recur(treenode *root)
 				break;
 			case TN_DECL:
 				// printf("my size is: %d\n", get_variable_size(((leafnode *)root->lnode)->data.sval->str));
-				strncat(struct_name, "0_", 2);
-				strncat(struct_name, ((leafnode *)root->lnode)->data.sval->str, strlen(((leafnode *)root->lnode)->data.sval->str));
-				reverse_string(struct_name);
-				strncat(struct_name, &SUPPERATOR, 1);
-				printf("STRUCT NAME IS: %s\n", struct_name);
+				// strncat(struct_name, "0_", 2);
+				// strncat(struct_name, ((leafnode *)root->lnode)->data.sval->str, strlen(((leafnode *)root->lnode)->data.sval->str));
+				// reverse_string(struct_name);
+				// strncat(struct_name, &SUPPERATOR, 1);
+				// printf("STRUCT NAME IS: %s\n", struct_name);
 				printf("LDC %d\n", get_variable_from_table(struct_name));
 				// printf("struct name is: %s_0%s\n", ((leafnode *)root->lnode)->data.sval->str, struct_name);
 				// printf("IXA %d\n", get_variable_size(((leafnode *)root->lnode)->data.sval->str));
@@ -818,46 +1004,9 @@ int code_recur(treenode *root)
 			{
 				/* Struct select case "." */
 				/* e.g. struct_variable.x; */
-
-				if (root->rnode != NULL && root->lnode != NULL && 
-					root->rnode->hdr.which == LEAF_T && root->rnode->hdr.type == TN_IDENT && 
-					root->lnode->hdr.which == NODE_T && root->lnode->hdr.type == TN_INDEX){
-						// printf ("BAKBAK\n");
-						// it means that the rnode is your inner field, such as e_0!INNER!
-						// it means left->left is your id, such as e_!
-				}
-				else if (root->rnode->hdr.which == LEAF_T && root->lnode->hdr.which == LEAF_T)
-				{
-					// printf("Before: %s\n", struct_name);
-					strncat(struct_name, ((leafnode *)root->lnode)->data.sval->str, strlen(((leafnode *)root->lnode)->data.sval->str));
-					strncat(struct_name, &SUPPERATOR, 1);
-					strncat(struct_name, ((leafnode *)root->rnode)->data.sval->str, strlen(((leafnode *)root->rnode)->data.sval->str));
-					strncat(struct_name, &SUPPERATOR, 1);
-					// printf("after: %s\n", struct_name);
-				}
-				else if (((leafnode *)root->rnode) != NULL && (((leafnode *)root->rnode)->hdr.type == TN_IDENT || ((leafnode *)root->rnode)->hdr.type != TN_INDEX))
-				{
+				if (set_struct_name(root) == 1)
 					code_recur(root->lnode);
-					// printf("!!!!Before: %s\n", struct_name);
-					strncat(struct_name, ((leafnode *)root->rnode)->data.sval->str, strlen(((leafnode *)root->rnode)->data.sval->str));
-					strncat(struct_name, &SUPPERATOR, 1);
-					// printf("!!!!after: %s\n", struct_name);
-				}
-				else if (root->lnode != NULL && root->lnode->hdr.type == TN_SELECT){
-					// printf("i dont know what to do son \n");
-					code_recur(root->lnode);
-					code_recur(root->rnode);
-				}
-
-				// code_recur(root->lnode);
 				// code_recur(root->rnode);
-				// else if (((leafnode *)root->rnode) != NULL && (((leafnode *)root->rnode)->hdr.type == TN_IDENT || ((leafnode *)root->rnode)->hdr.type != TN_INDEX))
-				// {
-				// 	// printf("!!!!Before: %s\n", struct_name);
-				// 	strncat(struct_name, ((leafnode *)root->rnode)->data.sval->str, strlen(((leafnode *)root->rnode)->data.sval->str));
-				// 	strncat(struct_name, &SUPPERATOR, 1);
-				// 	// printf("!!!!after: %s\n", struct_name);
-				// }
 			}
 			break;
 		case TN_ASSIGN:
@@ -902,7 +1051,9 @@ int code_recur(treenode *root)
 				}
 				else
 				{
+					// printf("XXX left type is: %d\n", root->lnode->hdr.type);
 					code_recur(root->lnode);
+					// printf("struct name is: %s\n", struct_name);
 					if (root->lnode != NULL && root->lnode->hdr.type == TN_SELECT &&
 						root->lnode->lnode != NULL && root->lnode->lnode->hdr.type != TN_INDEX)
 					{
@@ -1613,6 +1764,7 @@ void add_array_to_symbol_table(int size, char *typeAsString, tn_t typeAsEnum, ch
 	printf("array typeString: %s\n", typeAsString);
 	printf("array typeAsEnum: %d\n", typeAsEnum);
 	printf("array ID: %s\n", identitfier);
+
 	char id[100] = "";
 	char snum[1000000];
 	int i = 0;

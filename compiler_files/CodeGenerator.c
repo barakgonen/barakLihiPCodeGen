@@ -277,20 +277,21 @@ int last_loop_end_lable_line_num = -1;
 int set_struct_name(treenode *root)
 {
 	char non_leafs[1000] = "";
-	strcpy(struct_name, "");
 	treenode *left_node;
 	treenode *right_node;
 	left_node = root->lnode;
 	right_node = root->rnode;
 	int should_continue_go_down = 1;
-	int index_flag = 0;
+	int index_depth = 0; // indicator for array index depth
+	int search_dpeth = 1;
 
 	while (left_node != NULL && right_node != NULL &&
 		   should_continue_go_down)
 	{
 		// printf("ROUNDS\n");
 		if (left_node->hdr.type == TN_INDEX)
-			index_flag = 1;
+			index_depth = search_dpeth;
+		
 		if (left_node->hdr.which == LEAF_T && right_node->hdr.which == LEAF_T)
 		{
 			should_continue_go_down = 0;
@@ -305,7 +306,7 @@ int set_struct_name(treenode *root)
 				strncat(struct_name, ((leafnode *)left_node)->data.sval->str, strlen(((leafnode *)left_node)->data.sval->str));
 				strncat(struct_name, &SUPPERATOR, 1);
 				// printf("Im ident! %s\n",((leafnode *)left_node)->data.sval->str);
-				if (index_flag != 1)
+				if (index_depth == 0)
 				{
 					strncat(struct_name, ((leafnode *)right_node)->data.sval->str, strlen(((leafnode *)right_node)->data.sval->str));
 					strncat(struct_name, &SUPPERATOR, 1);
@@ -314,7 +315,7 @@ int set_struct_name(treenode *root)
 				else
 				{
 					strncat(struct_name, "_0", 2);
-					// strncat(struct_name, &SUPPERATOR, 1);
+					strncat(struct_name, &SUPPERATOR, 1);
 					// printf("struct name h1: %s\n", struct_name);
 				}
 
@@ -356,20 +357,20 @@ int set_struct_name(treenode *root)
 		}
 
 		// printf("END!\n");
+		search_dpeth+=1;
 	}
 
-	if (index_flag == 1){
+	// if (index_depth == 1){
 		// strncat(struct_name, &SUPPERATOR, 1);
 		// printf("struct name h2: %s\n", struct_name);
-	}
+	// }
 
 	// printf("struct name is: %s\n", struct_name);
 	// printf("non-leafes %s\n", non_leafs);
 	reverse_by_chanks(non_leafs);
 	strncat(struct_name, non_leafs, strlen(non_leafs));
-	// printf("Struct name before!  %s\n", struct_name);
-	// printf("Struct name after!  %s\n", struct_name);
-	return index_flag;
+	// printf("Struct name %s\n", struct_name);
+	return index_depth;
 
 				// case TN_SELECT:
 			// 	if (left_node->lnode != NULL && left_node->lnode->hdr.which == LEAF_T)
@@ -435,7 +436,7 @@ int set_struct_name(treenode *root)
 	// 	// printf("!!!!after: %s\n", struct_name);
 	// }
 }
-
+char array_ident[101] = "";
 /*
 *	This recursive function is the main method for Code Generation
 *	Input: treenode (AST)
@@ -923,13 +924,15 @@ int code_recur(treenode *root)
 			break;
 
 		case TN_INDEX:
-			/* call for array - for HW2! */
-			// printf("Looking for var with ID = %s\n", ((leafnode *)root->lnode)->data.sval->str);
-			switch (get_variable_type_from_symbol_table(((leafnode *)root->lnode)->data.sval->str))
+			/* call for array - for HW2! */			
+			strcpy(array_ident, ((leafnode *)root->lnode)->data.sval->str);
+			strncat(array_ident, &SUPPERATOR, 1);
+			// printf("Looking for var with ID = %s\n", array_ident);
+			switch (get_variable_type_from_symbol_table(array_ident))
 			{
 			case TN_INT:
 			case TN_REAL:
-				printf("LDC %d\n", get_variable_from_table(((leafnode *)root->lnode)->data.sval->str));
+				printf("LDC %d\n", get_variable_from_table(array_ident));
 				break;
 			case TN_DECL:
 				// printf("my size is: %d\n", get_variable_size(((leafnode *)root->lnode)->data.sval->str));
@@ -958,14 +961,14 @@ int code_recur(treenode *root)
 				printf("LDC %d\n", ((leafnode *)root->rnode)->data.cval);
 			}
 			// printf("type is: %d\n", get_variable_type_from_symbol_table(((leafnode *)root->lnode)->data.sval->str));
-			switch (get_variable_type_from_symbol_table(((leafnode *)root->lnode)->data.sval->str))
+			switch (get_variable_type_from_symbol_table(array_ident))
 			{
 			case TN_INT:
 			case TN_REAL:
 				printf("IXA 1\n");
 				break;
 			case TN_DECL:
-				printf("IXA %d\n", get_variable_size(((leafnode *)root->lnode)->data.sval->str));
+				printf("IXA %d\n", get_variable_size(array_ident));
 				break;
 			default:
 				printf("type name is: %s\n", ((leafnode *)root->lnode)->data.sval->str);
@@ -974,6 +977,7 @@ int code_recur(treenode *root)
 			}
 			// code_recur(root->lnode);
 			// code_recur(root->rnode);
+			strcpy(array_ident, "");
 			break;
 
 		case TN_DEREF:
@@ -1004,9 +1008,25 @@ int code_recur(treenode *root)
 			{
 				/* Struct select case "." */
 				/* e.g. struct_variable.x; */
-				if (set_struct_name(root) == 1)
-					code_recur(root->lnode);
-				// code_recur(root->rnode);
+				strcpy(struct_name, "");
+				int res = set_struct_name(root);
+				if (res != 0){
+					// printf("tn array is in depth: %d\n", res);
+					left_node = root->lnode;
+					res -= 1;
+					while (left_node != NULL && res > 0) {
+						left_node = left_node->lnode;
+						res-=1;
+					}
+					// printf("res is: %d\n", res);
+					code_recur(left_node);
+					// printf("Res is: %d\n", res);
+					// if (res == 1)
+					// 	code_recur(root->lnode);
+					// else
+					// 	printf("res is: %d\n", res);
+
+				}
 			}
 			break;
 		case TN_ASSIGN:
@@ -1053,9 +1073,9 @@ int code_recur(treenode *root)
 				{
 					// printf("XXX left type is: %d\n", root->lnode->hdr.type);
 					code_recur(root->lnode);
-					// printf("struct name is: %s\n", struct_name);
-					if (root->lnode != NULL && root->lnode->hdr.type == TN_SELECT &&
-						root->lnode->lnode != NULL && root->lnode->lnode->hdr.type != TN_INDEX)
+					// printf("struct name isa: %s\n", struct_name);
+					if (root->lnode != NULL && root->lnode->hdr.type == TN_SELECT)
+						// root->lnode->lnode != NULL && root->lnode->lnode->hdr.type != TN_INDEX)
 					{
 						if (get_variable_from_table(struct_name) != -1)
 						{
@@ -1763,6 +1783,8 @@ void add_array_to_symbol_table(int size, char *typeAsString, tn_t typeAsEnum, ch
 	printf("about to init an array in size of: %d\n", size);
 	printf("array typeString: %s\n", typeAsString);
 	printf("array typeAsEnum: %d\n", typeAsEnum);
+	strncat(identitfier, &SUPPERATOR, 1);
+
 	printf("array ID: %s\n", identitfier);
 
 	char id[100] = "";

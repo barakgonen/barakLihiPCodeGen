@@ -31,13 +31,14 @@ struct BaseFour
 
 void main() {
 	int i;   				// 5
-	int b[2];  			// start: 6 --> end  16
-	double c[2]; 			// start: 17 --> end 28
-	float d[2]; 			// start: 29 --> end 41
-	struct BaseFour e[2]; // start: 42 --> end 414
+	int b[10];  			// start: 6 --> end  16
+	double c[10]; 			// start: 17 --> end 28
+	float d[15]; 			// start: 29 --> end 41
+	struct BaseFour e[31]; // start: 42 --> end 414
 	// // pointer/
-	// int a[2][2];
-	// int three[3][3][3];
+	int a[15][15];
+	int three[2][2][2];
+	int j;
 	// int* aa;
 	// int** aa;
 	// int*** aaa;
@@ -75,65 +76,77 @@ void main() {
 	printf("%d\n", bS.G.ssss.yyyy);
 	printf("%f\n", bS.G.ssss.uuuuu.eeee);
 	printf("%f\n", bS.G.ssss.uuuuu.qqqq);
-	// for (i = 0; i < 10; i++){
-	// 	b[i] = i*2;
-	// }
-	// for (i = 0; i < 10; i++){
-	// 	printf("%d\n", b[i]);
-	// }
+	for (i = 0; i < 10; i++){
+		b[i] = i*2;
+	}
+	for (i = 0; i < 10; i++){
+		printf("%d\n", b[i]);
+	}
 
-	// for (i = 0; i < 11; i++){
-	// 	c[i] = i + 2.02;
-	// }
-	// for (i = 0; i < 11; i++){
-	// 	printf("%f\n", c[i]);
-	// }
-	// for (i = 0; i < 12; i++){
-	// 	d[i] = i + 2.12;
-	// }
-	// for (i = 0; i < 12; i++){
-	// 	printf("%f\n", d[i]);
-	// }
-	// ..Key is: e_0!dddd!
-	// e_0!ffff!
-	// for (i = 0; i < 5; i++){
-	// 	e[i].dddd = 123 + i;
-		// e[i].ffff = 456 - i;
-		// e[i].kkkk = 789 * i;
-		// e[i].G.iiii = i + 2 * i + 3 * i;
-		// e[i].G.oooo = (i + 1) * 2; 
-		// e[i].G.pppp = i * i;
-		// e[i].G.ssss.rrrr = 123 - (5 * i);
-		// e[i].G.ssss.tttt = 456 + (7 / 7);
-		// e[i].G.ssss.yyyy = 789 - (i * -5);
-		// e[i].G.ssss.uuuuu.eeee = i * 5.5;
-		// e[i].G.ssss.uuuuu.qqqq = i * 2 * 3.05;
-	// }
-	// e_0!dddd!
-	//e0_!dddd!
-	//e_0!dddd!
-	// for (i = 0; i < 5; i++){
-	// 	printf("%d\n", e[i].dddd);
-	// 	printf("%d\n", e[i].ffff);
-	// 	printf("%d\n", e[i].kkkk);
-		// printf("%d\n", e[i].G.iiii);
-	// 	printf("%d\n", e[i].G.oooo);
-	// 	printf("%d\n", e[i].G.pppp);
-	// 	printf("%d\n", e[i].G.ssss.rrrr);
-	// 	printf("%d\n", e[i].G.ssss.tttt);
-	// 	printf("%d\n", e[i].G.ssss.yyyy);
-	// 	printf("%f\n", e[i].G.ssss.uuuuu.qqqq);
-	// 	printf("%f\n", e[i].G.ssss.uuuuu.eeee);
-	// }
+	for (i = 0; i < 10; i++){
+		c[i] = i + 2.02;
+	}
+	for (i = 0; i < 10; i++){
+		printf("%f\n", c[i]);
+	}
+	for (i = 0; i < 15; i++){
+		d[i] = i + 2.12;
+	}
+	for (i = 0; i < 15; i++){
+		printf("%f\n", d[i]);
+	}
 
-	// // a[9][2] = 12;
-	// i = 9;
+	for (i = 0; i < 31; i++){
+		e[i].dddd = 123 + i;
+		e[i].ffff = 456 - i;
+		e[i].kkkk = 789 * i;
+		e[i].G.iiii = i + 2 * i + 3 * i;
+		e[i].G.oooo = (i + 1) * 2; 
+		e[i].G.pppp = i * i;
+		e[i].G.ssss.rrrr = 123 - (5 * i);
+		e[i].G.ssss.tttt = 456 + (7 / 7);
+		e[i].G.ssss.yyyy = 789 - (i * -5);
+		e[i].G.ssss.uuuuu.eeee = i * 5.5;
+		e[i].G.ssss.uuuuu.qqqq = i * 2 * 3.05;
+	}
+
+	for (i = 0; i < 31; i++){
+		printf("%d\n", e[i].dddd);
+		printf("%d\n", e[i].ffff);
+		printf("%d\n", e[i].kkkk);
+		printf("%d\n", e[i].G.iiii);
+		printf("%d\n", e[i].G.oooo);
+		printf("%d\n", e[i].G.pppp);
+		printf("%d\n", e[i].G.ssss.rrrr);
+		printf("%d\n", e[i].G.ssss.tttt);
+		printf("%d\n", e[i].G.ssss.yyyy);
+		printf("%f\n", e[i].G.ssss.uuuuu.qqqq);
+		printf("%f\n", e[i].G.ssss.uuuuu.eeee);
+	}
+
+	// a[9][2] = 12;
+	// printf("%d\n", a[8][7]);
+	
 	// for (i = 0; i < 10; i++){
 	// 	printf("%d\n", b[i]);
 	// }
 	// b[7] = 2;
 	// for (i = 0; i < 10; i++){
 	// 	printf("%d\n", b[i]);
+	// }
+	// a[8][7] = 9090;
+	// printf("%d\n", a[8][7]);
+
+	// for (i =0; i < 15; i++){
+	// 	for (j = 0; j < 15; j++){
+	// 		a[i][j]=i + j;
+	// 	}
+	// }
+
+	// for (i =0; i < 15; i++){
+	// 	for (j = 0; j < 15; j++){
+	// 		printf("%d\n", a[i][j]);
+	// 	}
 	// }
 	// // a[5][2] = 3;
 	// // c[1][2][3] = 4;

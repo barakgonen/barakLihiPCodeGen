@@ -140,10 +140,10 @@ varPtr add_variable_to_symbol_table(char *identifier, tn_t type, varPtr list)
 	strcpy(p->str, identifier);
 	p->type = type;
 	p->size = 1;
-	printf("===============\n");
-	printf("Key is: %s\n", p->str);
-	printf("ADDR: %d\n", p->address);
-	printf("===============\n");
+	// printf("===============\n");
+	// printf("Key is: %s\n", p->str);
+	// printf("ADDR: %d\n", p->address);
+	// printf("===============\n");
 	if (list == NULL)
 	{ /* in the case if "p" is the first element in the list */
 		p->next = 0;
@@ -356,14 +356,8 @@ int set_struct_name(treenode *root)
 			left_node = left_node->lnode;
 		}
 
-		// printf("END!\n");
 		search_dpeth+=1;
 	}
-
-	// if (index_depth == 1){
-		// strncat(struct_name, &SUPPERATOR, 1);
-		// printf("struct name h2: %s\n", struct_name);
-	// }
 
 	// printf("struct name is: %s\n", struct_name);
 	// printf("non-leafes %s\n", non_leafs);
@@ -371,70 +365,6 @@ int set_struct_name(treenode *root)
 	strncat(struct_name, non_leafs, strlen(non_leafs));
 	// printf("Struct name %s\n", struct_name);
 	return index_depth;
-
-				// case TN_SELECT:
-			// 	if (left_node->lnode != NULL && left_node->lnode->hdr.which == LEAF_T)
-			// 	{
-			// 		strncat(struct_name, ((leafnode *)left_node->lnode)->data.sval->str, strlen(((leafnode *)left_node->lnode)->data.sval->str));
-			// 		strncat(struct_name, &SUPPERATOR, 1);
-			// 	}
-			// break;
-			// case TN_INDEX:
-			// 	strncat(struct_name, ((leafnode *)left_node)->data.sval->str, strlen(((leafnode *)left_node)->data.sval->str));
-			// 	strncat(struct_name, &SUPPERATOR, 1);
-			// 	strncat(struct_name, "0_", 2);
-			// 	break;
-	// printf("STRUCT NAME IS: %s\n", struct_name);
-	// if (root->rnode != NULL && root->lnode != NULL &&
-	// 	root->rnode->hdr.which == LEAF_T && root->rnode->hdr.type == TN_IDENT &&
-	// 	root->lnode->hdr.which == NODE_T && root->lnode->hdr.type == TN_INDEX){
-	// 		strncat(struct_name, ((leafnode *)root->rnode)->data.sval->str, strlen(((leafnode *)root->rnode)->data.sval->str));
-	// 		strncat(struct_name, &SUPPERATOR, 1);
-	// 		code_recur(root->lnode);
-	// 		// it means that the rnode is your inner field, such as e_0!INNER!
-	// 		// it means left->left is your id, such as e_!
-	// }
-	// // else if (root->lnode != NULL && root->lnode->hdr.type == TN_IDENT &&
-	// // 		root->rnode != NULL && root->rn)
-	// else if (root->rnode->hdr.which == LEAF_T && root->lnode->hdr.which == LEAF_T)
-	// {
-	// 	printf("Before: %s\n", struct_name);
-	// 	strncat(struct_name, ((leafnode *)root->lnode)->data.sval->str, strlen(((leafnode *)root->lnode)->data.sval->str));
-	// 	strncat(struct_name, &SUPPERATOR, 1);
-	// 	strncat(struct_name, ((leafnode *)root->rnode)->data.sval->str, strlen(((leafnode *)root->rnode)->data.sval->str));
-	// 	strncat(struct_name, &SUPPERATOR, 1);
-	// 	printf("after: %s\n", struct_name);
-	// }
-	// else if (((leafnode *)root->rnode) != NULL &&
-	// 			(((leafnode *)root->rnode)->hdr.type == TN_IDENT ||
-	// 					((leafnode *)root->rnode)->hdr.type == TN_SELECT))
-	// {
-	// 	code_recur(root->lnode);
-	// 	printf("!!!!Before: %s\n", struct_name);
-	// 	strncat(struct_name, ((leafnode *)root->rnode)->data.sval->str, strlen(((leafnode *)root->rnode)->data.sval->str));
-	// 	strncat(struct_name, &SUPPERATOR, 1);
-	// 	printf("!!!!after: %s\n", struct_name);
-	// }
-
-	// else if (root->lnode != NULL && root->lnode->hdr.type == TN_SELECT){
-	// 	// printf("i dont know what to do son \n");
-	// 	code_recur(root->lnode);
-	// 	code_recur(root->rnode);
-	// }
-	// else
-	// {
-
-	// }
-
-	// code_recur(root->lnode);
-	// code_recur(root->rnode);
-	// else if (((leafnode *)root->rnode) != NULL && (((leafnode *)root->rnode)->hdr.type == TN_IDENT || ((leafnode *)root->rnode)->hdr.type != TN_INDEX))
-	// {
-	// 	// printf("!!!!Before: %s\n", struct_name);
-	// 	strncat(struct_name, ((leafnode *)root->rnode)->data.sval->str, strlen(((leafnode *)root->rnode)->data.sval->str));
-	// 	strncat(struct_name, &SUPPERATOR, 1);
-	// 	// printf("!!!!after: %s\n", struct_name);
-	// }
 }
 char array_ident[101] = "";
 /*
@@ -924,75 +854,76 @@ int code_recur(treenode *root)
 			break;
 
 		case TN_INDEX:
-			/* call for array - for HW2! */			
-			strcpy(array_ident, ((leafnode *)root->lnode)->data.sval->str);
-			strncat(array_ident, &SUPPERATOR, 1);
-			// printf("Looking for var with ID = %s\n", array_ident);
-			switch (get_variable_type_from_symbol_table(array_ident))
+			/* call for array - for HW2! */
+			if (root->lnode != NULL && root->lnode->hdr.which == LEAF_T && 
+				root->rnode != NULL && root->rnode->hdr.which == LEAF_T)
 			{
-			case TN_INT:
-			case TN_REAL:
-				printf("LDC %d\n", get_variable_from_table(array_ident));
+				strcpy(array_ident, ((leafnode *)root->lnode)->data.sval->str);
+				strncat(array_ident, &SUPPERATOR, 1);
+				// printf("Looking for var with ID = %s\n", array_ident);
+				switch (get_variable_type_from_symbol_table(array_ident))
+				{
+				case TN_INT:
+				case TN_REAL:
+					printf("LDC %d\n", get_variable_from_table(array_ident));
+					break;
+				case TN_DECL:
+					printf("LDC %d\n", get_variable_from_table(struct_name));
+					strcpy(struct_name, "");
+					break;
+				default:
+					printf("type name is: %s\n", ((leafnode *)root->lnode)->data.sval->str);
+					printf("UNHANDLED var type: %d\n", get_variable_type_from_symbol_table(((leafnode *)root->lnode)->data.sval->str));
+					break;
+				}
+				if (((leafnode *)root->rnode)->hdr.type == TN_IDENT)
+				{
+					printf("LDC %d\n", get_variable_from_table(((leafnode *)root->rnode)->data.sval->str));
+					printf("IND\n");
+				}
+				else if (((leafnode *)root->rnode)->hdr.type == TN_INT)
+				{
+					printf("LDC %d\n", ((leafnode *)root->rnode)->data.cval);
+				}
+				// printf("type is: %d\n", get_variable_type_from_symbol_table(((leafnode *)root->lnode)->data.sval->str));
+				switch (get_variable_type_from_symbol_table(array_ident))
+				{
+				case TN_INT:
+				case TN_REAL:
+					printf("IXA 1\n");
+					break;
+				case TN_DECL:
+					printf("IXA %d\n", get_variable_size(array_ident));
+					break;
+				default:
+					printf("type name is: %s\n", ((leafnode *)root->lnode)->data.sval->str);
+					printf("UNHANDLED var type: %d\n", get_variable_type_from_symbol_table(((leafnode *)root->lnode)->data.sval->str));
+					break;
+				}
+				// code_recur(root->lnode);
+				// code_recur(root->rnode);
+				strcpy(array_ident, "");
 				break;
-			case TN_DECL:
-				// printf("my size is: %d\n", get_variable_size(((leafnode *)root->lnode)->data.sval->str));
-				// strncat(struct_name, "0_", 2);
-				// strncat(struct_name, ((leafnode *)root->lnode)->data.sval->str, strlen(((leafnode *)root->lnode)->data.sval->str));
-				// reverse_string(struct_name);
-				// strncat(struct_name, &SUPPERATOR, 1);
-				// printf("STRUCT NAME IS: %s\n", struct_name);
-				printf("LDC %d\n", get_variable_from_table(struct_name));
-				// printf("struct name is: %s_0%s\n", ((leafnode *)root->lnode)->data.sval->str, struct_name);
-				// printf("IXA %d\n", get_variable_size(((leafnode *)root->lnode)->data.sval->str));
-				strcpy(struct_name, "");
-				break;
-			default:
-				printf("type name is: %s\n", ((leafnode *)root->lnode)->data.sval->str);
-				printf("UNHANDLED var type: %d\n", get_variable_type_from_symbol_table(((leafnode *)root->lnode)->data.sval->str));
-				break;
-			}
-			if (((leafnode *)root->rnode)->hdr.type == TN_IDENT)
-			{
-				printf("LDC %d\n", get_variable_from_table(((leafnode *)root->rnode)->data.sval->str));
-				printf("IND\n");
-			}
-			else if (((leafnode *)root->rnode)->hdr.type == TN_INT)
-			{
-				printf("LDC %d\n", ((leafnode *)root->rnode)->data.cval);
-			}
-			// printf("type is: %d\n", get_variable_type_from_symbol_table(((leafnode *)root->lnode)->data.sval->str));
-			switch (get_variable_type_from_symbol_table(array_ident))
-			{
-			case TN_INT:
-			case TN_REAL:
-				printf("IXA 1\n");
-				break;
-			case TN_DECL:
-				printf("IXA %d\n", get_variable_size(array_ident));
-				break;
-			default:
-				printf("type name is: %s\n", ((leafnode *)root->lnode)->data.sval->str);
-				printf("UNHANDLED var type: %d\n", get_variable_type_from_symbol_table(((leafnode *)root->lnode)->data.sval->str));
-				break;
-			}
-			// code_recur(root->lnode);
-			// code_recur(root->rnode);
-			strcpy(array_ident, "");
-			break;
 
-		case TN_DEREF:
-			/* pointer derefrence - for HW2! */
-			if (root->lnode != NULL)
-			{
-				code_recur(root->lnode);
+			case TN_DEREF:
+				/* pointer derefrence - for HW2! */
+				if (root->lnode != NULL)
+				{
+					code_recur(root->lnode);
+				}
+				if (root->rnode != NULL)
+				{
+					code_recur(root->rnode);
+					leaf = ((leafnode *)root->rnode);
+					printf("LDC %d\n", get_variable_from_table(leaf->data.sval->str));
+					printf("IND\n");
+				}
 			}
-			if (root->rnode != NULL)
+			else
 			{
-				code_recur(root->rnode);
-				leaf = ((leafnode *)root->rnode);
-				printf("LDC %d\n", get_variable_from_table(leaf->data.sval->str));
-				printf("IND\n");
+				printf("LETS THINK ABOUT IT\n");
 			}
+			
 			break;
 
 		case TN_SELECT:
@@ -1780,12 +1711,12 @@ void add_single_cell_to_array(char *id, char *typeAsString, tn_t typeAsEnum)
 
 void add_array_to_symbol_table(int size, char *typeAsString, tn_t typeAsEnum, char *identitfier)
 {
-	printf("about to init an array in size of: %d\n", size);
-	printf("array typeString: %s\n", typeAsString);
-	printf("array typeAsEnum: %d\n", typeAsEnum);
+	// printf("about to init an array in size of: %d\n", size);
+	// printf("array typeString: %s\n", typeAsString);
+	// printf("array typeAsEnum: %d\n", typeAsEnum);
 	strncat(identitfier, &SUPPERATOR, 1);
 
-	printf("array ID: %s\n", identitfier);
+	// printf("array ID: %s\n", identitfier);
 
 	char id[100] = "";
 	char snum[1000000];
@@ -1958,7 +1889,7 @@ void print_symbol_table(treenode *root)
 			}
 			else if (is_array_decleration(root))
 			{
-				printf("DEclaring an array!\n");
+				// printf("DEclaring an array!\n");
 				char identifier[500] = "";
 				leaf = (treenode *)left_node->lnode;
 				char typeAsString[50] = "";
@@ -2120,7 +2051,7 @@ void print_symbol_table(treenode *root)
 			break;
 		case TN_ARRAY_DECL:
 			/* array declaration - for HW2 */
-			printf("declearing an array \n");
+			// printf("declearing an array \n");
 			code_recur(root->lnode);
 			code_recur(root->rnode);
 			break;

@@ -213,7 +213,7 @@ tn_t get_variable_type_from_symbol_table(char *identifier)
 		curNode = curNode->next;
 	return (curNode != NULL) ? curNode->type : -1;
 }
-
+//banana
 void set_array_dimensions(char *identifier, char* demensionsArr)
 {
 	// printf("id is: %s\n", identifier);
@@ -257,7 +257,21 @@ void remove_variable_from_symbol_table(const char *name)
 {
 	// printf("BARAK PREFOREM REMOVE FROM YOUR SYMBOL LIST for this var: \n", name);
 }
-
+// int dim(char* str,int level)
+// {
+//     int i=level-1;
+//     int j=0;
+//     while(i!=0&&j<strlen(str))
+//     {
+//         if(str[j]=='!')
+//         {
+//             i--;
+//         }
+//         j++;
+//     }
+//     j++;
+//     return(itoa(str[j]));
+// }
 void reverse_string(char *str)
 {
 	int i, end_index;
@@ -313,7 +327,7 @@ int set_struct_name(treenode *root)
 	int should_continue_go_down = 1;
 	int index_depth = 0; // indicator for array index depth
 	int search_dpeth = 1;
-
+//banana
 	while (left_node != NULL && right_node != NULL &&
 		   should_continue_go_down)
 	{
@@ -396,9 +410,41 @@ int set_struct_name(treenode *root)
 	return index_depth;
 }
 char array_ident[101] = "";
+//banana
 
 void handling_array(treenode* root){
 	printf("HEREREE!\n");
+	// treenode* right_node = root->rnode;
+	// treenode* left_node = root->lnode;
+	char array_idnt[1000]="";
+	char array_indexes[1000]="";
+	char index[50]="";
+	char array_dim[1000]="";
+	treenode *tracker=root;
+	int depth_counter = 0;
+// level while
+	while(tracker!=NULL&&tracker->lnode!=NULL &&tracker->rnode!=NULL &&tracker->hdr.which != LEAF_T && tracker->rnode->hdr.which == LEAF_T ){
+		depth_counter++;
+		strcpy(index,"");
+		itoa(((leafnode *)tracker->rnode)->data.cval, index, 10);
+		strncat(array_indexes,&index, strlen(index));
+		strncat(array_indexes,&SUPPERATOR,1);
+		tracker=tracker->lnode;
+	}
+	reverse_by_chanks(array_indexes);
+	printf("the array indexs is: %s\n", array_indexes);
+	if(tracker!=NULL&&tracker->hdr.type==TN_IDENT)
+	{
+		strcpy(array_idnt,((leafnode*)tracker)->data.sval->str);
+		strncat(array_idnt,&SUPPERATOR,1);
+		printf("LDC %d\n",get_variable_from_table(array_idnt));
+		strcpy(array_dim, get_array_dimensions(array_idnt));
+		printf("the array dim are: %s\n",array_dim);
+
+	}
+	// printf("the level is: %d \n",depth_counter);()
+	// code_recur(root->rnode);
+
 	// printf("dims! %s\n", get_array_dimensions(fixedIdentifier));
 
 /* 

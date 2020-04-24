@@ -142,10 +142,10 @@ varPtr add_variable_to_symbol_table(char *identifier, tn_t type, varPtr list)
 	p->type = type;
 	p->size = 1;
 	strcpy(p->array_demensions, "");
-	// printf("===============\n");
-	// printf("Key is: %s\n", p->str);
-	// printf("ADDR: %d\n", p->address);
-	// printf("===============\n");
+	printf("===============\n");
+	printf("Key is: %s\n", p->str);
+	printf("ADDR: %d\n", p->address);
+	printf("===============\n");
 	if (list == NULL)
 	{ /* in the case if "p" is the first element in the list */
 		p->next = 0;
@@ -432,6 +432,18 @@ int get_n_dimension(char* array_dimensions, int expected_dimension){
 	return atoi(singleChankHolder);
 }
 
+int get_number_of_dimensions(char* array_dimensions){
+	int dimensions_counter = 0;
+	int index = 0;
+	while (index < strlen(array_dimensions)){
+		if (array_dimensions[index] == '!'){
+			dimensions_counter++;
+		}
+		index++;
+	}
+	return dimensions_counter;
+}
+
 void handling_array(treenode *root)
 {
 	// printf("HEREREE!\n");
@@ -455,8 +467,8 @@ void handling_array(treenode *root)
 				strncat(array_indexes, &SUPPERATOR, 1);
 			break;
 			case TN_IDENT:
-				// itoa(get_variable_from_table(((leafnode *)tracker->rnode)->data.sval->str), index, 10);
-				// strncat(array_indexes, &index, strlen(index));
+				itoa(get_variable_from_table(((leafnode *)tracker->rnode)->data.sval->str), index, 10);
+				strncat(array_indexes, &index, strlen(index));
 				strncat(array_indexes, &SUPPERATOR, 1);
 			break;
 			default:
@@ -467,7 +479,7 @@ void handling_array(treenode *root)
 		tracker = tracker->lnode;
 	}
 	// printf("array indexes: %s\n", array_indexes);
-	reverse_by_chanks(array_indexes);
+	// reverse_by_chanks(array_indexes);
 	if (tracker != NULL && tracker->hdr.type == TN_IDENT)
 	{
 		strcpy(array_idnt, ((leafnode *)tracker)->data.sval->str);
@@ -531,14 +543,15 @@ void handling_array(treenode *root)
 	{
 		int index = strlen(array_indexes) - 2;
 		char indexBetweenSupps[100] = "";
-		int counter = 0;
-		int copy_of_counter = 0;
-		int calculated_distance_from_array_beggining = 0;
 		int current_dimension_offset_counter = 1;
+		int dimCounter = 1;
+		int tempDimCounter = 1;
+		int numberOfDimensions = get_number_of_dimensions(array_dim);
 
 		// printf("NOT SUPPORTED YET in siz of: %d\n", depth_counter);
-		printf("array dim: %s\n", array_dim);
-		printf("array ids %s\n", array_indexes);
+		// printf("		number of dimensions is: %d\n", numberOfDimensions);
+		// printf("		array dim: %s\n", array_dim);
+		// printf("		array ids %s\n", array_indexes);
 	
 		while(index >= 0){
 			strcpy(indexBetweenSupps, "");
@@ -547,30 +560,36 @@ void handling_array(treenode *root)
 				strncat(indexBetweenSupps, &array_indexes[index], 1);
 				index -= 1;
 			}
-			
-			// printf("indexBetweenSupps is: %s\n", indexBetweenSupps);
-			current_dimension_offset_counter = atoi(indexBetweenSupps);
-			// printf("BEFORE WHILE:\n");
-			while(copy_of_counter > 0){
+			reverse_string(indexBetweenSupps);
+			printf("~!~!~!~!~LDC %s\n", indexBetweenSupps);
+			current_dimension_offset_counter = 1;
+			// printf("	BEFORE WHILE:\n");
+			while(dimCounter < numberOfDimensions){
 				// printf("~~start multiplying with dimensions, copy_of_counter is: %d\n", copy_of_counter);
 				// printf("~~calculated_distance_from_array_beggining = %d\n", current_dimension_offset_counter);
-				// printf("~~need to multiply by: %d\n", get_n_dimension(array_dim, copy_of_counter));
-				current_dimension_offset_counter *= get_n_dimension(array_dim, copy_of_counter);
-				printf("LDC %d\n", get_n_dimension(array_dim, copy_of_counter));
-				copy_of_counter -= 1;
-				// printf("LDC %s\n", indexBetweenSupps);
+				// printf("~~need to multiply by: %d\n", get_n_dimension(array_dim, dimCounter));
+				current_dimension_offset_counter *= get_n_dimension(array_dim, dimCounter);
+				dimCounter++;
 			}
-			// printf("calculated_distance_from_array_beggining = %d\n", current_dimension_offset_counter);
-			// printf("AFTER WHILE^^\n");
-			calculated_distance_from_array_beggining += current_dimension_offset_counter;
-			current_dimension_offset_counter = 1;
+			current_dimension_offset_counter *= get_variable_size(array_idnt);
+			printf("IXA %d\n", current_dimension_offset_counter);
+			// current_dimension_offset_counter *= get_variable_size(array_idnt);
+			// if (current_dimension_offset_counter != 0)
+			// {
+			// 	printf("LDC %d\n", atoi(indexBetweenSupps));
+			// 	printf("IXA %d\n", current_dimension_offset_counter);
+			// }
+			// // printf("calculated_distance_from_array_beggining = %d\n", current_dimension_offset_counter);
+			// printf("	AFTER WHILE^^\n");
+			// calculated_distance_from_array_beggining += current_dimension_offset_counter;
+			// current_dimension_offset_counter = 1;
 			index -= 1;
-			counter++;
-			copy_of_counter = counter;
+			tempDimCounter++;
+			dimCounter = tempDimCounter;
 		}
-		printf("LDC %d\n", calculated_distance_from_array_beggining);
-		printf("IXA %d\n", get_variable_size(array_idnt));
-		calculated_distance_from_array_beggining = 0;
+		// printf("LDC %d\n", calculated_distance_from_array_beggining);
+		// printf("IXA %d\n", get_variable_size(array_idnt));
+		// calculated_distance_from_array_beggining = 0;
 	}
 	
 }

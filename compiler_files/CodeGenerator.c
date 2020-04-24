@@ -214,7 +214,7 @@ tn_t get_variable_type_from_symbol_table(char *identifier)
 	return (curNode != NULL) ? curNode->type : -1;
 }
 //banana
-void set_array_dimensions(char *identifier, char* demensionsArr)
+void set_array_dimensions(char *identifier, char *demensionsArr)
 {
 	// printf("id is: %s\n", identifier);
 	varPtr curNode;
@@ -223,11 +223,11 @@ void set_array_dimensions(char *identifier, char* demensionsArr)
 	// Iterate till last element until key is not found
 	while (curNode != NULL && strcmp(curNode->str, identifier) != 0)
 		curNode = curNode->next;
-	if(curNode != NULL)
+	if (curNode != NULL)
 		strcpy(curNode->array_demensions, demensionsArr);
 }
 
-char* get_array_dimensions(char *identifier)
+char *get_array_dimensions(char *identifier)
 {
 	// printf("id is: %s\n", identifier);
 	varPtr curNode;
@@ -236,7 +236,7 @@ char* get_array_dimensions(char *identifier)
 	// Iterate till last element until key is not found
 	while (curNode != NULL && strcmp(curNode->str, identifier) != 0)
 		curNode = curNode->next;
-	if (curNode != NULL) 
+	if (curNode != NULL)
 		return curNode->array_demensions;
 	return NULL;
 }
@@ -288,27 +288,27 @@ void reverse_string(char *str)
 	return temp;
 }
 
-void reverse_by_chanks(char* str)
+void reverse_by_chanks(char *str)
 {
-    char singleChankHolder[100] = "";
-    char temp2[100] = "";
-    char reversedString[100] = "";
+	char singleChankHolder[100] = "";
+	char temp2[100] = "";
+	char reversedString[100] = "";
 
-    for (int i = 0; i < strlen(str); i++)
-    {
-        strcpy(singleChankHolder, "");
-        do
-        {
-            strncat(singleChankHolder, &str[i], 1);
-            i++;
+	for (int i = 0; i < strlen(str); i++)
+	{
+		strcpy(singleChankHolder, "");
+		do
+		{
+			strncat(singleChankHolder, &str[i], 1);
+			i++;
 
-        } while (str[i] != '!' && i < strlen(str));
-        strncat(singleChankHolder, &str[i], 1);
-        strcpy(temp2, reversedString);
-        strcpy(reversedString, singleChankHolder);
-        strncat(reversedString, temp2, strlen(temp2));
-    }
-    strcpy(str, reversedString);
+		} while (str[i] != '!' && i < strlen(str));
+		strncat(singleChankHolder, &str[i], 1);
+		strcpy(temp2, reversedString);
+		strcpy(reversedString, singleChankHolder);
+		strncat(reversedString, temp2, strlen(temp2));
+	}
+	strcpy(str, reversedString);
 }
 
 struct StructsMapper tbl = {{0}, NULL, NULL, foo_strhash, strcmp};
@@ -327,14 +327,14 @@ int set_struct_name(treenode *root)
 	int should_continue_go_down = 1;
 	int index_depth = 0; // indicator for array index depth
 	int search_dpeth = 1;
-//banana
+	//banana
 	while (left_node != NULL && right_node != NULL &&
 		   should_continue_go_down)
 	{
 		// printf("ROUNDS\n");
 		if (left_node->hdr.type == TN_INDEX)
 			index_depth = search_dpeth;
-		
+
 		if (left_node->hdr.which == LEAF_T && right_node->hdr.which == LEAF_T)
 		{
 			should_continue_go_down = 0;
@@ -344,7 +344,7 @@ int set_struct_name(treenode *root)
 			{
 
 			case TN_IDENT:
-			
+
 				// printf("struct name h2-B: %s\n", struct_name);
 				strncat(struct_name, ((leafnode *)left_node)->data.sval->str, strlen(((leafnode *)left_node)->data.sval->str));
 				strncat(struct_name, &SUPPERATOR, 1);
@@ -399,7 +399,7 @@ int set_struct_name(treenode *root)
 			left_node = left_node->lnode;
 		}
 
-		search_dpeth+=1;
+		search_dpeth += 1;
 	}
 
 	// printf("struct name is: %s\n", struct_name);
@@ -412,112 +412,167 @@ int set_struct_name(treenode *root)
 char array_ident[101] = "";
 //banana
 
-void handling_array(treenode* root){
-	printf("HEREREE!\n");
+int get_n_dimension(char* array_dimensions, int expected_dimension){
+	char singleChankHolder[100] = "";
+	char temp2[100] = "";
+	int dimension_counter = 0;
+
+	for (int i = strlen(array_dimensions) -2 ; i >= 0 && dimension_counter < expected_dimension; i--)
+	{
+		strcpy(singleChankHolder, "");
+		do
+		{
+			strncat(singleChankHolder, &array_dimensions[i], 1);
+			i--;
+		} while (array_dimensions[i] != '!' &&  i >= 0 && i < strlen(array_dimensions));
+		strncat(singleChankHolder, &array_dimensions[i], 1);
+		dimension_counter ++;
+	}
+	return atoi(singleChankHolder);
+}
+
+void handling_array(treenode *root)
+{
+	// printf("HEREREE!\n");
 	// treenode* right_node = root->rnode;
 	// treenode* left_node = root->lnode;
-	char array_idnt[1000]="";
-	char array_indexes[1000]="";
-	char index[50]="";
-	char array_dim[1000]="";
-	treenode *tracker=root;
+	char array_idnt[1000] = "";
+	char array_indexes[1000] = "";
+	char index[50] = "";
+	char array_dim[1000] = "";
+	treenode *tracker = root;
 	int depth_counter = 0;
-// level while
-	while(tracker!=NULL&&tracker->lnode!=NULL &&tracker->rnode!=NULL &&tracker->hdr.which != LEAF_T && tracker->rnode->hdr.which == LEAF_T ){
-		depth_counter++;
-		strcpy(index,"");
-		itoa(((leafnode *)tracker->rnode)->data.cval, index, 10);
-		strncat(array_indexes,&index, strlen(index));
-		strncat(array_indexes,&SUPPERATOR,1);
-		tracker=tracker->lnode;
-	}
-	reverse_by_chanks(array_indexes);
-	printf("the array indexs is: %s\n", array_indexes);
-	if(tracker!=NULL&&tracker->hdr.type==TN_IDENT)
+	// level while
+	while (tracker != NULL && tracker->lnode != NULL && tracker->rnode != NULL && tracker->hdr.which != LEAF_T && tracker->rnode->hdr.which == LEAF_T)
 	{
-		strcpy(array_idnt,((leafnode*)tracker)->data.sval->str);
-		strncat(array_idnt,&SUPPERATOR,1);
-		printf("LDC %d\n",get_variable_from_table(array_idnt));
-		strcpy(array_dim, get_array_dimensions(array_idnt));
-		printf("the array dim are: %s\n",array_dim);
-
+		depth_counter++;
+		strcpy(index, "");
+		switch(((leafnode *)tracker->rnode)->hdr.type){
+			case TN_INT:
+				itoa(((leafnode *)tracker->rnode)->data.cval, index, 10);
+				strncat(array_indexes, &index, strlen(index));
+				strncat(array_indexes, &SUPPERATOR, 1);
+			break;
+			case TN_IDENT:
+				// itoa(get_variable_from_table(((leafnode *)tracker->rnode)->data.sval->str), index, 10);
+				// strncat(array_indexes, &index, strlen(index));
+				strncat(array_indexes, &SUPPERATOR, 1);
+			break;
+			default:
+				printf("Unhandled inner [] type. type is: %d\n", ((leafnode *)tracker->rnode)->hdr.type);
+			break;
+		}
+		
+		tracker = tracker->lnode;
 	}
-	// printf("the level is: %d \n",depth_counter);()
-	// code_recur(root->rnode);
-
-	// printf("dims! %s\n", get_array_dimensions(fixedIdentifier));
-
-/* 
-			if (root->lnode != NULL && root->lnode->hdr.which == LEAF_T && 
-				root->rnode != NULL && root->rnode->hdr.which == LEAF_T)
+	// printf("array indexes: %s\n", array_indexes);
+	reverse_by_chanks(array_indexes);
+	if (tracker != NULL && tracker->hdr.type == TN_IDENT)
+	{
+		strcpy(array_idnt, ((leafnode *)tracker)->data.sval->str);
+		strncat(array_idnt, &SUPPERATOR, 1);
+		printf("LDC %d\n", get_variable_from_table(array_idnt));
+		strcpy(array_dim, get_array_dimensions(array_idnt));
+		printf("the array dim are: %s\n", array_dim);
+	}
+	if (depth_counter == 1)
+	{
+		// set_struct_name(root);
+		// printf("struct name is: %s\n", struct_name);
+		if (root->lnode != NULL && root->lnode->hdr.which == LEAF_T &&
+			root->rnode != NULL && root->rnode->hdr.which == LEAF_T)
+		{
+			strcpy(array_ident, ((leafnode *)root->lnode)->data.sval->str);
+			strncat(array_ident, &SUPPERATOR, 1);
+			// printf("Looking for var with ID = %s\n", array_ident);
+			switch (get_variable_type_from_symbol_table(array_ident))
 			{
-				strcpy(array_ident, ((leafnode *)root->lnode)->data.sval->str);
-				strncat(array_ident, &SUPPERATOR, 1);
-				// printf("Looking for var with ID = %s\n", array_ident);
-				switch (get_variable_type_from_symbol_table(array_ident))
-				{
-				case TN_INT:
-				case TN_REAL:
-					printf("LDC %d\n", get_variable_from_table(array_ident));
-					break;
-				case TN_DECL:
-					printf("LDC %d\n", get_variable_from_table(struct_name));
-					strcpy(struct_name, "");
-					break;
-				default:
-					printf("type name is: %s\n", ((leafnode *)root->lnode)->data.sval->str);
-					printf("UNHANDLED var type: %d\n", get_variable_type_from_symbol_table(((leafnode *)root->lnode)->data.sval->str));
-					break;
-				}
-				if (((leafnode *)root->rnode)->hdr.type == TN_IDENT)
-				{
-					printf("LDC %d\n", get_variable_from_table(((leafnode *)root->rnode)->data.sval->str));
-					printf("IND\n");
-				}
-				else if (((leafnode *)root->rnode)->hdr.type == TN_INT)
-				{
-					printf("LDC %d\n", ((leafnode *)root->rnode)->data.cval);
-				}
-				// printf("type is: %d\n", get_variable_type_from_symbol_table(((leafnode *)root->lnode)->data.sval->str));
-				switch (get_variable_type_from_symbol_table(array_ident))
-				{
-				case TN_INT:
-				case TN_REAL:
-					printf("IXA 1\n");
-					break;
-				case TN_DECL:
-					printf("IXA %d\n", get_variable_size(array_ident));
-					break;
-				default:
-					printf("type name is: %s\n", ((leafnode *)root->lnode)->data.sval->str);
-					printf("UNHANDLED var type: %d\n", get_variable_type_from_symbol_table(((leafnode *)root->lnode)->data.sval->str));
-					break;
-				}
-				// code_recur(root->lnode);
-				// code_recur(root->rnode);
-				strcpy(array_ident, "");
+			case TN_INT:
+			case TN_REAL:
+				printf("LDC %d\n", get_variable_from_table(array_ident));
 				break;
+			case TN_DECL:
+				printf("LDC %d\n", get_variable_from_table(struct_name));
+				strcpy(struct_name, "");
+				break;
+			default:
+				printf("type name is: %s\n", ((leafnode *)root->lnode)->data.sval->str);
+				printf("UNHANDLED var type: %d\n", get_variable_type_from_symbol_table(((leafnode *)root->lnode)->data.sval->str));
+				break;
+			}
+			if (((leafnode *)root->rnode)->hdr.type == TN_IDENT)
+			{
+				printf("LDC %d\n", get_variable_from_table(((leafnode *)root->rnode)->data.sval->str));
+				printf("IND\n");
+			}
+			else if (((leafnode *)root->rnode)->hdr.type == TN_INT)
+			{
+				printf("LDC %d\n", ((leafnode *)root->rnode)->data.cval);
+			}
+			// printf("type is: %d\n", get_variable_type_from_symbol_table(((leafnode *)root->lnode)->data.sval->str));
+			switch (get_variable_type_from_symbol_table(array_ident))
+			{
+			case TN_INT:
+			case TN_REAL:
+				printf("IXA 1\n");
+				break;
+			case TN_DECL:
+				printf("IXA %d\n", get_variable_size(array_ident));
+				break;
+			default:
+				printf("type name is: %s\n", ((leafnode *)root->lnode)->data.sval->str);
+				printf("UNHANDLED var type: %d\n", get_variable_type_from_symbol_table(((leafnode *)root->lnode)->data.sval->str));
+				break;
+			}
+			strcpy(array_ident, "");
+		}
+	}
+	else
+	{
+		int index = strlen(array_indexes) - 2;
+		char indexBetweenSupps[100] = "";
+		int counter = 0;
+		int copy_of_counter = 0;
+		int calculated_distance_from_array_beggining = 0;
+		int current_dimension_offset_counter = 1;
 
-			case TN_DEREF:
-				/* pointer derefrence - for HW2! */
-			// 	if (root->lnode != NULL)
-			// 	{
-			// 		code_recur(root->lnode);
-			// 	}
-			// 	if (root->rnode != NULL)
-			// 	{
-			// 		code_recur(root->rnode);
-			// 		leaf = ((leafnode *)root->rnode);
-			// 		printf("LDC %d\n", get_variable_from_table(leaf->data.sval->str));
-			// 		printf("IND\n");
-			// 	}
-			// }
-			// else
-			// {
-			// 	printf("LETS THINK ABOUT IT\n");
-			// }
+		// printf("NOT SUPPORTED YET in siz of: %d\n", depth_counter);
+		printf("array dim: %s\n", array_dim);
+		printf("array ids %s\n", array_indexes);
+	
+		while(index >= 0){
+			strcpy(indexBetweenSupps, "");
+			while (index >= 0 && array_indexes[index] != '!')
+			{
+				strncat(indexBetweenSupps, &array_indexes[index], 1);
+				index -= 1;
+			}
 			
-
+			// printf("indexBetweenSupps is: %s\n", indexBetweenSupps);
+			current_dimension_offset_counter = atoi(indexBetweenSupps);
+			// printf("BEFORE WHILE:\n");
+			while(copy_of_counter > 0){
+				// printf("~~start multiplying with dimensions, copy_of_counter is: %d\n", copy_of_counter);
+				// printf("~~calculated_distance_from_array_beggining = %d\n", current_dimension_offset_counter);
+				// printf("~~need to multiply by: %d\n", get_n_dimension(array_dim, copy_of_counter));
+				current_dimension_offset_counter *= get_n_dimension(array_dim, copy_of_counter);
+				printf("LDC %d\n", get_n_dimension(array_dim, copy_of_counter));
+				copy_of_counter -= 1;
+				// printf("LDC %s\n", indexBetweenSupps);
+			}
+			// printf("calculated_distance_from_array_beggining = %d\n", current_dimension_offset_counter);
+			// printf("AFTER WHILE^^\n");
+			calculated_distance_from_array_beggining += current_dimension_offset_counter;
+			current_dimension_offset_counter = 1;
+			index -= 1;
+			counter++;
+			copy_of_counter = counter;
+		}
+		printf("LDC %d\n", calculated_distance_from_array_beggining);
+		printf("IXA %d\n", get_variable_size(array_idnt));
+		calculated_distance_from_array_beggining = 0;
+	}
+	
 }
 /*
 *	This recursive function is the main method for Code Generation
@@ -712,7 +767,7 @@ int code_recur(treenode *root)
 				printf("LDC %d\n", get_variable_from_table(leaf->data.sval->str));
 				printf("IND\n");
 			}
-		break;
+			break;
 		case TN_PARBLOCK:
 			/* Maybe you will use it later */
 			code_recur(root->lnode);
@@ -1022,7 +1077,7 @@ int code_recur(treenode *root)
 
 		case TN_INDEX:
 			/* call for array - for HW2! */
-			printf("AAA\n");
+			// printf("AAA\n");
 			handling_array(root);
 			break;
 
@@ -1041,13 +1096,15 @@ int code_recur(treenode *root)
 				/* e.g. struct_variable.x; */
 				strcpy(struct_name, "");
 				int res = set_struct_name(root);
-				if (res != 0){
+				if (res != 0)
+				{
 					// printf("tn array is in depth: %d\n", res);
 					left_node = root->lnode;
 					res -= 1;
-					while (left_node != NULL && res > 0) {
+					while (left_node != NULL && res > 0)
+					{
 						left_node = left_node->lnode;
-						res-=1;
+						res -= 1;
 					}
 					// printf("res is: %d\n", res);
 					code_recur(left_node);
@@ -1056,7 +1113,6 @@ int code_recur(treenode *root)
 					// 	code_recur(root->lnode);
 					// else
 					// 	printf("res is: %d\n", res);
-
 				}
 			}
 			break;
@@ -1106,7 +1162,7 @@ int code_recur(treenode *root)
 					code_recur(root->lnode);
 					// printf("struct name isa: %s\n", struct_name);
 					if (root->lnode != NULL && root->lnode->hdr.type == TN_SELECT)
-						// root->lnode->lnode != NULL && root->lnode->lnode->hdr.type != TN_INDEX)
+					// root->lnode->lnode != NULL && root->lnode->lnode->hdr.type != TN_INDEX)
 					{
 						if (get_variable_from_table(struct_name) != -1)
 						{
@@ -1809,17 +1865,19 @@ void add_single_cell_to_array(char *id, char *typeAsString, tn_t typeAsEnum)
 	// strcpy(id, "");
 }
 
-void add_array_to_symbol_table(int size, char *typeAsString, tn_t typeAsEnum, char *identitfier, char* dimensionsArray)
+void add_array_to_symbol_table(int size, char *typeAsString, tn_t typeAsEnum, char *identitfier, char *dimensionsArray)
 {
 	char snum[1000];
 	int i = 0;
 	char temp[1000];
 	char fixedIdentifier[1000] = "";
 	int complex_type_size = 0;
-	
+
 	strcpy(fixedIdentifier, identitfier);
 	strncat(fixedIdentifier, &SUPPERATOR, 1);
 
+	// printf("received id is: %s\n", identitfier);
+	// printf("fixed id is:! %s\n", fixedIdentifier);
 	// printf("about to init an array in size of: %d\n", size);
 	// printf("array typeString: %s\n", typeAsString);
 	// printf("array typeAsEnum: %d\n", typeAsEnum);
@@ -1850,6 +1908,7 @@ void add_array_to_symbol_table(int size, char *typeAsString, tn_t typeAsEnum, ch
 	{
 		strcpy(fixedIdentifier, "");
 		strcpy(fixedIdentifier, identitfier);
+		strncat(fixedIdentifier, &SUPPERATOR, 1);
 		strncat(fixedIdentifier, "_", 1);
 		itoa(i, snum, 10);
 		strncat(fixedIdentifier, snum, 1000);
@@ -2023,8 +2082,6 @@ void print_symbol_table(treenode *root)
 					break;
 				}
 
-
-				
 				if (right_node->lnode != NULL)
 				{
 					left_node = right_node;

@@ -425,9 +425,10 @@ int get_n_dimension(char* array_dimensions, int expected_dimension){
 			strncat(singleChankHolder, &array_dimensions[i], 1);
 			i--;
 		} while (array_dimensions[i] != '!' &&  i >= 0 && i < strlen(array_dimensions));
-		strncat(singleChankHolder, &array_dimensions[i], 1);
+		// strncat(singleChankHolder, &array_dimensions[i], 1);
 		dimension_counter ++;
 	}
+	reverse_string(singleChankHolder);
 	return atoi(singleChankHolder);
 }
 
@@ -473,7 +474,6 @@ void handling_array(treenode *root)
 		strncat(array_idnt, &SUPPERATOR, 1);
 		printf("LDC %d\n", get_variable_from_table(array_idnt));
 		strcpy(array_dim, get_array_dimensions(array_idnt));
-		printf("the array dim are: %s\n", array_dim);
 	}
 	if (depth_counter == 1)
 	{

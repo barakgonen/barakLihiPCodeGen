@@ -34,28 +34,22 @@ void main() {
 	int b[10];  			// start: 6 --> end  16
 	double c[10]; 			// start: 17 --> end 28
 	float d[15]; 			// start: 29 --> end 41
-	int j = 8;
 	struct BaseFour e[31]; // start: 42 --> end 414
     struct BaseFour bS;
-
+	int j = 8;
     int aV = 6;
     double dV = 4.4;
     float cV = 5.5;
 	// pointer/
-	// int a[4][6];
-	// int three[4][5][6];
-	// int fourD[6][7][8][9];
-	// int fourD[3][4][5][6];
-	// int fourD[5][4][13][4];
+	 int a[4][6];
+	 int fourD[5][4][13][4];
 
 	// int four[1][1][1][1][1][1][1][1][1][1][2][2][2][2][2][2][2][2][2][2];
-//	 int indexA;
-//	 int indexB;
-//	 int indexC;
-//	 int indexD;
+	 int indexA;
+	 int indexB;
+	 int indexC;
+	 int indexD;
 
-
-	// // int j;
 	// // // int* aa;
 	// // // int** aa;
 	// // // int*** aaa;
@@ -214,73 +208,72 @@ void main() {
 	 	printf("%f\n", e[i].G.ssss.uuuuu.eeee);
 	 }
 
-	// fourD[2][2][0][8] = 20;
-	// printf("%d\n", fourD[2][2][0][8]);
-	// fourD[1][3][4][5] = 999;	
-	// printf("%d\n", fourD[1][3][4][5]);
+	 fourD[2][2][0][8] = 20;
+	 printf("%d\n", fourD[2][2][0][8]);
+	 fourD[1][3][4][5] = 999;
+	 printf("%d\n", fourD[1][3][4][5]);
 
-	// indexA = 7;
-	// indexB = 3;
-	// indexC = 5;
-	// indexD = 4;
-	// fourD[4][5][6][7] = indexA + indexB + indexC + indexD;
-	// printf("%d\n", fourD[4][5][6][7]);
+	 indexA = 7;
+	 indexB = 3;
+	 indexC = 5;
+	 indexD = 4;
+	 fourD[4][5][6][7] = indexA + indexB + indexC + indexD;
+	 printf("%d\n", fourD[4][5][6][7]);
 
-	// indexA = 3;
-	// indexB = 2;
-	// indexC = 8;
-	// indexD = 2;
-	// fourD[indexA][indexB][indexC][indexD] = 2;
-	// printf("%d\n", fourD[3][2][8][2]);
-	// printf("%d\n", fourD[indexA][indexB][indexC][indexD]);
-	// fourD[indexA][indexB][indexC][indexD] = indexA + indexB + indexC + indexD;
+	 indexA = 3;
+	 indexB = 2;
+	 indexC = 8;
+	 indexD = 2;
+	 fourD[indexA][indexB][indexC][indexD] = 2;
+	 printf("%d\n", fourD[3][2][8][2]);
+	 printf("%d\n", fourD[indexA][indexB][indexC][indexD]);
+	 fourD[indexA][indexB][indexC][indexD] = indexA + indexB + indexC + indexD;
 
-	// for (indexA = 0; indexA < 5; indexA++){
-	// 	for(indexB = 0; indexB < 4; indexB++){
-	// 		for(indexC = 0; indexC < 13; indexC++){
-	// 			for(indexD = 0; indexD < 4; indexD++){
-	// 				fourD[indexA][indexB][indexC][indexD] = (indexA + indexB + indexC + indexD);
-	// 			}
-	// 		}
-	// 	}
-	// }
+	 for (indexA = 0; indexA < 5; indexA++){
+	 	for(indexB = 0; indexB < 4; indexB++){
+	 		for(indexC = 0; indexC < 13; indexC++){
+	 			for(indexD = 0; indexD < 4; indexD++){
+	 				fourD[indexA][indexB][indexC][indexD] = (indexA + indexB + indexC + indexD);
+	 			}
+	 		}
+	 	}
+	 }
 
-	// for (indexA = 0; indexA < 5; indexA++){
-	// 	for(indexB = 0; indexB < 4; indexB++){
-	// 		for(indexC = 0; indexC < 13; indexC++){
-	// 			for(indexD = 0; indexD < 4; indexD++){
-	// 				printf("%d\n", fourD[indexA][indexB][indexC][indexD]);
-	// 			}
-	// 		}
-	// 	}
-	// }
-	// a[3][2] = 12;
-	// printf("%d\n", a[8][7]);
-	
-	// for (i = 0; i < 10; i++){
-	// 	printf("%d\n", b[i]);
-	// }
-	// b[7] = 2;
-	// for (i = 0; i < 10; i++){
-	// 	printf("%d\n", b[i]);
-	// }
-	// a[8][7] = 9090;
-	// printf("%d\n", a[8][7]);
+	 for (indexA = 0; indexA < 5; indexA++){
+	 	for(indexB = 0; indexB < 4; indexB++){
+	 		for(indexC = 0; indexC < 13; indexC++){
+	 			for(indexD = 0; indexD < 4; indexD++){
+	 				printf("%d\n", fourD[indexA][indexB][indexC][indexD]);
+	 			}
+	 		}
+	 	}
+	 }
+	 a[3][2] = 12;
+	 printf("%d\n", a[8][7]);
 
-	// for (i =0; i < 15; i++){
-	// 	for (j = 0; j < 15; j++){
-	// 		a[i][j]=i + j;
-	// 	}
-	// }
+	 for (i = 0; i < 10; i++){
+	 	printf("%d\n", b[i]);
+	 }
+	 b[7] = 2;
+	 for (i = 0; i < 10; i++){
+	 	printf("%d\n", b[i]);
+	 }
+	 a[8][7] = 9090;
+	 printf("%d\n", a[8][7]);
 
-	// for (i =0; i < 15; i++){
-	// 	for (j = 0; j < 15; j++){
-	// 		printf("%d\n", a[i][j]);
-	// 	}
-	// }
-	// // a[5][2] = 3;
-	// // c[1][2][3] = 4;
+	 for (i =0; i < 15; i++){
+	 	for (j = 0; j < 15; j++){
+	 		a[i][j]=i + j;
+	 	}
+	 }
 
-	// // printf("%d\n",a[5][2]);
+	 for (i =0; i < 15; i++){
+	 	for (j = 0; j < 15; j++){
+	 		printf("%d\n", a[i][j]);
+	 	}
+	 }
+	  a[5][2] = 3;
+	  printf("%d\n",a[5][2]);
+
 	return;
 }

@@ -200,20 +200,6 @@ void set_array_dimensions(char *identifier, char *demensionsArr)
 		strcpy(curNode->array_demensions, demensionsArr);
 }
 
-char *get_array_dimensions(char *identifier)
-{
-	// printf("id is: %s\n", identifier);
-	varPtr curNode;
-	curNode = symbolTalble->vars;
-
-	// Iterate till last element until key is not found
-	while (curNode != NULL && strcmp(curNode->str, identifier) != 0)
-		curNode = curNode->next;
-	if (curNode != NULL)
-		return curNode->array_demensions;
-	return NULL;
-}
-
 void update_pointer_target(char *srcIdentifier, int targetAddress)
 {
 	varPtr curNode;
@@ -439,8 +425,8 @@ char* get_array_identifier(treenode* root)
            tracker->lnode != NULL &&
            tracker->rnode != NULL &&
            tracker->hdr.which != LEAF_T &&
-           tracker->lnode->hdr.type == TN_IDENT &&
-           tracker->lnode ->hdr.which == LEAF_T)
+           ((tracker->lnode->hdr.type == TN_IDENT && tracker->lnode ->hdr.which == LEAF_T) ||
+           (tracker->rnode->hdr.which == LEAF_T && tracker->lnode->hdr.type == TN_INDEX)))
 //           (tracker->rnode->hdr.which == LEAF_T || tracker->rnode->hdr.type == TN_EXPR))
         tracker = tracker->lnode;
 
@@ -449,7 +435,52 @@ char* get_array_identifier(treenode* root)
         strcpy(array_idnt, ((leafnode *)tracker)->data.sval->str);
         strncat(array_idnt, &SUPPERATOR, 1);
     }
-    char* bla = array_idnt;
+    reverse_by_chanks(array_idnt);
+    char* blaaa = array_idnt;
+    return blaaa;
+}
+
+char *get_array_dimensions(treenode* root)
+{
+    // printf("id is: %s\n", identifier);
+    varPtr curNode;
+    curNode = symbolTalble->vars;
+
+    // Iterate till last element until key is not found
+    while (curNode != NULL && strcmp(curNode->str, get_array_identifier(root)) != 0)
+        curNode = curNode->next;
+    if (curNode != NULL)
+        return curNode->array_demensions;
+    return NULL;
+}
+
+char* get_array_indexes(treenode* root) {
+    treenode *tracker = root;
+    char array_indexes[500] = "";
+    char indexStringBuffer[50] = "";
+    while (tracker != NULL &&
+           tracker->lnode != NULL &&
+           tracker->rnode != NULL &&
+           tracker->hdr.which != LEAF_T && tracker->rnode->hdr.which == LEAF_T)
+    {
+        strcpy(indexStringBuffer, "");
+        switch(((leafnode *)tracker->rnode)->hdr.type){
+            case TN_INT:
+                itoa(((leafnode *)tracker->rnode)->data.cval, indexStringBuffer, 10);
+            break;
+            case TN_IDENT:
+                itoa(get_variable_from_table(((leafnode *)tracker->rnode)->data.sval->str), indexStringBuffer, 10);
+            break;
+            default:
+                printf("Unhandled inner [] type. type is: %d\n", ((leafnode *)tracker->rnode)->hdr.type);
+            break;
+        }
+        strncat(array_indexes, &indexStringBuffer, strlen(indexStringBuffer));
+        strncat(array_indexes, &SUPPERATOR, 1);
+
+        tracker = tracker->lnode;
+    }
+    char* bla = array_indexes;
     return bla;
 }
 
@@ -1069,14 +1100,28 @@ int code_recur(treenode *root) {
                     /* call for array - for HW2! */
 //                    set_array_identifier(root);
                     set_node_dimension(root);
+                    char* array_indexes = get_array_indexes(root);
+                    char* array_identifier = get_array_identifier(root);
+                    char* array_dimensions = get_array_dimensions(root);
+                    int array_size = get_number_of_dimensions(get_array_indexes(root));
+                    int current_dimension = get_number_of_dimensions(get_array_dimensions(root));
                     // printf("current dimension is: %d\n", current_dimension);
 
-                    if (current_dimension == 1) {
+
+//                    if (current_dimension == 1) {
 //                        set_struct_name(root);
                         // this flag must be on, in order to print LDC and arrays identifier address without ind
                         code_recur(root->lnode);
                         strcpy(struct_name, "");
-                        code_recur(root->rnode);
+//                        code_recur(root->rnode);
+                        int ixaValue = get_variable_size(get_array_identifier(root));
+
+                        // prepares data for single cell generation
+                        int index;
+                        for (index = array_size; index < current_dimension; index++){
+                            ixaValue *= get_n_dimension(get_array_dimensions(root), index);
+                        }
+
                         // In case right node is an array, we have to print it's value and not just the address,
                         // that's why we use IND here, for example a[a[2]]
                         if (root->rnode != NULL && root->rnode->hdr.type == TN_INDEX){
@@ -1086,12 +1131,13 @@ int code_recur(treenode *root) {
                         // when i = 7, means we want a[7]
                         if (root->rnode != NULL && root->rnode->hdr.type == TN_IDENT)
                             printf("IND\n");
-                        char* array_identifier = get_array_identifier(root);
 //                        printf("Array identifier is: %s\n", array_identifier);
                         if ((root->lnode != NULL && root->lnode->hdr.type == TN_IDENT) ||
-                                (root->lnode != NULL && root->lnode->hdr.which == LEAF_T &&
+                                (root->lnode != NULL &&
+                                //root->lnode->hdr.which == LEAF_T &&
                                 root->rnode != NULL && root->rnode->hdr.which == LEAF_T))
-                            printf("IXA %d\n", get_variable_size(array_identifier));
+                            printf("IXA %d\n", ixaValue);
+
                         //                        else if (should_print_ind == 1 && root->rnode != NULL && root->rnode->hdr.type == TN_IDENT)
 //                            printf("IND\n");
                         // Set from else if to just an if because we had to print IND in the end of the statment
@@ -1156,7 +1202,7 @@ int code_recur(treenode *root) {
 //                                                   ((leafnode *) root->lnode)->data.sval->str));
 //                                    break;
 //                            }
-                        }
+//                        }
 //                            strcpy(array_identifier, "");
                         break;
 

@@ -1,0 +1,3 @@
+C:/Users/barak/Documents/HaifaUniversity/Compilers/barakLihiPCodeGen/cmake-build-debug/CMakeFiles/compiler.dir
+C:/Users/barak/Documents/HaifaUniversity/Compilers/barakLihiPCodeGen/cmake-build-debug/CMakeFiles/edit_cache.dir
+C:/Users/barak/Documents/HaifaUniversity/Compilers/barakLihiPCodeGen/cmake-build-debug/CMakeFiles/rebuild_cache.dir

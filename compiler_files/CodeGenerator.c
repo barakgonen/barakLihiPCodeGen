@@ -38,11 +38,11 @@ structObjectPtr add_struct_to_structs_mapping(structObjectPtr list, char *key, c
     strcpy(p->key, key);
     strcpy(p->value, value);
     p->size = 1;
-    printf("===============\n");
-    printf("Struct definition Key is: %s\n", p->key);
-    printf("Struct definition value is: %s\n", p->value);
-    printf("Struct definition size is: %d\n", p->size);
-    printf("===============\n");
+//    printf("===============\n");
+//    printf("Struct definition Key is: %s\n", p->key);
+//    printf("Struct definition value is: %s\n", p->value);
+//    printf("Struct definition size is: %d\n", p->size);
+//    printf("===============\n");
     if (list == NULL)
     { /* in the case if "p" is the first element in the list */
         p->next = 0;
@@ -115,10 +115,10 @@ varPtr add_variable_to_symbol_table(char *identifier, tn_t type, varPtr list)
 	p->type = type;
 	p->size = 1;
 	strcpy(p->array_demensions, "");
-	printf("===============\n");
-	printf("Key is: %s\n", p->str);
-	printf("ADDR: %d\n", p->address);
-	printf("===============\n");
+//	printf("===============\n");
+//	printf("Key is: %s\n", p->str);
+//	printf("ADDR: %d\n", p->address);
+//	printf("===============\n");
 	if (list == NULL)
 	{ /* in the case if "p" is the first element in the list */
 		p->next = 0;
@@ -1113,7 +1113,7 @@ int code_recur(treenode *root) {
                         // this flag must be on, in order to print LDC and arrays identifier address without ind
                         code_recur(root->lnode);
                         strcpy(struct_name, "");
-//                        code_recur(root->rnode);
+                        code_recur(root->rnode);
                         int ixaValue = get_variable_size(get_array_identifier(root));
 
                         // prepares data for single cell generation

@@ -27,7 +27,7 @@ void main() {
     switch (55) {
         case 1:
 		{
-			printf("%d\n", 0); 
+			printf("%d\n", 0);
 			break;
 		}
 
@@ -38,8 +38,8 @@ void main() {
 
 		case -8:
 		{
-			printf("%d\n", 1); 
-			printf("%d\n", 2); 
+			printf("%d\n", 1);
+			printf("%d\n", 2);
 			break;
 		}
 
@@ -47,11 +47,11 @@ void main() {
 
     i = (5*6)+0;
     i *= -1;
-    printf("%d\n", i); 
+    printf("%d\n", i);
     b = 1;
     b = !b;
     b = b || (i < 0);
-    printf("%d\n", b); 
+    printf("%d\n", b);
 
 	return;
 }

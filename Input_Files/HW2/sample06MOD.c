@@ -2,7 +2,7 @@
 
 struct B{
 	int c;
-	struct B* d;
+	struct B** d;
 	float* e;
 };
 

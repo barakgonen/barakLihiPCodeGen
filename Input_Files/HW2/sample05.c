@@ -2,7 +2,7 @@
 
 void main() {
     int a[1];
-    int* b; //
+    int* b;
     int** c;
     int*** d;
 
@@ -11,6 +11,6 @@ void main() {
     d = 7;
 
     a[0] = 8;
-//    printf("%d\n",(***d)[0]);
-//    return;
+    printf("%d\n",(***d)[0]);
+    return;
 }

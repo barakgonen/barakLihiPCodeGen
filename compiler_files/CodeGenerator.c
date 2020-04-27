@@ -11,6 +11,7 @@ typedef struct arrayObject
     char key[500];
     int cellSize;
     int numberOfDimensions;
+    char demensionsArr[500];
     arrayObjectPtr next;
     arrayObjectPtr prev;
 } ArrayObject;
@@ -23,7 +24,7 @@ typedef struct arrays_symbol_table
 
 ArraysSymbolTable *arraysSymbolTable = NULL;
 
-arrayObjectPtr add_array_to_arrays_mapping(arrayObjectPtr list, char *key, int cellSize)
+arrayObjectPtr add_array_to_arrays_mapping(arrayObjectPtr list, char *key, int cellSize, char *demensionsArr, int numberOfDimensions)
 {
     arrayObjectPtr p, q;
     arraysSymbolTable->arraysCounter += 1;
@@ -37,6 +38,8 @@ arrayObjectPtr add_array_to_arrays_mapping(arrayObjectPtr list, char *key, int c
 
     strcpy(p->key, key);
     p->cellSize = cellSize;
+    strcpy(p->demensionsArr, demensionsArr);
+    p->numberOfDimensions = numberOfDimensions;
 //    printf("===============\n");
 //    printf("Array definition Key is: %s\n", p->key);
 //    printf("Array cell size is: %s\n", p->value);
@@ -71,17 +74,6 @@ int get_arrays_cell_size(char* array_identifier){
     return (curNode != NULL) ? curNode->cellSize : -1;
 }
 
-void set_number_of_dimensions_for_array(char* identifier, int numberOfDimensions){
-    arrayObjectPtr curNode;
-    curNode = arraysSymbolTable->arrays;
-
-    // Iterate till last element until key is not found
-    while (curNode != NULL && strcmp(curNode->key, identifier) != 0)
-        curNode = curNode->next;
-    if (curNode != NULL)
-        curNode->numberOfDimensions = numberOfDimensions;
-}
-
 int get_number_of_dimensions_for_array(char* identifier){
     arrayObjectPtr curNode;
     curNode = arraysSymbolTable->arrays;
@@ -92,6 +84,19 @@ int get_number_of_dimensions_for_array(char* identifier){
     if (curNode != NULL)
         return curNode->numberOfDimensions;
     return -1;
+}
+
+char *get_array_dimensions(char* identifier)
+{
+    arrayObjectPtr curNode;
+    curNode = arraysSymbolTable->arrays;
+
+    // Iterate till last element until key is not found
+    while (curNode != NULL && strcmp(curNode->key, identifier) != 0)
+        curNode = curNode->next;
+    if (curNode != NULL)
+        return &curNode->demensionsArr;
+    return NULL;
 }
 
 typedef struct structObject *structObjectPtr;
@@ -170,7 +175,6 @@ typedef struct variable
 	int address;
 	char str[100];
 	char typeAsString[100];
-	char array_demensions[1000];
 	tn_t type;
 	varPtr prev;
 	varPtr next;
@@ -203,7 +207,6 @@ varPtr add_variable_to_symbol_table(char *identifier, tn_t type, varPtr list)
 	strcpy(p->str, identifier);
 	p->type = type;
 	p->size = 1;
-	strcpy(p->array_demensions, "");
 	printf("===============\n");
 	printf("Key is: %s\n", p->str);
 	printf("ADDR: %d\n", p->address);
@@ -274,19 +277,6 @@ tn_t get_variable_type_from_symbol_table(char *identifier)
 	while (curNode != NULL && strcmp(curNode->str, identifier) != 0)
 		curNode = curNode->next;
 	return (curNode != NULL) ? curNode->type : -1;
-}
-//banana
-void set_array_dimensions(char *identifier, char *demensionsArr)
-{
-	// printf("id is: %s\n", identifier);
-	varPtr curNode;
-	curNode = symbolTalble->vars;
-	// printf("<set_array_dimensions()> ID IS: %s\n", identifier);
-	// Iterate till last element until key is not found
-	while (curNode != NULL && strcmp(curNode->str, identifier) != 0)
-		curNode = curNode->next;
-	if (curNode != NULL)
-		strcpy(curNode->array_demensions, demensionsArr);
 }
 
 //void update_pointer_target(treenode* root)
@@ -458,10 +448,12 @@ int set_struct_name(treenode *root)
 
 //banana
 //e!_0!dddd!
-int get_n_dimension(char* array_dimensions, int expected_dimension){
+int get_n_dimension(char* array_identifier, int expected_dimension){
 	char singleChankHolder[100] = "";
 	char temp2[100] = "";
 	int dimension_counter = 0;
+	char array_dimensions[500] = "";
+	strcpy(array_dimensions, get_array_dimensions(array_identifier));
 
 	for (int i = strlen(array_dimensions) -2 ; i >= 0 && dimension_counter < expected_dimension; i--)
 	{
@@ -534,21 +526,6 @@ char* get_array_identifier(treenode* root)
 //    reverse_by_chanks(array_idnt);
     char* blaaa = array_idnt;
     return blaaa;
-}
-
-char *get_array_dimensions(treenode* root)
-{
-    // printf("id is: %s\n", identifier);
-    varPtr curNode;
-    int i;
-    curNode = symbolTalble->vars;
-
-    // Iterate till last element until key is not found
-    while (curNode != NULL && strcmp(curNode->str, get_array_identifier(root)) != 0)
-        curNode = curNode->next;
-    if (curNode != NULL)
-        return curNode->array_demensions;
-    return NULL;
 }
 
 char* get_array_indexes(treenode* root) {
@@ -1230,9 +1207,10 @@ int code_recur(treenode *root) {
 
                     code_recur(root->lnode);
                     memset(struct_name,0,sizeof(struct_name));
+                    char bla[500] = "";
                     code_recur(root->rnode);
-                    char* array_identifier = get_array_identifier(root);
-                    int currentDimension = get_number_of_dimensions_for_array(get_array_identifier(root));
+                    strcpy(bla, get_array_identifier(root));
+                    int number_of_dimensions = get_number_of_dimensions_for_array(get_array_identifier(root));
                     if (root->lnode != NULL && root->lnode->hdr.type != TN_DEREF){
 //                    int current_dimension = get_number_of_dimensions(get_array_dimensions(root));
                         // printf("current dimension is: %d\n", current_dimension);
@@ -1246,9 +1224,14 @@ int code_recur(treenode *root) {
 
                         // prepares data for single cell generation
                         int index;
-                        for (index = currentDimension; index < current_dimension; index++){
-                            ixaValue *= get_n_dimension(get_array_dimensions(root), index);
+                        for (index = current_dimension; index <= number_of_dimensions ; index++){
+                            ixaValue *= get_n_dimension(bla, index);
                         }
+                        // this one worked
+//                        int index;
+//                        for (index = number_of_dimensions; index < current_dimension; index++){
+//                            ixaValue *= get_n_dimension(get_array_dimensions(get_array_identifier(root)), index);
+//                        }
 
                         // In case right node is an array, we have to print it's value and not just the address,
                         // that's why we use IND here, for example a[a[2]]
@@ -2082,9 +2065,8 @@ void add_complex_data_type(char *string, char *structIdnt, int startIndex, int e
 //                    strcpy(fixedIdentifier, identitfier);
 //                    strncat(fixedIdentifier, &SUPPERATOR, 1);
 //                    add_single_cell_to_array(fixedIdentifier, typeAsString, typeAsEnum);
-//                    set_array_dimensions(fixedIdentifier, dimensionsArray);
                     set_variable_size(fixedIdentifier, 1);
-                    arraysSymbolTable->arrays = add_array_to_arrays_mapping(arraysSymbolTable->arrays, fixedIdentifier, 1);
+                    arraysSymbolTable->arrays = add_array_to_arrays_mapping(arraysSymbolTable->arrays, fixedIdentifier, 1, dimensionsArray, numberOfDimensions);
                 } else {
                     tempIndex = 0;
                     strcpy(temp, get_struct_value_str(typeAsString));
@@ -2095,9 +2077,8 @@ void add_complex_data_type(char *string, char *structIdnt, int startIndex, int e
                     }
 //                    add_single_cell_to_array(identitfier, typeAsString, typeAsEnum);
                     set_variable_size(fixedIdentifier, complex_type_size);
-                    arraysSymbolTable->arrays = add_array_to_arrays_mapping(arraysSymbolTable->arrays, fixedIdentifier, complex_type_size);
+                    arraysSymbolTable->arrays = add_array_to_arrays_mapping(arraysSymbolTable->arrays, fixedIdentifier, complex_type_size, dimensionsArray, numberOfDimensions);
                 }
-                set_number_of_dimensions_for_array(fixedIdentifier, numberOfDimensions);
             }
         }
     }

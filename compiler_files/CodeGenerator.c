@@ -71,7 +71,7 @@ char* get_struct_value_str(const char *key)
     // Iterate till last element until key is not found
     while (curNode != NULL && strcmp(curNode->key, key) != 0)
         curNode = curNode->next;
-    return (curNode != NULL) ? curNode->value : "NULL";
+    return (curNode != NULL) ? curNode->value : NULL;
 }
 
 const int CODE_INIT_FRAME_IN_BYTES = 4;
@@ -86,6 +86,7 @@ typedef struct variable
 	varPtr prev;
 	varPtr next;
 	int size;
+    int numberOfDimensions;
 } Variable;
 
 // This struct holds a linked list of variables called vars, and a counter for current number of variables
@@ -114,6 +115,7 @@ varPtr add_variable_to_symbol_table(char *identifier, tn_t type, varPtr list)
 	strcpy(p->str, identifier);
 	p->type = type;
 	p->size = 1;
+	p->numberOfDimensions = -1;
 	strcpy(p->array_demensions, "");
 	printf("===============\n");
 	printf("Key is: %s\n", p->str);
@@ -175,6 +177,29 @@ int get_variable_size(char *identifier)
 	return -2;
 }
 
+void set_number_of_dimensions_for_array(char* identifier, int numberOfDimensions){
+    varPtr curNode;
+    curNode = symbolTalble->vars;
+
+    // Iterate till last element until key is not found
+    while (curNode != NULL && strcmp(curNode->str, identifier) != 0)
+        curNode = curNode->next;
+    if (curNode != NULL)
+        curNode->numberOfDimensions = numberOfDimensions;
+}
+
+int get_number_of_dimensions_for_array(char* identifier){
+    varPtr curNode;
+    curNode = symbolTalble->vars;
+
+    // Iterate till last element until key is not found
+    while (curNode != NULL && strcmp(curNode->str, identifier) != 0)
+        curNode = curNode->next;
+    if (curNode != NULL)
+        return curNode->numberOfDimensions;
+    return -1;
+}
+
 tn_t get_variable_type_from_symbol_table(char *identifier)
 {
 	// printf("id is: %s\n", identifier);
@@ -200,17 +225,17 @@ void set_array_dimensions(char *identifier, char *demensionsArr)
 		strcpy(curNode->array_demensions, demensionsArr);
 }
 
-void update_pointer_target(char *srcIdentifier, int targetAddress)
-{
-	varPtr curNode;
-	curNode = symbolTalble->vars;
-
-	// Iterate till last element until key is not found
-	while (curNode != NULL && strcmp(curNode->str, srcIdentifier) != 0)
-		curNode = curNode->next;
-	if (curNode != NULL)
-		curNode->address = targetAddress;
-}
+//void update_pointer_target(treenode* root)
+//{
+//	varPtr curNode;
+//	curNode = symbolTalble->vars;
+//
+//	// Iterate till last element until key is not found
+//	while (curNode != NULL && strcmp(curNode->str, srcIdentifier) != 0)
+//		curNode = curNode->next;
+//	if (curNode != NULL)
+//		curNode->address = targetAddress;
+//}
 
 void remove_variable_from_symbol_table(const char *name)
 {
@@ -265,108 +290,105 @@ int current_dimension = -1;
 
 int set_struct_name(treenode *root)
 {
-	char non_leafs[1000] = "";
-	char name[500] = "";
-	treenode *left_node;
-	treenode *right_node;
-	left_node = root->lnode;
-	right_node = root->rnode;
+	char namesFromEnd[1000] = "";
+	char nameFromBegining[500] = ""; // it will collect all the left kids
+	treenode* tracker = root; // pointer to perform tree traversal
 	int should_continue_go_down = 1;
 	int index_depth = 0; // indicator for array index depth
 	int search_dpeth = 1;
 	//banana
-	while (left_node != NULL && right_node != NULL && should_continue_go_down)
+	while (tracker != NULL && tracker->lnode != NULL && tracker->rnode != NULL && should_continue_go_down)
 	{
 		// printf("ROUNDS\n");
-		if (left_node->hdr.type == TN_INDEX)
+		if (tracker->lnode->hdr.type == TN_INDEX)
 			index_depth = search_dpeth;
-
-		if (left_node->hdr.which == LEAF_T && right_node->hdr.which == LEAF_T)
-		{
-			should_continue_go_down = 0;
-			// printf("struct name is %s\n", struct_name);
-			// printf("Setting should_continue_go_down to 0 \n");
-			switch (left_node->hdr.type)
-			{
-
-			case TN_IDENT:
-
-				// printf("struct name h2-B: %s\n", struct_name);
-				strncat(name, ((leafnode *)left_node)->data.sval->str, strlen(((leafnode *)left_node)->data.sval->str));
-				strncat(name, &SUPPERATOR, 1);
-				// printf("Im ident! %s\n",((leafnode *)left_node)->data.sval->str);
-				if (index_depth == 0)
-				{
-				    if (((leafnode *)right_node)->hdr.type != TN_INT)
-                    {
-                        strncat(name, ((leafnode *)right_node)->data.sval->str, strlen(((leafnode *)right_node)->data.sval->str));
-                        strncat(name, &SUPPERATOR, 1);
-                        // printf("struct name h: %s\n", struct_name);
+        if (tracker->lnode->hdr.which == LEAF_T && tracker->rnode->hdr.which == LEAF_T)
+        {
+            should_continue_go_down = 0;
+            // printf("struct nameFromBegining is %s\n", struct_name);
+            // printf("Setting should_continue_go_down to 0 \n");
+            if (tracker->lnode->hdr.type == TN_IDENT) {
+                strncat(nameFromBegining, ((leafnode *) tracker->lnode)->data.sval->str,
+                        strlen(((leafnode *) tracker->lnode)->data.sval->str));
+                strncat(nameFromBegining, &SUPPERATOR, 1);
+                // printf("Im ident! %s\n",((leafnode *)left_node)->data.sval->str);
+                if (index_depth == 0) {
+                    if (((leafnode *) tracker->rnode)->hdr.type != TN_INT) {
+                        strncat(nameFromBegining, ((leafnode *) tracker->rnode)->data.sval->str,
+                                strlen(((leafnode *) tracker->rnode)->data.sval->str));
+                        strncat(nameFromBegining, &SUPPERATOR, 1);
+                        // printf("struct nameFromBegining h: %s\n", struct_name);
                     }
-                }
-				else
-				{
-					strncat(name, &ARRAY_IDENT_SUPP, 2);
-					strncat(name, &SUPPERATOR, 1);
-					// printf("struct name h1: %s\n", struct_name);
-				}
-
-				break;
-			default:
-                code_recur(root->lnode);
-			    code_recur(root->rnode);
-				break;
-			}
-			// printf("struct_name is %s\n", struct_name);
-		}
-
-		/* code */
-		if (should_continue_go_down != 0)
-		{
-		    if (left_node->hdr.type == TN_INDEX){
-		    }
-		    else
-            {
-                switch (((leafnode *)right_node)->hdr.type)
-                {
-                    // case TN_SELECT:
-                    // if (right_node->rnode != NULL && right_node->rnode->hdr.which == LEAF_T)
-                    // {
-                    // 	strncat(name, ((leafnode *)right_node)->data.sval->str, strlen(((leafnode *)right_node)->data.sval->str));
-                    // 	strncat(name, &SUPPERATOR, 1);
-                    // }
-                    break;
-                case TN_INDEX:
-                    break;
-                case TN_IDENT:
-                    // printf("struct name h3: %s\n", name);
-                    strncat(non_leafs, ((leafnode *)right_node)->data.sval->str, strlen(((leafnode *)right_node)->data.sval->str));
-                    strncat(non_leafs, &SUPPERATOR, 1);
-                    // printf("struct name h4: %s\n", name);
-                    break;
-                default:
-                    code_recur(root->lnode);
-                    code_recur(root->rnode);
-                    break;
+                } else {
+                    strncat(nameFromBegining, &ARRAY_IDENT_SUPP, 2);
+                    strncat(nameFromBegining, &SUPPERATOR, 1);
+                    // printf("struct nameFromBegining h1: %s\n", struct_name);
                 }
             }
-			right_node = left_node->rnode;
-			left_node = left_node->lnode;
-		}
+        }
+        else{
+            if (tracker->rnode->hdr.type == TN_IDENT){
+                strncat(namesFromEnd, ((leafnode *)tracker->rnode)->data.sval->str, strlen(((leafnode *)tracker->rnode)->data.sval->str));
+                strncat(namesFromEnd, &SUPPERATOR, 1);
+            }
+//				break;
+//			default:
+//                code_recur(root->lnode);
+//			    code_recur(root->rnode);
+//				break;
 
+			// printf("struct_name is %s\n", struct_name);
+    }
+
+		/* code */
+//		if (should_continue_go_down != 0)
+//		{
+//		    if (tracker->lnode->hdr.type == TN_INDEX){
+//		    }
+//		    else
+//            {
+//                switch (((leafnode *)tracker->rnode)->hdr.type)
+//                {
+//                    // case TN_SELECT:
+//                    // if (right_node->rnode != NULL && right_node->rnode->hdr.which == LEAF_T)
+//                    // {
+//                    // 	strncat(nameFromBegining, ((leafnode *)right_node)->data.sval->str, strlen(((leafnode *)right_node)->data.sval->str));
+//                    // 	strncat(nameFromBegining, &SUPPERATOR, 1);
+//                    // }
+//                    break;
+//                case TN_INDEX:
+//                    break;
+//                case TN_IDENT:
+//                    // printf("struct nameFromBegining h3: %s\n", nameFromBegining);
+//                    strncat(namesFromEnd, ((leafnode *)tracker->rnode)->data.sval->str, strlen(((leafnode *)tracker->rnode)->data.sval->str));
+//                    strncat(namesFromEnd, &SUPPERATOR, 1);
+//                    // printf("struct nameFromBegining h4: %s\n", nameFromBegining);
+//                    break;
+//                default:
+//                    code_recur(root->lnode);
+//                    code_recur(root->rnode);
+//                    break;
+//                }
+//            }
+//		}
+
+        tracker = tracker->lnode;
 		search_dpeth += 1;
 	}
 
-	// printf("struct name is: %s\n", name);
-	// printf("non-leafes %s\n", non_leafs);
-	if(((leafnode*)root->rnode)->data.sval != NULL){
-        strncat(non_leafs, ((leafnode*)root->rnode)->data.sval->str, strlen(((leafnode*)root->rnode)->data.sval->str));
-        strncat(non_leafs, &SUPPERATOR, 1);
-	}
-	reverse_by_chanks(non_leafs);
-	strncat(name, non_leafs, strlen(non_leafs));
-	strcpy(struct_name, name);
-	// printf("Struct name %s\n", name);
+	// printf("struct nameFromBegining is: %s\n", nameFromBegining);
+	// printf("non-leafes %s\n", namesFromEnd);
+	// if you decide to return it, make better condition!
+//	if(((leafnode*)root->rnode)->hdr.type == TN_IDENT && ((leafnode*)root->rnode)->data.sval != NULL){
+//        strncat(namesFromEnd, ((leafnode*)root->rnode)->data.sval->str, strlen(((leafnode*)root->rnode)->data.sval->str));
+//        strncat(namesFromEnd, &SUPPERATOR, 1);
+//	}
+	reverse_by_chanks(namesFromEnd);
+
+	// non leafs, means in situation like that: bs.G.iiii -> it's the
+	strncat(nameFromBegining, namesFromEnd, strlen(namesFromEnd));
+	strcpy(struct_name, nameFromBegining);
+	// printf("Struct nameFromBegining %s\n", nameFromBegining);
 	return index_depth;
 }
 
@@ -442,8 +464,10 @@ char* get_array_identifier(treenode* root)
     {
         strcpy(array_idnt, ((leafnode *)tracker)->data.sval->str);
         strncat(array_idnt, &SUPPERATOR, 1);
+        strncat(array_idnt, &ARRAY_IDENT_SUPP, 2);
+//        strncat(array_idnt, &SUPPERATOR, 1);
     }
-    reverse_by_chanks(array_idnt);
+//    reverse_by_chanks(array_idnt);
     char* blaaa = array_idnt;
     return blaaa;
 }
@@ -452,11 +476,11 @@ char *get_array_dimensions(treenode* root)
 {
     // printf("id is: %s\n", identifier);
     varPtr curNode;
+    int i;
     curNode = symbolTalble->vars;
-    const char* array_identifier =  get_array_identifier(root);
 
     // Iterate till last element until key is not found
-    while (curNode != NULL && strcmp(curNode->str, array_identifier) != 0)
+    while (curNode != NULL && strcmp(curNode->str, get_array_identifier(root)) != 0)
         curNode = curNode->next;
     if (curNode != NULL)
         return curNode->array_demensions;
@@ -658,6 +682,11 @@ int code_recur(treenode *root) {
                                 strncat(index, &SUPPERATOR, 1);
                                 if (get_variable_from_table(index) != -1)
                                     printf("LDC %d\n", get_variable_from_table(index));
+                                else{
+                                    strncat(index, &ARRAY_IDENT_SUPP, 2);
+                                    if (get_variable_from_table(index) != -1)
+                                        printf("LDC %d\n", get_variable_from_table(index));
+                                }
                             }
                         }
 //                        }
@@ -733,6 +762,7 @@ int code_recur(treenode *root) {
                         code_recur(ifn->else_n);
                         printf("end_%d%s\n", root->hdr.line, ":");
                     }
+
                     return 0;
 
                 case TN_COND_EXPR:
@@ -797,16 +827,18 @@ int code_recur(treenode *root) {
 
                 case TN_DEREF:
                     /* pointer derefrence - for HW2! */
-                    if (root->lnode != NULL) {
-                        printf("IND\n");
-                        code_recur(root->lnode);
-                    }
-                    if (root->rnode != NULL) {
-                        code_recur(root->rnode);
-                        leaf = ((leafnode *) root->rnode);
-                        printf("LDC %d\n", get_variable_from_table(leaf->data.sval->str));
-                        printf("IND\n");
-                    }
+                    code_recur(root->lnode);
+                    code_recur(root->rnode);
+                    printf("IND\n");
+//                    if (root->lnode != NULL) {
+//                        printf("IND\n");
+//                        code_recur(root->lnode);
+//                    }
+//                    if (root->rnode != NULL) {
+//                        code_recur(root->rnode);
+//                        leaf = ((leafnode *) root->rnode);
+//                        printf("IND\n");
+//                    }
                     break;
                 case TN_PARBLOCK:
                     /* Maybe you will use it later */
@@ -841,49 +873,53 @@ int code_recur(treenode *root) {
                         /* the currentNode->right->right sub tree */
                         /* Look at the output AST structure! */
                         // code_recur(root->lnode);
-                        code_recur(root->rnode);
-                        right_node = root->rnode;
-                        left_node = root->lnode;
-                        if (right_node != NULL) {
-                            if (right_node->rnode != NULL &&
-                                right_node->rnode->hdr.type == TN_SELECT &&
-                                strcmp(struct_name, "") != 0 && get_variable_from_table(struct_name) != -1)
-                            {
-                                printf("LDC %d\n", get_variable_from_table(struct_name));
-                                printf("IND \n");
-                                strcpy(struct_name, "");
-                            }
-                            else if (strcmp(struct_name, "") != 0 && get_variable_from_table(struct_name) != -1) {
-                                printf("IND \n");
-                                strcpy(struct_name, "");
-                            } else if (right_node->hdr.type == TN_EXPR_LIST &&
-                                       right_node->rnode != NULL &&
-                                       right_node->rnode->hdr.type == TN_DEREF &&
-                                       right_node->rnode->rnode != NULL) {
-                                // printf("need to print *a\n"); // need to print the address that the pointer points to
-                                leaf = (leafnode *) right_node->rnode->rnode;
-                                printf("LDC %d\n", get_variable_from_table(leaf->data.sval->str));
-                            } else if (right_node->hdr.type == TN_EXPR_LIST &&
-                                       right_node->rnode != NULL &&
-                                       right_node->rnode->hdr.type == TN_SELECT) {
-                                int should_print_spam = 1;
-                                left_node = right_node->rnode;
-                                while (left_node != NULL && left_node->lnode != NULL && should_print_spam == 1) {
-                                    if (left_node->hdr.type == TN_INDEX) {
-                                        should_print_spam = 0;
-                                    }
-                                    left_node = left_node->lnode;
-                                }
-                                // printf("NANANAN\n");
-                                // Removed handling arrays index of structs
-                                // printf("struct name is: %s\n", struct_name);
-                                if (should_print_spam == 1) {
-                                    printf("LDC %d\n", get_variable_from_table(struct_name));
 
-                                     strcpy(struct_name, "");
-                                }
-                                printf("IND\n");
-                            }
+                        memset(struct_name,0,sizeof(struct_name));
+                        code_recur(root->rnode);
+//                        right_node = root->rnode;
+//                        left_node = root->lnode;
+//                        if (right_node != NULL) {
+//                            if (right_node->rnode != NULL &&
+//                                right_node->rnode->hdr.type == TN_SELECT &&
+//                                strcmp(struct_name, "") != 0 && get_variable_from_table(struct_name) != -1)
+//                            {
+//                                printf("LDC %d\n", get_variable_from_table(struct_name));
+//                                printf("IND \n");
+//                                memset(struct_name,0,sizeof(struct_name));
+//                            }
+//                            else if (strcmp(struct_name, "") != 0 && get_variable_from_table(struct_name) != -1) {
+//                                printf("IND \n");
+//                                memset(struct_name,0,sizeof(struct_name));
+//                            } else if (right_node->hdr.type == TN_EXPR_LIST &&
+//                                       right_node->rnode != NULL &&
+//                                       right_node->rnode->hdr.type == TN_DEREF &&
+//                                       right_node->rnode->rnode != NULL) {
+//                                // printf("need to print *a\n"); // need to print the address that the pointer points to
+//                                leaf = (leafnode *) right_node->rnode->rnode;
+//                                printf("LDC %d\n", get_variable_from_table(leaf->data.sval->str));
+//                            } else if (right_node->hdr.type == TN_EXPR_LIST &&
+//                                       right_node->rnode != NULL &&
+//                                       right_node->rnode->hdr.type == TN_SELECT) {
+//                                int should_print_spam = 1;
+//                                left_node = right_node->rnode;
+//                                memset(struct_name,0,sizeof(struct_name));
+//                                while (left_node != NULL && left_node->lnode != NULL && should_print_spam == 1) {
+//
+//                                    if (left_node->hdr.type == TN_INDEX) {
+//                                        should_print_spam = 0;
+//                                    }
+//                                    left_node = left_node->lnode;
+//                                }
+//                                 printf("NANANAN\n");
+//                                // Removed handling arrays index of structs
+//                                // printf("struct name is: %s\n", struct_name);
+//                                if (should_print_spam == 1) {
+//                                    printf("LDC %d\n", get_variable_from_table(struct_name));
+//
+//                                     memset(struct_name,0,sizeof(struct_name));
+//                                }
+//                                printf("IND\n");
+//                            }
                                 // 	if (ru
                                 // 		root->rnode->hdr.type == TN_EXPR &&
                                 // 		root->rnode->rnode != NULL &&
@@ -900,20 +936,19 @@ int code_recur(treenode *root) {
                                 // 		break;
                                 // 	}
                                 // }
-
-                            else if (right_node->rnode != NULL &&
-                                     right_node->rnode->hdr.type == TN_IDENT) {
-                                leaf = (leafnode *) root->rnode->rnode;
+//                            else if (right_node->rnode != NULL &&
+//                                     right_node->rnode->hdr.type == TN_IDENT) {
+//                                leaf = (leafnode *) root->rnode->rnode;
 //                                printf("LDC %d\n", get_variable_from_table(leaf->data.sval->str));
-                                printf("IND\n");
-                            }
-					else if (right_node->hdr.type == TN_EXPR_LIST &&
-							 right_node->rnode != NULL && (right_node->rnode->hdr.type == TN_SELECT ||
-							 right_node->rnode->hdr.type == TN_INDEX))
-					{
-						printf("IND\n");
-					}
-                        }
+//                                printf("IND\n");
+//                            }
+//					else if (right_node->hdr.type == TN_EXPR_LIST &&
+//							 right_node->rnode != NULL && (right_node->rnode->hdr.type == TN_SELECT ||
+//							 right_node->rnode->hdr.type == TN_INDEX))
+//					{
+//						printf("IND\n");
+//					}
+//                        }
 
                         printf("PRINT\n");
                     } else {
@@ -940,7 +975,18 @@ int code_recur(treenode *root) {
                     /* Maybe you will use it later */
                     code_recur(root->lnode);
                     // printf("before\n");
+                    if (root->rnode !=NULL && root->rnode != NULL && root->rnode->lnode != NULL &&
+                        root->rnode->rnode == NULL && root->rnode->lnode->hdr.type == TN_IDENT && root->rnode->lnode->hdr.which == LEAF_T) {
+                        printf("LDC %d\n", get_variable_from_table(((leafnode*)root->rnode->lnode)->data.sval->str));
+                        printf("IND\n");
+                    }
                     code_recur(root->rnode);
+
+                    if (get_variable_from_table(struct_name) != -1)
+                        printf("LDC %d\n", get_variable_from_table(struct_name));
+                    if (root->rnode != NULL && (root->rnode->hdr.type != TN_INT || root->rnode->hdr.type != TN_REAL))
+                        printf("IND\n");
+
                     break;
 
                 case TN_NAME_LIST:
@@ -1113,22 +1159,25 @@ int code_recur(treenode *root) {
                 case TN_INDEX:
                     /* call for array - for HW2! */
 //                    set_array_identifier(root);
+
                     set_node_dimension(root);
 //                    char* array_indexes = get_array_indexes(root);
-                    char* array_identifier = get_array_identifier(root);
 //                    char* array_dimensions = get_array_dimensions(root);
 
-                    int array_size = get_number_of_dimensions(get_array_indexes(root));
-                    int current_dimension = get_number_of_dimensions(get_array_dimensions(root));
-                    // printf("current dimension is: %d\n", current_dimension);
+                    code_recur(root->lnode);
+                    memset(struct_name,0,sizeof(struct_name));
+                    code_recur(root->rnode);
+                    char* array_identifier = get_array_identifier(root);
+                    int array_size = get_number_of_dimensions_for_array(get_array_identifier(root));
+                    if (root->lnode != NULL && root->lnode->hdr.type != TN_DEREF){
+                        int current_dimension = get_number_of_dimensions(get_array_dimensions(root));
+                        // printf("current dimension is: %d\n", current_dimension);
 
 
 //                    if (current_dimension == 1) {
 //                        set_struct_name(root);
                         // this flag must be on, in order to print LDC and arrays identifier address without ind
-                        code_recur(root->lnode);
-                        strcpy(struct_name, "");
-                        code_recur(root->rnode);
+
                         int ixaValue = get_variable_size(get_array_identifier(root));
 
                         // prepares data for single cell generation
@@ -1148,10 +1197,13 @@ int code_recur(treenode *root) {
                             printf("IND\n");
 //                        printf("Array identifier is: %s\n", array_identifier);
                         if ((root->lnode != NULL && root->lnode->hdr.type == TN_IDENT) ||
-                                (root->lnode != NULL &&
-                                //root->lnode->hdr.which == LEAF_T &&
-                                root->rnode != NULL && root->rnode->hdr.which == LEAF_T))
+                            (root->lnode != NULL &&
+                             //root->lnode->hdr.which == LEAF_T &&
+                             root->rnode != NULL && root->rnode->hdr.which == LEAF_T))
                             printf("IXA %d\n", ixaValue);
+                    } else
+                        printf("IXA 1\n");
+
 
                         //                        else if (should_print_ind == 1 && root->rnode != NULL && root->rnode->hdr.type == TN_IDENT)
 //                            printf("IND\n");
@@ -1187,7 +1239,7 @@ int code_recur(treenode *root) {
 //                                    break;
 //                                case TN_DECL:
 //                                    printf("LDC %d\n", get_variable_from_table(struct_name));
-//                                    strcpy(struct_name, "");
+//                                    memset(struct_name,0,sizeof(struct_name));
 //                                    break;
 //                                default:
 //                                    printf("type name is: %s\n", ((leafnode *) root->lnode)->data.sval->str);
@@ -1231,18 +1283,19 @@ int code_recur(treenode *root) {
                             } else {
                                 /* Struct select case "." */
                                 /* e.g. struct_variable.x; */
-                                strcpy(struct_name, "");
+                                memset(struct_name,0,sizeof(struct_name));
                                 int res = set_struct_name(root);
 //                                if (res != 0) {
 //                                    // printf("tn array is in depth: %d\n", res);
-                                    left_node = root->lnode;
+//                                    left_node = ;
 //                                    res -= 1;
 //                                    while (left_node != NULL && res > 0) {
 //                                        left_node = left_node->lnode;
 //                                        res -= 1;
 //                                    }
                                     // printf("res is: %d\n", res);
-                                    code_recur(left_node);
+//                                    code_recur(root->lnode);
+//                                    code_recur(root->rnode);
                                     // printf("Res is: %d\n", res);
                                     // if (res == 1)
                                     // 	code_recur(root->lnode);
@@ -1292,7 +1345,7 @@ int code_recur(treenode *root) {
                                         if (get_variable_from_table(struct_name) != -1) {
                                             // printf("we would like to have the address of: %s\n", struct_name);
                                             printf("LDC %d\n", get_variable_from_table(struct_name));
-                                            strcpy(struct_name, "");
+                                            memset(struct_name,0,sizeof(struct_name));
                                         }
                                     }
                                     code_recur(root->rnode);
@@ -1906,33 +1959,19 @@ void add_complex_data_type(char *string, char *structIdnt, int startIndex, int e
     }
 
     void add_single_cell_to_array(char *id, char *typeAsString, tn_t typeAsEnum) {
-        if (typeAsEnum == TN_DECL) {
+        if (typeAsEnum == TN_DECL)
             add_struct_to_symbolTable(get_struct_value_str(typeAsString), id, typeAsString);
-        }
-            // printf("HEREREERERER\n");
-            // printf("Type as string is: %s\n", typeAsString);
-            // printf("Type as string is: %s\n", get(&tbl, typeAsString));
-            // printf("ID IS: %s\n", id);
-//        } else {
-            // printf("ADDING ID: %s\n", id);
-            // printf("ITS TYPE as string is: %s\n", typeAsString);
-            // printf("Its type as tn_t is: %d\n", typeAsEnum);
-            symbolTalble->vars = add_variable_to_symbol_table(id, typeAsEnum, symbolTalble->vars);
-            // printf("%s\n", id);
-//        }
-        // strcpy(id, "");
+        symbolTalble->vars = add_variable_to_symbol_table(id, typeAsEnum, symbolTalble->vars);
     }
 
     void
-    add_array_to_symbol_table(int size, char *typeAsString, tn_t typeAsEnum, char *identitfier, char *dimensionsArray) {
+    add_array_to_symbol_table(int size, char *typeAsString, tn_t typeAsEnum, char *identitfier, char *dimensionsArray, int numberOfDimensions) {
         char snum[1000];
         int i = 0;
         char temp[1000];
         char fixedIdentifier[1000] = "";
         int complex_type_size = 0;
-
-        strcpy(fixedIdentifier, identitfier);
-        strncat(fixedIdentifier, &SUPPERATOR, 1);
+        int tempIndex = 0;
 
         // printf("received id is: %s\n", identitfier);
         // printf("fixed id is:! %s\n", fixedIdentifier);
@@ -1942,30 +1981,20 @@ void add_complex_data_type(char *string, char *structIdnt, int startIndex, int e
         // printf("identifier is: %s\n", fixedIdentifier);
 
         // removed this if statement since the size and dimenstions of the array was not appered in mapping
-//        if (typeAsEnum != TN_DECL) {
-            add_single_cell_to_array(fixedIdentifier, typeAsString, typeAsEnum);
-            // printf("dimensionsArray: %s\n", dimensionsArray);
-            // printf("<add_array_to_symbol_table()> ID is: %s\n", fixedIdentifier);
-            set_array_dimensions(fixedIdentifier, dimensionsArray);
-//        } else {
-            strcpy(temp, get_struct_value_str(typeAsString));
-            while (i < strlen(temp)) {
-                if (temp[i] == PAIR_SUP)
-                    complex_type_size += 1;
-                i++;
-            }
+
+
 //            symbolTalble->vars = add_variable_to_symbol_table(fixedIdentifier, typeAsEnum, symbolTalble->vars);
             // printf("Setting the size of var: %s\n", identitfier);
             // printf("To be: %d\n", complex_type_size);
-            if (typeAsEnum != TN_DECL) {
-                set_variable_size(fixedIdentifier, complex_type_size);
-            }
-            else{
-                set_variable_size(fixedIdentifier, complex_type_size + 1);
-            }
+//            if (typeAsEnum != TN_DECL) {
+//
+//            }
+//            else{
+//
+//            }
 //        }
 
-        for (int i = 1; i < size; i++) {
+        for (i = 0; i < size; i++) {
             strcpy(fixedIdentifier, "");
             strcpy(fixedIdentifier, identitfier);
             strncat(fixedIdentifier, &SUPPERATOR, 1);
@@ -1973,6 +2002,28 @@ void add_complex_data_type(char *string, char *structIdnt, int startIndex, int e
             itoa(i, snum, 10);
             strncat(fixedIdentifier, snum, 1000);
             add_single_cell_to_array(fixedIdentifier, typeAsString, typeAsEnum);
+            if (i == 0){
+                if (typeAsEnum != TN_DECL) {
+                    // printf("dimensionsArray: %s\n", dimensionsArray);
+                    // printf("<add_array_to_symbol_table()> ID is: %s\n", fixedIdentifier);
+//                    strcpy(fixedIdentifier, identitfier);
+//                    strncat(fixedIdentifier, &SUPPERATOR, 1);
+//                    add_single_cell_to_array(fixedIdentifier, typeAsString, typeAsEnum);
+//                    set_array_dimensions(fixedIdentifier, dimensionsArray);
+                    set_variable_size(fixedIdentifier, 1);
+                } else {
+                    tempIndex = 0;
+                    strcpy(temp, get_struct_value_str(typeAsString));
+                    while (tempIndex < strlen(temp)) {
+                        if (temp[i] == PAIR_SUP)
+                            complex_type_size += 1;
+                        tempIndex++;
+                    }
+//                    add_single_cell_to_array(identitfier, typeAsString, typeAsEnum);
+                    set_variable_size(fixedIdentifier, complex_type_size);
+                }
+                set_number_of_dimensions_for_array(fixedIdentifier, numberOfDimensions);
+            }
         }
     }
 
@@ -2108,6 +2159,7 @@ void add_complex_data_type(char *string, char *structIdnt, int startIndex, int e
                             char typeAsString[50] = "";
                             tn_t type_as_enum = 0;
                             int array_size = 1;
+                            int dimensionsCounter = 0;
                             char dimensionsArr[1000] = "";
                             char singleDimensionSize[10];
                             leaf = (treenode *) left_node->lnode;
@@ -2142,6 +2194,7 @@ void add_complex_data_type(char *string, char *structIdnt, int startIndex, int e
                                                         10)));
                                     strncat(dimensionsArr, &SUPPERATOR, 1);
                                     array_size *= ((leafnode *) left_node->rnode)->data.cval;
+                                    dimensionsCounter += 1;
                                     if (((leafnode *) left_node->lnode)->hdr.type == TN_IDENT) {
                                         strcpy(identifier, ((leafnode *) left_node->lnode)->data.sval->str);
                                         break;
@@ -2151,7 +2204,7 @@ void add_complex_data_type(char *string, char *structIdnt, int startIndex, int e
 
                                 reverse_by_chanks(dimensionsArr);
                                 add_array_to_symbol_table(array_size, typeAsString, type_as_enum, identifier,
-                                                          dimensionsArr);
+                                                          dimensionsArr, dimensionsCounter);
                             }
                         }
                         else if (is_pointer_decleration(root)) {
@@ -2252,6 +2305,20 @@ void add_complex_data_type(char *string, char *structIdnt, int startIndex, int e
                                     strlen(((leafnode *) root->rnode)->data.sval->str));
                             strncat(struct_definition, "%", 1);
                             should_print_id = 0;
+                        }
+                        else if (root->lnode != NULL && root->lnode->lnode != NULL &&
+                        root->lnode->lnode->hdr.type ==TN_OBJ_REF && root->rnode != NULL &&
+                        root->rnode->lnode != NULL && root->rnode->lnode->hdr.type == TN_PNTR){
+                            int numberOfPs = 0;
+                            treenode* node = root->rnode->lnode;
+                            while (node != NULL){
+                                node = node->rnode;
+                                numberOfPs++;
+                            }
+                            strncat(struct_definition, "^", 1);
+                            strncat(struct_definition, ((leafnode *) root->rnode)->data.sval->str,
+                                    strlen(((leafnode *) root->rnode)->data.sval->str));
+                            strncat(struct_definition, "^", 1);
                         }
                         print_symbol_table(root->lnode);
                         print_symbol_table(root->rnode);

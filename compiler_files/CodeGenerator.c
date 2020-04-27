@@ -1031,7 +1031,9 @@ int code_recur(treenode *root) {
                     // trying new statement
                     if (get_variable_from_table(struct_name) != -1)
                         printf("LDC %d\n", get_variable_from_table(struct_name));
-                    if (root->rnode != NULL && (root->rnode->hdr.type != TN_INT && root->rnode->hdr.type != TN_REAL))
+                    if (root->rnode != NULL && (root->rnode->hdr.type != TN_INT &&
+                                                root->rnode->hdr.type != TN_REAL &&
+                                                root->rnode->hdr.type != TN_EXPR))
                         printf("IND\n");
                     break;
 
@@ -1639,12 +1641,14 @@ int code_recur(treenode *root) {
                                     code_recur(root->lnode);
                                     if (root->lnode != NULL &&
                                         (root->lnode->hdr.type == TN_IDENT ||
-                                        root->lnode->hdr.type == TN_INDEX))
+                                        root->lnode->hdr.type == TN_INDEX ||
+                                        root->lnode->hdr.type == TN_SELECT))
                                         printf("IND\n");
                                     code_recur(root->rnode);
                                     if (root->rnode != NULL &&
                                         (root->rnode->hdr.type == TN_IDENT ||
-                                         root->rnode->hdr.type == TN_INDEX))
+                                         root->rnode->hdr.type == TN_INDEX ||
+                                         root->rnode->hdr.type == TN_SELECT))
                                         printf("IND\n");
                                     printf("ADD\n");
                                     break;

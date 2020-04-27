@@ -5,6 +5,95 @@
 
 #define NR_BUCKETS 1024
 
+typedef struct arrayObject *arrayObjectPtr;
+typedef struct arrayObject
+{
+    char key[500];
+    int cellSize;
+    int numberOfDimensions;
+    arrayObjectPtr next;
+    arrayObjectPtr prev;
+} ArrayObject;
+
+typedef struct arrays_symbol_table
+{
+    ArrayObject *arrays;
+    int arraysCounter;
+} ArraysSymbolTable;
+
+ArraysSymbolTable *arraysSymbolTable = NULL;
+
+arrayObjectPtr add_array_to_arrays_mapping(arrayObjectPtr list, char *key, int cellSize)
+{
+    arrayObjectPtr p, q;
+    arraysSymbolTable->arraysCounter += 1;
+
+    /* allocate memory for new record */
+    if ((p = (arrayObjectPtr)malloc(sizeof(ArrayObject))) == NULL)
+    {
+        printf("Cannot allocate memory\n");
+        exit(1);
+    }
+
+    strcpy(p->key, key);
+    p->cellSize = cellSize;
+//    printf("===============\n");
+//    printf("Array definition Key is: %s\n", p->key);
+//    printf("Array cell size is: %s\n", p->value);
+//    printf("===============\n");
+    if (list == NULL)
+    { /* in the case if "p" is the first element in the list */
+        p->next = 0;
+        p->prev = 0;
+        return p;
+    }
+    else
+    {
+        q = list;
+        while (q->next != NULL)
+        { /* moving to the end of the list */
+            q = q->next;
+        }
+        p->next = q->next;
+        q->next = p;
+        p->prev = q;
+        return list;
+    }
+}
+
+int get_arrays_cell_size(char* array_identifier){
+    arrayObjectPtr curNode;
+    curNode = arraysSymbolTable->arrays;
+
+    // Iterate till last element until key is not found
+    while (curNode != NULL && strcmp(curNode->key, array_identifier) != 0)
+        curNode = curNode->next;
+    return (curNode != NULL) ? curNode->cellSize : -1;
+}
+
+void set_number_of_dimensions_for_array(char* identifier, int numberOfDimensions){
+    arrayObjectPtr curNode;
+    curNode = arraysSymbolTable->arrays;
+
+    // Iterate till last element until key is not found
+    while (curNode != NULL && strcmp(curNode->key, identifier) != 0)
+        curNode = curNode->next;
+    if (curNode != NULL)
+        curNode->numberOfDimensions = numberOfDimensions;
+}
+
+int get_number_of_dimensions_for_array(char* identifier){
+    arrayObjectPtr curNode;
+    curNode = arraysSymbolTable->arrays;
+
+    // Iterate till last element until key is not found
+    while (curNode != NULL && strcmp(curNode->key, identifier) != 0)
+        curNode = curNode->next;
+    if (curNode != NULL)
+        return curNode->numberOfDimensions;
+    return -1;
+}
+
 typedef struct structObject *structObjectPtr;
 typedef struct structObject
 {
@@ -86,7 +175,6 @@ typedef struct variable
 	varPtr prev;
 	varPtr next;
 	int size;
-    int numberOfDimensions;
 } Variable;
 
 // This struct holds a linked list of variables called vars, and a counter for current number of variables
@@ -115,7 +203,6 @@ varPtr add_variable_to_symbol_table(char *identifier, tn_t type, varPtr list)
 	strcpy(p->str, identifier);
 	p->type = type;
 	p->size = 1;
-	p->numberOfDimensions = -1;
 	strcpy(p->array_demensions, "");
 	printf("===============\n");
 	printf("Key is: %s\n", p->str);
@@ -175,29 +262,6 @@ int get_variable_size(char *identifier)
 	if (curNode != NULL)
 		return curNode->size;
 	return -2;
-}
-
-void set_number_of_dimensions_for_array(char* identifier, int numberOfDimensions){
-    varPtr curNode;
-    curNode = symbolTalble->vars;
-
-    // Iterate till last element until key is not found
-    while (curNode != NULL && strcmp(curNode->str, identifier) != 0)
-        curNode = curNode->next;
-    if (curNode != NULL)
-        curNode->numberOfDimensions = numberOfDimensions;
-}
-
-int get_number_of_dimensions_for_array(char* identifier){
-    varPtr curNode;
-    curNode = symbolTalble->vars;
-
-    // Iterate till last element until key is not found
-    while (curNode != NULL && strcmp(curNode->str, identifier) != 0)
-        curNode = curNode->next;
-    if (curNode != NULL)
-        return curNode->numberOfDimensions;
-    return -1;
 }
 
 tn_t get_variable_type_from_symbol_table(char *identifier)
@@ -464,7 +528,7 @@ char* get_array_identifier(treenode* root)
     {
         strcpy(array_idnt, ((leafnode *)tracker)->data.sval->str);
         strncat(array_idnt, &SUPPERATOR, 1);
-        strncat(array_idnt, &ARRAY_IDENT_SUPP, 2);
+//        strncat(array_idnt, &ARRAY_IDENT_SUPP, 2);
 //        strncat(array_idnt, &SUPPERATOR, 1);
     }
 //    reverse_by_chanks(array_idnt);
@@ -1168,9 +1232,9 @@ int code_recur(treenode *root) {
                     memset(struct_name,0,sizeof(struct_name));
                     code_recur(root->rnode);
                     char* array_identifier = get_array_identifier(root);
-                    int array_size = get_number_of_dimensions_for_array(get_array_identifier(root));
+                    int currentDimension = get_number_of_dimensions_for_array(get_array_identifier(root));
                     if (root->lnode != NULL && root->lnode->hdr.type != TN_DEREF){
-                        int current_dimension = get_number_of_dimensions(get_array_dimensions(root));
+//                    int current_dimension = get_number_of_dimensions(get_array_dimensions(root));
                         // printf("current dimension is: %d\n", current_dimension);
 
 
@@ -1178,11 +1242,11 @@ int code_recur(treenode *root) {
 //                        set_struct_name(root);
                         // this flag must be on, in order to print LDC and arrays identifier address without ind
 
-                        int ixaValue = get_variable_size(get_array_identifier(root));
+                        int ixaValue = get_arrays_cell_size(get_array_identifier(root));
 
                         // prepares data for single cell generation
                         int index;
-                        for (index = array_size; index < current_dimension; index++){
+                        for (index = currentDimension; index < current_dimension; index++){
                             ixaValue *= get_n_dimension(get_array_dimensions(root), index);
                         }
 
@@ -1285,16 +1349,18 @@ int code_recur(treenode *root) {
                                 /* e.g. struct_variable.x; */
                                 memset(struct_name,0,sizeof(struct_name));
                                 int res = set_struct_name(root);
-//                                if (res != 0) {
-//                                    // printf("tn array is in depth: %d\n", res);
-//                                    left_node = ;
-//                                    res -= 1;
-//                                    while (left_node != NULL && res > 0) {
-//                                        left_node = left_node->lnode;
-//                                        res -= 1;
-//                                    }
+                                if (res != 0) {
+                                    // printf("tn array is in depth: %d\n", res);
+                                    left_node = root->lnode;
+                                    res -= 1;
+                                    while (left_node != NULL && res > 0) {
+                                        left_node = left_node->lnode;
+                                        res -= 1;
+                                    }
+
                                     // printf("res is: %d\n", res);
-//                                    code_recur(root->lnode);
+                                    code_recur(root->lnode);
+                                }
 //                                    code_recur(root->rnode);
                                     // printf("Res is: %d\n", res);
                                     // if (res == 1)
@@ -1772,37 +1838,37 @@ int code_recur(treenode *root) {
                         case TN_WHILE:
                             /* While case */
                             last_loop_end_lable_line_num = root->hdr.line;
-                        strcpy(break_dest, "end_while_");
-                        printf("while_statement_%d%s\n", root->hdr.line, ":");
-                        code_recur(root->lnode);
-                        printf("FJP end_while_%d\n", root->hdr.line);
-                        code_recur(root->rnode);
-                        printf("UJP while_statement_%d\n", root->hdr.line);
-                        printf("end_while_%d%s\n", root->hdr.line, ":");
+                            strcpy(break_dest, "end_while_");
+                            printf("while_statement_%d%s\n", root->hdr.line, ":");
+                            code_recur(root->lnode);
+                            printf("FJP end_while_%d\n", root->hdr.line);
+                            code_recur(root->rnode);
+                            printf("UJP while_statement_%d\n", root->hdr.line);
+                            printf("end_while_%d%s\n", root->hdr.line, ":");
                         break;
 
                         case TN_DOWHILE:
                             /* Do-While case */
                             last_loop_end_lable_line_num = root->hdr.line;
-                        strcpy(break_dest, "end_do_while_");
-                        printf("do_while_statement_%d%s\n", root->hdr.line, ":");
-                        code_recur(root->rnode);
-                        code_recur(root->lnode);
-                        printf("FJP end_do_while_%d\n", root->hdr.line);
-                        printf("UJP do_while_statement_%d\n", root->hdr.line);
-                        printf("end_do_while_%d%s\n", root->hdr.line, ":");
+                            strcpy(break_dest, "end_do_while_");
+                            printf("do_while_statement_%d%s\n", root->hdr.line, ":");
+                            code_recur(root->rnode);
+                            code_recur(root->lnode);
+                            printf("FJP end_do_while_%d\n", root->hdr.line);
+                            printf("UJP do_while_statement_%d\n", root->hdr.line);
+                            printf("end_do_while_%d%s\n", root->hdr.line, ":");
                         break;
 
                         case TN_LABEL:
                             code_recur(root->lnode);
-                        printf("FJP case_%d\n", root->hdr.line);
-                        code_recur(root->rnode);
-                        printf("case_%d%s\n", root->hdr.line, ":");
+                            printf("FJP case_%d\n", root->hdr.line);
+                            code_recur(root->rnode);
+                            printf("case_%d%s\n", root->hdr.line, ":");
                         break;
 
                         default:
                             code_recur(root->lnode);
-                        code_recur(root->rnode);
+                            code_recur(root->rnode);
                         break;
                     }
                     break;
@@ -2003,6 +2069,9 @@ void add_complex_data_type(char *string, char *structIdnt, int startIndex, int e
             strncat(fixedIdentifier, snum, 1000);
             add_single_cell_to_array(fixedIdentifier, typeAsString, typeAsEnum);
             if (i == 0){
+                strcpy(fixedIdentifier, "");
+                strcpy(fixedIdentifier, identitfier);
+                strncat(fixedIdentifier, &SUPPERATOR, 1);
                 if (typeAsEnum != TN_DECL) {
                     // printf("dimensionsArray: %s\n", dimensionsArray);
                     // printf("<add_array_to_symbol_table()> ID is: %s\n", fixedIdentifier);
@@ -2011,16 +2080,18 @@ void add_complex_data_type(char *string, char *structIdnt, int startIndex, int e
 //                    add_single_cell_to_array(fixedIdentifier, typeAsString, typeAsEnum);
 //                    set_array_dimensions(fixedIdentifier, dimensionsArray);
                     set_variable_size(fixedIdentifier, 1);
+                    arraysSymbolTable->arrays = add_array_to_arrays_mapping(arraysSymbolTable->arrays, fixedIdentifier, 1);
                 } else {
                     tempIndex = 0;
                     strcpy(temp, get_struct_value_str(typeAsString));
                     while (tempIndex < strlen(temp)) {
-                        if (temp[i] == PAIR_SUP)
+                        if (temp[tempIndex] == PAIR_SUP)
                             complex_type_size += 1;
                         tempIndex++;
                     }
 //                    add_single_cell_to_array(identitfier, typeAsString, typeAsEnum);
                     set_variable_size(fixedIdentifier, complex_type_size);
+                    arraysSymbolTable->arrays = add_array_to_arrays_mapping(arraysSymbolTable->arrays, fixedIdentifier, complex_type_size);
                 }
                 set_number_of_dimensions_for_array(fixedIdentifier, numberOfDimensions);
             }
@@ -2093,6 +2164,9 @@ void add_complex_data_type(char *string, char *structIdnt, int startIndex, int e
             structsSymbolTable = (StructsSymbolTable *) malloc(sizeof(StructsSymbolTable));
             structsSymbolTable->vars = NULL;
             structsSymbolTable->variables_counter = 0;
+            arraysSymbolTable = (ArraysSymbolTable*) malloc(sizeof(ArraysSymbolTable));
+            arraysSymbolTable->arrays = NULL;
+            arraysSymbolTable->arraysCounter = 0;
         }
 
         treenode *right_node;

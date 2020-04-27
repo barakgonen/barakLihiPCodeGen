@@ -1359,6 +1359,8 @@ int code_recur(treenode *root) {
                                     }
 
                                     // printf("res is: %d\n", res);
+                                    if (get_variable_from_table(struct_name) != -1)
+                                        printf("LDC %d\n", get_variable_from_table(struct_name));
                                     code_recur(root->lnode);
                                 }
 //                                    code_recur(root->rnode);
@@ -2027,7 +2029,9 @@ void add_complex_data_type(char *string, char *structIdnt, int startIndex, int e
     void add_single_cell_to_array(char *id, char *typeAsString, tn_t typeAsEnum) {
         if (typeAsEnum == TN_DECL)
             add_struct_to_symbolTable(get_struct_value_str(typeAsString), id, typeAsString);
-        symbolTalble->vars = add_variable_to_symbol_table(id, typeAsEnum, symbolTalble->vars);
+        else{
+            symbolTalble->vars = add_variable_to_symbol_table(id, typeAsEnum, symbolTalble->vars);
+        }
     }
 
     void

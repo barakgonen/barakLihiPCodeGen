@@ -381,7 +381,7 @@ int set_struct_name(treenode *root)
             }
         }
         else{
-            if (tracker->rnode->hdr.type == TN_IDENT){
+            if (tracker->hdr.type != TN_INDEX && tracker->rnode->hdr.type == TN_IDENT){
                 strncat(namesFromEnd, ((leafnode *)tracker->rnode)->data.sval->str, strlen(((leafnode *)tracker->rnode)->data.sval->str));
                 strncat(namesFromEnd, &SUPPERATOR, 1);
             }
@@ -560,12 +560,16 @@ char* get_array_indexes(treenode* root) {
 
 void set_node_dimension(treenode* root)
 {
-	current_dimension = 1;
+	current_dimension = 0;
 	treenode *tracker = root;
 
 	while (tracker != NULL && tracker->lnode != NULL && tracker->rnode != NULL && 
-	tracker->hdr.which != LEAF_T && tracker->rnode->hdr.which == LEAF_T)
+	            tracker->hdr.which != LEAF_T && tracker->rnode->hdr.which == LEAF_T){
 		tracker = tracker->lnode;
+	    current_dimension++;
+	}
+
+
 }
 
 int should_print_ind(treenode* root){
@@ -1023,11 +1027,12 @@ int code_recur(treenode *root) {
                     }
                     code_recur(root->rnode);
 
+
+                    // trying new statement
                     if (get_variable_from_table(struct_name) != -1)
                         printf("LDC %d\n", get_variable_from_table(struct_name));
-                    if (root->rnode != NULL && (root->rnode->hdr.type != TN_INT || root->rnode->hdr.type != TN_REAL))
+                    if (root->rnode != NULL && (root->rnode->hdr.type != TN_INT && root->rnode->hdr.type != TN_REAL))
                         printf("IND\n");
-
                     break;
 
                 case TN_NAME_LIST:
@@ -1201,14 +1206,13 @@ int code_recur(treenode *root) {
                     /* call for array - for HW2! */
 //                    set_array_identifier(root);
 
-                    set_node_dimension(root);
 //                    char* array_indexes = get_array_indexes(root);
 //                    char* array_dimensions = get_array_dimensions(root);
-
                     code_recur(root->lnode);
                     memset(struct_name,0,sizeof(struct_name));
                     char bla[500] = "";
                     code_recur(root->rnode);
+                    set_node_dimension(root);
                     strcpy(bla, get_array_identifier(root));
                     int number_of_dimensions = get_number_of_dimensions_for_array(get_array_identifier(root));
                     if (root->lnode != NULL && root->lnode->hdr.type != TN_DEREF){
@@ -1224,14 +1228,14 @@ int code_recur(treenode *root) {
 
                         // prepares data for single cell generation
                         int index;
-                        for (index = current_dimension; index <= number_of_dimensions ; index++){
-                            ixaValue *= get_n_dimension(bla, index);
-                        }
-                        // this one worked
-//                        int index;
-//                        for (index = number_of_dimensions; index < current_dimension; index++){
-//                            ixaValue *= get_n_dimension(get_array_dimensions(get_array_identifier(root)), index);
+                        // this one worked fix!
+//                        for (index = current_dimension; index <= number_of_dimensions ; index++){
+//                            ixaValue *= get_n_dimension(bla, index);
 //                        }
+                        for (index = current_dimension; index < number_of_dimensions ; index++){
+                            if (get_n_dimension(bla, index) != 0)
+                                ixaValue *= get_n_dimension(bla, index);
+                        }
 
                         // In case right node is an array, we have to print it's value and not just the address,
                         // that's why we use IND here, for example a[a[2]]
@@ -1342,8 +1346,12 @@ int code_recur(treenode *root) {
                                     }
 
                                     // printf("res is: %d\n", res);
+                                    // Im not sure we have to use it.. if just print fail
                                     if (get_variable_from_table(struct_name) != -1)
+                                    {
                                         printf("LDC %d\n", get_variable_from_table(struct_name));
+                                        memset(struct_name,0,sizeof(struct_name));
+                                    }
                                     code_recur(root->lnode);
                                 }
 //                                    code_recur(root->rnode);
